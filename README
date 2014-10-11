@@ -1,4 +1,11 @@
-See:
-* http://code.google.com/p/libfsrefs/wiki/Building
-* README.macosx
+Library and tools to access the Resilient File System (ReFS).
+
+Note that this project currently only focuses on the analysis of the format.
+
+Planned:
+* Library to read the format
+
+For more information see:
+* Project documentation: https://github.com/libyal/libfsrefs/wiki/Home
+* How to build from source: https://github.com/libyal/libfsrefs/wiki/Building
 
