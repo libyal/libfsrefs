@@ -2,8 +2,12 @@ Library and tools to access the Resilient File System (ReFS).
 
 Note that this project currently only focuses on the analysis of the format.
 
+Project information:
+* Status: experimental
+* Licence: LGPLv3+
+
 Planned:
-* Library to read the format
+* Finish library
 
 For more information see:
 * Project documentation: https://github.com/libyal/libfsrefs/wiki/Home
