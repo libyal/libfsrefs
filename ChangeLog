@@ -1,0 +1,51 @@
+TODO
+* API
+  - complete volume name functions
+* metadata table
+  - check value entry offsets
+* directory
+  - complete first approach to directory handling code
+  - sub parse directory entry - type file tables
+* update libfsrefs.c
+* update msvcpp files
+* do not print full block data in:
+  libfsrefs_metadata_block_read: metadata block data:
+
+20141011
+* removed README.macosx
+* updated dependencies
+
+20140529
+* updated dependencies
+
+20140118
+* 2014 update
+* updated dependencies
+
+20131109
+* updated dependencies
+* code clean up
+
+20130915
+* code clean up
+
+20130914
+* updated dependencies
+* added libcthreads build support
+
+20130224
+* updated dependencies
+* 2013 update
+
+20120930
+* worked on format
+
+20120929
+* updated dependencies
+* worked on format
+
+20120528
+* worked on format
+
+20120527
+* initial version based on libfsntfs

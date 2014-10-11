@@ -1,0 +1,76 @@
+#!/usr/bin/make -f
+# debian/rules that uses debhelper >= 7.
+
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+
+# This has to be exported to make some magic below work.
+export DH_OPTIONS
+
+
+%:
+	dh  $@
+
+install_libfsrefs:
+	# Set up libfsrefs package directories and files
+	mkdir -p debian/libfsrefs/usr/lib
+	install -p -m755 debian/tmp/usr/lib/lib*.so.*.*.* debian/libfsrefs/usr/lib
+
+install_libfsrefs_dev:
+	# Set up libfsrefs-dev package directories and files
+	mkdir -p debian/libfsrefs-dev/usr/include
+	mkdir -p debian/libfsrefs-dev/usr/include/libfsrefs
+	mkdir -p debian/libfsrefs-dev/usr/lib
+	mkdir -p debian/libfsrefs-dev/usr/lib/pkgconfig
+	mkdir -p debian/libfsrefs-dev/usr/share/man/man3
+	install -p -m755 debian/tmp/usr/include/*.h debian/libfsrefs-dev/usr/include
+	install -p -m755 debian/tmp/usr/include/libfsrefs/*.h debian/libfsrefs-dev/usr/include/libfsrefs
+	install -p -m755 debian/tmp/usr/lib/*.la debian/libfsrefs-dev/usr/lib
+	install -p -m755 debian/tmp/usr/lib/lib*.a debian/libfsrefs-dev/usr/lib
+	install -p -m755 debian/tmp/usr/lib/lib*.so debian/libfsrefs-dev/usr/lib
+	install -p -m755 debian/tmp/usr/lib/pkgconfig/* debian/libfsrefs-dev/usr/lib/pkgconfig
+	install -p -m755 debian/tmp/usr/share/man/man3/* debian/libfsrefs-dev/usr/share/man/man3
+
+install_libfsrefs_tools:
+	# Set up libfsrefs-tools package directories and files
+	mkdir -p debian/libfsrefs-tools/usr/bin
+	mkdir -p debian/libfsrefs-tools/usr/share/man/man1
+	install -p -m755 debian/tmp/usr/bin/* debian/libfsrefs-tools/usr/bin
+	install -p -m755 debian/tmp/usr/share/man/man1/* debian/libfsrefs-tools/usr/share/man/man1
+
+override_dh_auto_test:
+
+override_dh_installinit: install_libfsrefs install_libfsrefs_dev install_libfsrefs_tools
+
+override_dh_installmenu:
+
+override_dh_installmime:
+
+override_dh_installmodules:
+
+override_dh_installlogcheck:
+
+override_dh_installlogrotate:
+
+override_dh_installpam:
+
+override_dh_installppp:
+
+override_dh_installudev:
+
+override_dh_installwm:
+
+override_dh_installxfonts:
+
+override_dh_gconf:
+
+override_dh_icons:
+
+override_dh_perl:
+
+override_dh_shlibdeps:
+	dh_shlibdeps -Llibfsrefs -l${PWD}/debian/tmp/usr/lib
+
+override_dh_makeshlibs:
+	dh_makeshlibs -Xlibfsrefs-dev
+

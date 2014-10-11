@@ -1,0 +1,29 @@
+Source: libfsrefs
+Section: unknown
+Priority: extra
+Maintainer: Joachim Metz <joachim.metz@gmail.com>
+Build-Depends: debhelper (>= 7), autotools-dev
+Standards-Version: 3.8.3
+Homepage: http://code.google.com/p/libfsrefs/
+
+Package: libfsrefs
+Section: libs
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Library to access the Windows Resiliant File System (REFS) format
+ libfsrefs is a library to access the Windows Resiliant File System (REFS) format.
+
+Package: libfsrefs-dev
+Section: libdevel
+Architecture: any
+Depends: libfsrefs (= ${Source-Version})
+Description: Header files and libraries for developing applications for libfsrefs
+ Header files and libraries for developing applications for libfsrefs.
+
+Package: libfsrefs-tools
+Section: utils
+Architecture: any
+Depends: libfsrefs (= ${Source-Version}), ${shlibs:Depends}
+Description: Several tools for reading Windows Resiliant File System (REFS) volumes
+ Several tools for reading Windows Resiliant File System (REFS) volumes.
+
