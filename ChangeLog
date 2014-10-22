@@ -11,6 +11,9 @@ TODO
 * do not print full block data in:
   libfsrefs_metadata_block_read: metadata block data:
 
+20141022
+* changes for deployment
+
 20141011
 * removed README.macosx
 * updated dependencies
