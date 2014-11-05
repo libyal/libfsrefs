@@ -294,7 +294,7 @@ int libfsrefs_directory_read(
 			if( libcnotify_verbose != 0 )
 			{
 				libcnotify_printf(
-				 "%s: level: %d value: %02d identifier\t\t: 0x%08" PRIx32 "\n",
+				 "%s: level: %d value: %02d identifier\t\t\t: 0x%08" PRIx32 "\n",
 				 function,
 				 level,
 				 metadata_table_value_index,

@@ -697,27 +697,25 @@ int libfsrefs_volume_open_read(
      libfsrefs_internal_volume_t *internal_volume,
      libcerror_error_t **error )
 {
-	libfsrefs_directory_t *directory                                         = NULL;
-	libfsrefs_directory_t *root_directory                                    = NULL;
-	libfsrefs_block_descriptor_t *level3_metadata_block_descriptor           = NULL;
-	libfsrefs_block_descriptor_t *level4_metadata_block_descriptor           = NULL;
-	libfsrefs_block_descriptor_t *primary_level2_metadata_block_descriptor   = NULL;
-	libfsrefs_block_descriptor_t *secondary_level2_metadata_block_descriptor = NULL;
-	libfsrefs_block_descriptors_t *directory_block_descriptors               = NULL;
-	libfsrefs_level0_metadata_t *level0_metadata                             = NULL;
-	libfsrefs_level1_metadata_t *level1_primary_metadata                     = NULL;
-	libfsrefs_level1_metadata_t *level1_secondary_metadata                   = NULL;
-	libfsrefs_level2_metadata_t *level2_metadata                             = NULL;
-	libfsrefs_level3_metadata_t *level3_metadata                             = NULL;
-	static char *function                                                    = "libfsrefs_volume_open_read";
-	uint64_t value_identifier                                                = 0;
-	int level2_metadata_block_descriptor_index                               = 0;
-	int level3_metadata_block_descriptor_index                               = 0;
-	int level4_metadata_block_descriptor_index                               = 0;
-	int number_of_level3_metadata_block_descriptors                          = 0;
-	int number_of_level4_metadata_block_descriptors                          = 0;
-	int number_of_primary_level2_metadata_block_descriptors                  = 0;
-	int number_of_secondary_level2_metadata_block_descriptors                = 0;
+	libfsrefs_directory_t *directory                               = NULL;
+	libfsrefs_directory_t *root_directory                          = NULL;
+	libfsrefs_block_descriptor_t *level2_metadata_block_descriptor = NULL;
+	libfsrefs_block_descriptor_t *level3_metadata_block_descriptor = NULL;
+	libfsrefs_block_descriptor_t *level4_metadata_block_descriptor = NULL;
+	libfsrefs_block_descriptors_t *directory_block_descriptors     = NULL;
+	libfsrefs_level0_metadata_t *level0_metadata                   = NULL;
+	libfsrefs_level1_metadata_t *level1_primary_metadata           = NULL;
+	libfsrefs_level1_metadata_t *level1_secondary_metadata         = NULL;
+	libfsrefs_level2_metadata_t *level2_metadata                   = NULL;
+	libfsrefs_level3_metadata_t *level3_metadata                   = NULL;
+	static char *function                                          = "libfsrefs_volume_open_read";
+	uint64_t value_identifier                                      = 0;
+	int level2_metadata_block_descriptor_index                     = 0;
+	int level3_metadata_block_descriptor_index                     = 0;
+	int level4_metadata_block_descriptor_index                     = 0;
+	int number_of_level2_metadata_block_descriptors                = 0;
+	int number_of_level3_metadata_block_descriptors                = 0;
+	int number_of_level4_metadata_block_descriptors                = 0;
 
 	if( internal_volume == NULL )
 	{
@@ -877,114 +875,89 @@ int libfsrefs_volume_open_read(
 		 "Reading level 2 metadata:\n" );
 	}
 #endif
-	if( libfsrefs_level1_metadata_get_number_of_level2_metadata_block_descriptors(
-             level1_primary_metadata,
-             &number_of_primary_level2_metadata_block_descriptors,
-             error ) != 1 )
+	if( level1_primary_metadata->sequence_number >= level1_secondary_metadata->sequence_number )
 	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve number of primary level 2 metadata block descriptors.",
-		 function );
+		if( libfsrefs_level1_metadata_get_number_of_level2_metadata_block_descriptors(
+		     level1_primary_metadata,
+		     &number_of_level2_metadata_block_descriptors,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve number of level 2 metadata block descriptors from primary level 1 metadata.",
+			 function );
 
-		goto on_error;
+			goto on_error;
+		}
 	}
-	if( libfsrefs_level1_metadata_get_number_of_level2_metadata_block_descriptors(
-             level1_secondary_metadata,
-             &number_of_secondary_level2_metadata_block_descriptors,
-             error ) != 1 )
+	else
 	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve number of secondary level 2 metadata block descriptors.",
-		 function );
+		if( libfsrefs_level1_metadata_get_number_of_level2_metadata_block_descriptors(
+		     level1_secondary_metadata,
+		     &number_of_level2_metadata_block_descriptors,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve number of level 2 metadata block descriptors from secondary level 1 metadata.",
+			 function );
 
-		goto on_error;
-	}
-	if( number_of_primary_level2_metadata_block_descriptors != number_of_secondary_level2_metadata_block_descriptors )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_INPUT,
-		 LIBCERROR_INPUT_ERROR_VALUE_MISMATCH,
-		 "%s: mismatch between primary and secondary level 2 metadata block descriptors.",
-		 function );
-
-		goto on_error;
+			goto on_error;
+		}
 	}
 	for( level2_metadata_block_descriptor_index = 0;
-	     level2_metadata_block_descriptor_index < number_of_primary_level2_metadata_block_descriptors;
+	     level2_metadata_block_descriptor_index < number_of_level2_metadata_block_descriptors;
 	     level2_metadata_block_descriptor_index++ )
 	{
-		if( libfsrefs_level1_metadata_get_level2_metadata_block_descriptor_by_index(
-		     level1_primary_metadata,
-		     level2_metadata_block_descriptor_index,
-		     &primary_level2_metadata_block_descriptor,
-		     error ) != 1 )
+		if( level1_primary_metadata->sequence_number >= level1_secondary_metadata->sequence_number )
 		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve primary level 2 metadata block descriptor: %d.",
-			 function,
-			 level2_metadata_block_descriptor_index );
+			if( libfsrefs_level1_metadata_get_level2_metadata_block_descriptor_by_index(
+			     level1_primary_metadata,
+			     level2_metadata_block_descriptor_index,
+			     &level2_metadata_block_descriptor,
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+				 "%s: unable to retrieve level 2 metadata block descriptor: %d from primary level 1 metadata.",
+				 function,
+				 level2_metadata_block_descriptor_index );
 
-			goto on_error;
+				goto on_error;
+			}
 		}
-		if( primary_level2_metadata_block_descriptor == NULL )
+		else
 		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-			 "%s: missing primary level 2 metadata block descriptor: %d.",
-			 function,
-			 level2_metadata_block_descriptor_index );
+			if( libfsrefs_level1_metadata_get_level2_metadata_block_descriptor_by_index(
+			     level1_secondary_metadata,
+			     level2_metadata_block_descriptor_index,
+			     &level2_metadata_block_descriptor,
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+				 "%s: unable to retrieve level 2 metadata block descriptor: %d from secondary level 1 metadata.",
+				 function,
+				 level2_metadata_block_descriptor_index );
 
-			goto on_error;
+				goto on_error;
+			}
 		}
-		if( libfsrefs_level1_metadata_get_level2_metadata_block_descriptor_by_index(
-		     level1_secondary_metadata,
-		     level2_metadata_block_descriptor_index,
-		     &secondary_level2_metadata_block_descriptor,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve secondary level 2 metadata block descriptor: %d.",
-			 function,
-			 level2_metadata_block_descriptor_index );
-
-			goto on_error;
-		}
-		if( secondary_level2_metadata_block_descriptor == NULL )
+		if( level2_metadata_block_descriptor == NULL )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-			 "%s: missing secondary level 2 metadata block descriptor: %d.",
-			 function,
-			 level2_metadata_block_descriptor_index );
-
-			goto on_error;
-		}
-		if( ( primary_level2_metadata_block_descriptor->block_number != secondary_level2_metadata_block_descriptor->block_number )
-		 || ( primary_level2_metadata_block_descriptor->unknown != secondary_level2_metadata_block_descriptor->unknown )
-		 || ( primary_level2_metadata_block_descriptor->checksum != secondary_level2_metadata_block_descriptor->checksum ) )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_INPUT,
-			 LIBCERROR_INPUT_ERROR_VALUE_MISMATCH,
-			 "%s: mismatch between primary and secondary level 2 metadata block descriptor: %d.",
+			 "%s: missing level 2 metadata block descriptor: %d.",
 			 function,
 			 level2_metadata_block_descriptor_index );
 
@@ -1007,7 +980,7 @@ int libfsrefs_volume_open_read(
 		     level2_metadata,
 		     internal_volume->io_handle,
 		     internal_volume->file_io_handle,
-		     primary_level2_metadata_block_descriptor->block_number * internal_volume->io_handle->metadata_block_size,
+		     level2_metadata_block_descriptor->block_number * internal_volume->io_handle->metadata_block_size,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
@@ -1016,7 +989,7 @@ int libfsrefs_volume_open_read(
 			 LIBCERROR_IO_ERROR_READ_FAILED,
 			 "%s: unable to read level 2 metadata block: %" PRIu64 ".",
 			 function,
-			 primary_level2_metadata_block_descriptor->block_number );
+			 level2_metadata_block_descriptor->block_number );
 
 			goto on_error;
 		}
@@ -1125,6 +1098,51 @@ int libfsrefs_volume_open_read(
 			}
 			else if( value_identifier == 0x00000701UL )
 			{
+				if( libfsrefs_directory_initialize(
+				     &directory,
+				     error ) != 1 )
+				{
+					libcerror_error_set(
+					 error,
+					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+					 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+					 "%s: unable to create directory.",
+					 function );
+
+					goto on_error;
+				}
+				if( libfsrefs_directory_read(
+				     directory,
+				     internal_volume->io_handle,
+				     internal_volume->file_io_handle,
+				     level3_metadata_block_descriptor->block_number * internal_volume->io_handle->metadata_block_size,
+				     4,
+				     error ) != 1 )
+				{
+					libcerror_error_set(
+					 error,
+					 LIBCERROR_ERROR_DOMAIN_IO,
+					 LIBCERROR_IO_ERROR_READ_FAILED,
+					 "%s: unable to read directory block: %" PRIu64 ".",
+					 function,
+					 level4_metadata_block_descriptor->block_number );
+
+					goto on_error;
+				}
+				if( libfsrefs_directory_free(
+				     &directory,
+				     error ) != 1 )
+				{
+					libcerror_error_set(
+					 error,
+					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+					 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+					 "%s: unable to free directory.",
+					 function );
+
+					goto on_error;
+				}
+#ifdef TODO
 				if( libfsrefs_block_descriptors_initialize(
 				     &directory_block_descriptors,
 				     error ) != 1 )
@@ -1260,6 +1278,7 @@ int libfsrefs_volume_open_read(
 
 					goto on_error;
 				}
+#endif /* TODO */
 			}
 			else
 			{

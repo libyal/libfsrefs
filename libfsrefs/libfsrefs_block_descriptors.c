@@ -185,7 +185,7 @@ int libfsrefs_block_descriptors_read(
 	libfsrefs_metadata_block_t *metadata_block     = NULL;
 	libfsrefs_metadata_table_t *metadata_table     = NULL;
 	libfsrefs_metadata_value_t *metadata_value     = NULL;
-	static char *function                          = "libfsrefs_block_descriptors_initialize";
+	static char *function                          = "libfsrefs_block_descriptors_read";
 	int array_entry_index                          = 0;
 	int metadata_table_value_index                 = 0;
 	int number_of_metadata_table_values            = 0;
@@ -325,7 +325,7 @@ int libfsrefs_block_descriptors_read(
 				 metadata_value->identifier_data,
 				 value_16bit );
 				libcnotify_printf(
-				 "%s: level: %d value: %02d identifier signature\t\t: 0x%04" PRIx16 "\n",
+				 "%s: level: %d value: %02d identifier signature\t: 0x%04" PRIx16 "\n",
 				 function,
 				 level,
 				 metadata_table_value_index,
@@ -468,6 +468,20 @@ int libfsrefs_block_descriptors_read(
 
 			goto on_error;
 		}
+#if defined( HAVE_DEBUG_OUTPUT )
+		if( libcnotify_verbose != 0 )
+		{
+			libcnotify_printf(
+			 "%s: level: %d value: %02d identifier data:\n",
+			 function,
+			 level,
+			 metadata_table_value_index );
+			libcnotify_print_data(
+			 metadata_value->data,
+			 24,
+			 0 );
+		}
+#endif
 		byte_stream_copy_to_uint64_little_endian(
 		 metadata_value->data,
 		 block_descriptor->block_number );
@@ -484,7 +498,7 @@ int libfsrefs_block_descriptors_read(
 		if( libcnotify_verbose != 0 )
 		{
 			libcnotify_printf(
-			 "%s: level: %d value: %02d block number\t\t\t: %" PRIu64 "\n",
+			 "%s: level: %d value: %02d block number\t\t: %" PRIu64 "\n",
 			 function,
 			 level,
 			 metadata_table_value_index,

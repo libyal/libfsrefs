@@ -146,7 +146,7 @@ int libfsrefs_level0_metadata_read(
      libcerror_error_t **error )
 {
 	libfsrefs_metadata_block_t *metadata_block = NULL;
-	static char *function                      = "libfsrefs_level0_metadata_initialize";
+	static char *function                      = "libfsrefs_level0_metadata_read";
 
 #if defined( HAVE_DEBUG_OUTPUT )
 	libcstring_system_character_t guid_string[ 48 ];
@@ -276,7 +276,7 @@ int libfsrefs_level0_metadata_read(
 			goto on_error;
 		}
 		libcnotify_printf(
-		 "%s: identifier\t\t\t: %" PRIs_LIBCSTRING_SYSTEM "\n",
+		 "%s: identifier\t\t\t\t: %" PRIs_LIBCSTRING_SYSTEM "\n",
 		 function,
 		 guid_string );
 
@@ -372,12 +372,11 @@ int libfsrefs_level0_metadata_read(
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )
 	{
-
 		byte_stream_copy_to_uint64_little_endian(
 		 &(  metadata_block->data[ 176 ] ),
 		 value_64bit );
 		libcnotify_printf(
-		 "%s: block number\t\t\t: %" PRIu64 "\n",
+		 "%s: block number\t\t\t\t: %" PRIu64 "\n",
 		 function,
 		 value_64bit );
 

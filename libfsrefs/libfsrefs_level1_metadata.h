@@ -39,6 +39,10 @@ typedef struct libfsrefs_level1_metadata libfsrefs_level1_metadata_t;
 
 struct libfsrefs_level1_metadata
 {
+	/* The sequence number
+	 */
+	uint64_t sequence_number;
+
 	/* The level 2 metadata block descriptors array
 	 */
 	libcdata_array_t *level2_metadata_block_descriptors_array;

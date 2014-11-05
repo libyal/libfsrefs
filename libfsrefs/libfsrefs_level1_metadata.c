@@ -177,7 +177,7 @@ int libfsrefs_level1_metadata_read(
 {
 	libfsrefs_block_descriptor_t *block_descriptor = NULL;
 	libfsrefs_metadata_block_t *metadata_block     = NULL;
-	static char *function                          = "libfsrefs_level1_metadata_initialize";
+	static char *function                          = "libfsrefs_level1_metadata_read";
 	size_t metadata_block_data_offset              = 0;
 	uint32_t entry_index                           = 0;
 	uint32_t entry_offset                          = 0;
@@ -242,7 +242,9 @@ int libfsrefs_level1_metadata_read(
 
 		goto on_error;
 	}
-/* TODO */
+	level1_metadata->sequence_number = metadata_block->sequence_number;
+
+/* TODO add structures */
 	byte_stream_copy_to_uint32_little_endian(
 	 &( metadata_block->data[ 56 ] ),
 	 entry_offset );
@@ -279,7 +281,7 @@ int libfsrefs_level1_metadata_read(
 		 value_16bit );
 
 		libcnotify_printf(
-		 "%s: unknown4 offset\t\t\t: 0x%08" PRIx32 "\n",
+		 "%s: unknown4 offset\t\t\t\t: 0x%08" PRIx32 "\n",
 		 function,
 		 entry_offset );
 
@@ -295,7 +297,7 @@ int libfsrefs_level1_metadata_read(
 		 &( metadata_block->data[ 64 ] ),
 		 value_64bit );
 		libcnotify_printf(
-		 "%s: sequence number\t\t\t: %" PRIu64 "\n",
+		 "%s: sequence number\t\t\t\t: %" PRIu64 "\n",
 		 function,
 		 value_64bit );
 
@@ -324,7 +326,7 @@ int libfsrefs_level1_metadata_read(
 		 LIBCNOTIFY_PRINT_DATA_FLAG_GROUP_DATA );
 
 		libcnotify_printf(
-		 "%s: number of table entries\t\t: %" PRIu32 "\n",
+		 "%s: number of table entries\t\t\t: %" PRIu32 "\n",
 		 function,
 		 number_of_entries );
 
@@ -354,7 +356,7 @@ int libfsrefs_level1_metadata_read(
 		 &( metadata_block->data[ entry_offset + 8 ] ),
 		 value_64bit );
 		libcnotify_printf(
-		 "%s: self entry: unknown1\t\t: 0x%08" PRIx64 "\n",
+		 "%s: self entry: unknown1\t\t\t: 0x%08" PRIx64 "\n",
 		 function,
 		 value_64bit );
 
@@ -362,7 +364,7 @@ int libfsrefs_level1_metadata_read(
 		 &( metadata_block->data[ entry_offset + 16 ] ),
 		 value_64bit );
 		libcnotify_printf(
-		 "%s: self entry: checksum\t\t: 0x%08" PRIx64 "\n",
+		 "%s: self entry: checksum\t\t\t: 0x%08" PRIx64 "\n",
 		 function,
 		 value_64bit );
 
@@ -423,19 +425,19 @@ int libfsrefs_level1_metadata_read(
 		if( libcnotify_verbose != 0 )
 		{
 			libcnotify_printf(
-			 "%s: entry: %02" PRIu32 " block number\t\t: %" PRIu64 "\n",
+			 "%s: entry: %02" PRIu32 " block number\t\t\t: %" PRIu64 "\n",
 			 function,
 			 entry_index,
 			 block_descriptor->block_number );
 
 			libcnotify_printf(
-			 "%s: entry: %02" PRIu32 " unknown1\t\t: 0x%08" PRIx64 "\n",
+			 "%s: entry: %02" PRIu32 " unknown1\t\t\t: 0x%08" PRIx64 "\n",
 			 function,
 			 entry_index,
 			 block_descriptor->unknown );
 
 			libcnotify_printf(
-			 "%s: entry: %02" PRIu32 " checksum\t\t: 0x%08" PRIx64 "\n",
+			 "%s: entry: %02" PRIu32 " checksum\t\t\t: 0x%08" PRIx64 "\n",
 			 function,
 			 entry_index,
 			 block_descriptor->checksum );

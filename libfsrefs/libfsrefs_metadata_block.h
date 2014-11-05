@@ -45,34 +45,9 @@ struct libfsrefs_metadata_block
 	 */
 	size_t data_size;
 
-/* TODO */
 	/* The sequence number
 	 */
 	uint64_t sequence_number;
-
-	/* Unknown block number
-	 */
-	uint64_t block_number1;
-
-	/* Unknown block number
-	 */
-	uint64_t block_number2;
-
-	/* Unknown block number
-	 */
-	uint64_t block_number3;
-
-	/* Unknown block number
-	 */
-	uint64_t block_number4;
-
-	/* Unknown block number
-	 */
-	uint64_t block_number5;
-
-	/* Unknown block number
-	 */
-	uint64_t block_number6;
 };
 
 int libfsrefs_metadata_block_initialize(

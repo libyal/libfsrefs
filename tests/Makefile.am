@@ -2,11 +2,13 @@ AM_CPPFLAGS = \
 	-I$(top_srcdir)/include \
 	-I$(top_srcdir)/common \
 	@LIBCSTRING_CPPFLAGS@ \
-	@LIBCERROR_CPPFLAGS@
+	@LIBCERROR_CPPFLAGS@ \
+	@LIBFSREFS_DLL_IMPORT@
 
 TESTS =
 
-check_SCRIPTS =
+check_SCRIPTS = \
+	test_runner.sh
 
 EXTRA_DIST = \
 	$(check_SCRIPTS)

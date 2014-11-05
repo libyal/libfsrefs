@@ -326,12 +326,24 @@ int libfsrefs_metadata_table_read(
 #if defined( HAVE_DEBUG_OUTPUT )
 		if( libcnotify_verbose != 0 )
 		{
-			libcnotify_printf(
-			 "%s: level: %d entry: %02" PRIu32 " size\t\t\t: %" PRIu32 "\n",
-			 function,
-			 level,
-			 entry_index,
-			 entry_size );
+			if( entry_index == 0 )
+			{
+				libcnotify_printf(
+				 "%s: level: %d entry: %02" PRIu32 " size\t\t\t: %" PRIu32 "\n",
+				 function,
+				 level,
+				 entry_index,
+				 entry_size );
+			}
+			else
+			{
+				libcnotify_printf(
+				 "%s: level: %d entry: %02" PRIu32 " size\t\t\t\t\t: %" PRIu32 "\n",
+				 function,
+				 level,
+				 entry_index,
+				 entry_size );
+			}
 		}
 #endif
 		if( entry_index == 0 )
