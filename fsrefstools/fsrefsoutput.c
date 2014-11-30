@@ -24,49 +24,20 @@
 #include <memory.h>
 #include <types.h>
 
-#if defined( HAVE_LOCAL_LIBUNA )
-#include <libuna_definitions.h>
-#elif defined( HAVE_LIBUNA_H )
-#include <libuna.h>
-#endif
-
-#if defined( HAVE_LOCAL_LIBBFIO )
-#include <libbfio_definitions.h>
-#elif defined( HAVE_LIBBFIO_H )
-#include <libbfio.h>
-#endif
-
-#if defined( HAVE_LOCAL_LIBFDATA )
-#include <libfdata_definitions.h>
-#elif defined( HAVE_LIBFDATA )
-#include <libfdata.h>
-#endif
-
-#if defined( HAVE_LOCAL_LIBFDATETIME )
-#include <libfdatetime_definitions.h>
-#elif defined( HAVE_LIBFDATETIME_H )
-#include <libfdatetime.h>
-#endif
-
-#if defined( HAVE_LOCAL_LIBFGUID )
-#include <libfguid_definitions.h>
-#elif defined( HAVE_LIBFGUID )
-#include <libfguid.h>
-#endif
-
-#if defined( HAVE_LOCAL_LIBFWNT )
-#include <libfwnt_definitions.h>
-#elif defined( HAVE_LIBFWNT )
-#include <libfwnt.h>
-#endif
-
 #include "fsrefsoutput.h"
+#include "fsrefstools_libbfio.h"
 #include "fsrefstools_libcerror.h"
 #include "fsrefstools_libclocale.h"
 #include "fsrefstools_libcnotify.h"
 #include "fsrefstools_libcstring.h"
 #include "fsrefstools_libcsystem.h"
+#include "fsrefstools_libfcache.h"
+#include "fsrefstools_libfdata.h"
+#include "fsrefstools_libfdatetime.h"
+#include "fsrefstools_libfguid.h"
 #include "fsrefstools_libfsrefs.h"
+#include "fsrefstools_libfwnt.h"
+#include "fsrefstools_libuna.h"
 
 /* Prints the copyright information
  */
@@ -77,11 +48,26 @@ void fsrefsoutput_copyright_fprint(
 	{
 		return;
 	}
+	/* TRANSLATORS: This is a proper name.
+	 */
 	fprintf(
 	 stream,
-	 "Copyright (c) 2012-2014, Joachim Metz <%s>.\n"
-	 "This is free software; see the source for copying conditions. There is NO\n"
-	 "warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n",
+	 _( "Copyright (c) 2012-2014, %s.\n" ),
+	 _( "Joachim Metz" ) );
+
+	fprintf(
+	 stream,
+	 _( "This is free software; see the source for copying conditions. There is NO\n"
+	    "warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n" ) );
+
+	/* TRANSLATORS: The placeholder indicates the bug-reporting address
+	 * for this package.  Please add _another line_ saying
+	 * "Report translation bugs to <...>\n" with the address for translation
+	 * bugs (typically your translation team's web or email address).
+	 */
+	fprintf(
+	 stream,
+	 _( "Report bugs to <%s>.\n" ),
 	 PACKAGE_BUGREPORT );
 }
 

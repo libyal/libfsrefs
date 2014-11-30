@@ -1,7 +1,7 @@
 /*
- * The internal type definitions
+ * The libfguid header wrapper
  *
- * Copyright (C) 2012-2014, Joachim Metz <joachim.metz@gmail.com>
+ * Copyright (c) 2012-2014, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *
@@ -19,31 +19,31 @@
  * along with this software.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if !defined( _LIBFSREFS_INTERNAL_TYPES_H )
-#define _LIBFSREFS_INTERNAL_TYPES_H
+#if !defined( _FSREFSTOOLS_LIBFGUID_H )
+#define _FSREFSTOOLS_LIBFGUID_H
 
 #include <common.h>
-#include <types.h>
 
-/* Define HAVE_LOCAL_LIBFSREFS for local use of libfsrefs
- * The definitions in <libfsrefs/types.h> are copied here
- * for local use of libfsrefs
+/* Define HAVE_LOCAL_LIBFGUID for local use of libfguid
  */
-#if defined( HAVE_LOCAL_LIBFSREFS )
+#if defined( HAVE_LOCAL_LIBFGUID )
 
-/* The following type definitions hide internal data structures
- */
-#if defined( HAVE_DEBUG_OUTPUT ) && !defined( WINAPI )
-typedef struct libfsrefs_file_entry {}		libfsrefs_file_entry_t;
-typedef struct libfsrefs_volume {}		libfsrefs_volume_t;
+#include <libfguid_definitions.h>
+#include <libfguid_identifier.h>
+#include <libfguid_types.h>
 
 #else
-typedef intptr_t libfsrefs_file_entry_t;
-typedef intptr_t libfsrefs_volume_t;
 
+/* If libtool DLL support is enabled set LIBFGUID_DLL_IMPORT
+ * before including libfguid.h
+ */
+#if defined( _WIN32 ) && defined( DLL_IMPORT )
+#define LIBFGUID_DLL_IMPORT
 #endif
 
-#endif /* defined( HAVE_LOCAL_LIBFSREFS ) */
+#include <libfguid.h>
+
+#endif
 
 #endif
 

@@ -222,7 +222,31 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\fsrefstools\fsrefstools_libfcache.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\fsrefstools\fsrefstools_libfdata.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\fsrefstools\fsrefstools_libfdatetime.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\fsrefstools\fsrefstools_libfguid.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\fsrefstools\fsrefstools_libfsrefs.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\fsrefstools\fsrefstools_libfwnt.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\fsrefstools\fsrefstools_libuna.h"
 				>
 			</File>
 			<File

@@ -27,8 +27,11 @@
 #include "libfsrefs_io_handle.h"
 #include "libfsrefs_libbfio.h"
 #include "libfsrefs_libcerror.h"
+#include "libfsrefs_libclocale.h"
 #include "libfsrefs_libcnotify.h"
 #include "libfsrefs_support.h"
+
+#if !defined( HAVE_LOCAL_LIBFSREFS )
 
 /* Returns the library version
  */
@@ -38,7 +41,69 @@ const char *libfsrefs_get_version(
 	return( (const char *) LIBFSREFS_VERSION_STRING );
 }
 
-/* Determines if an volume contains the REFS file system (check for the REFS signature)
+/* Returns the access flags for reading
+ */
+int libfsrefs_get_access_flags_read(
+     void )
+{
+	return( (int) LIBFSREFS_ACCESS_FLAG_READ );
+}
+
+/* Retrieves the narrow system string codepage
+ * A value of 0 represents no codepage, UTF-8 encoding is used instead
+ * Returns 1 if successful or -1 on error
+ */
+int libfsrefs_get_codepage(
+     int *codepage,
+     libcerror_error_t **error )
+{
+	static char *function = "libfsrefs_get_codepage";
+
+	if( libclocale_codepage_get(
+	     codepage,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve codepage.",
+		 function );
+
+		return( -1 );
+	}
+	return( 1 );
+}
+
+/* Sets the narrow system string codepage
+ * A value of 0 represents no codepage, UTF-8 encoding is used instead
+ * Returns 1 if successful or -1 on error
+ */
+int libfsrefs_set_codepage(
+     int codepage,
+     libcerror_error_t **error )
+{
+	static char *function = "libfsrefs_set_codepage";
+
+	if( libclocale_codepage_set(
+	     codepage,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to set codepage.",
+		 function );
+
+		return( -1 );
+	}
+	return( 1 );
+}
+
+#endif /* !defined( HAVE_LOCAL_LIBFSREFS ) */
+
+/* Determines if a file contains a REFS volume signature
  * Returns 1 if true, 0 if not or -1 on error
  */
 int libfsrefs_check_volume_signature(
@@ -73,7 +138,7 @@ int libfsrefs_check_volume_signature(
 		 "%s: invalid filename.",
 		 function );
 
-		return( -1 );
+		goto on_error;
 	}
 	if( libbfio_file_initialize(
 	     &file_io_handle,
@@ -86,7 +151,7 @@ int libfsrefs_check_volume_signature(
 		 "%s: unable to create file IO handle.",
 		 function );
 
-		return( -1 );
+		goto on_error;
 	}
 	if( libbfio_file_set_name(
 	     file_io_handle,
@@ -101,11 +166,7 @@ int libfsrefs_check_volume_signature(
 		 "%s: unable to set filename in file IO handle.",
 		 function );
 
-		libbfio_handle_free(
-		 &file_io_handle,
-		 NULL );
-
-		return( -1 );
+		goto on_error;
 	}
 	result = libfsrefs_check_volume_signature_file_io_handle(
 	          file_io_handle,
@@ -120,11 +181,7 @@ int libfsrefs_check_volume_signature(
 		 "%s: unable to check file signature using a file handle.",
 		 function );
 
-		libbfio_handle_free(
-		 &file_io_handle,
-		 NULL );
-
-		return( -1 );
+		goto on_error;
 	}
 	if( libbfio_handle_free(
 	     &file_io_handle,
@@ -137,14 +194,23 @@ int libfsrefs_check_volume_signature(
 		 "%s: unable to free file IO handle.",
 		 function );
 
-		return( -1 );
+		goto on_error;
 	}
 	return( result );
+
+on_error:
+	if( file_io_handle != NULL )
+	{
+		libbfio_handle_free(
+		 &file_io_handle,
+		 NULL );
+	}
+	return( -1 );
 }
 
 #if defined( HAVE_WIDE_CHARACTER_TYPE )
 
-/* Determines if an volume contains the REFS file system (check for the REFS signature)
+/* Determines if a file contains a REFS volume signature
  * Returns 1 if true, 0 if not or -1 on error
  */
 int libfsrefs_check_volume_signature_wide(
@@ -179,7 +245,7 @@ int libfsrefs_check_volume_signature_wide(
 		 "%s: invalid filename.",
 		 function );
 
-		return( -1 );
+		goto on_error;
 	}
 	if( libbfio_file_initialize(
 	     &file_io_handle,
@@ -192,7 +258,7 @@ int libfsrefs_check_volume_signature_wide(
 		 "%s: unable to create file IO handle.",
 		 function );
 
-		return( -1 );
+		goto on_error;
 	}
 	if( libbfio_file_set_name_wide(
 	     file_io_handle,
@@ -207,11 +273,7 @@ int libfsrefs_check_volume_signature_wide(
 		 "%s: unable to set filename in file IO handle.",
 		 function );
 
-		libbfio_handle_free(
-		 &file_io_handle,
-		 NULL );
-
-		return( -1 );
+		goto on_error;
 	}
 	result = libfsrefs_check_volume_signature_file_io_handle(
 	          file_io_handle,
@@ -226,11 +288,7 @@ int libfsrefs_check_volume_signature_wide(
 		 "%s: unable to check file signature using a file handle.",
 		 function );
 
-		libbfio_handle_free(
-		 &file_io_handle,
-		 NULL );
-
-		return( -1 );
+		goto on_error;
 	}
 	if( libbfio_handle_free(
 	     &file_io_handle,
@@ -243,12 +301,21 @@ int libfsrefs_check_volume_signature_wide(
 		 "%s: unable to free file IO handle.",
 		 function );
 
-		return( -1 );
+		goto on_error;
 	}
 	return( result );
+
+on_error:
+	if( file_io_handle != NULL )
+	{
+		libbfio_handle_free(
+		 &file_io_handle,
+		 NULL );
+	}
+	return( -1 );
 }
 
-#endif
+#endif /* defined( HAVE_WIDE_CHARACTER_TYPE ) */
 
 /* Determines if an volume contains the REFS file system (check for the REFS signature) using a Basic File IO (bfio) handle
  * Returns 1 if true, 0 if not or -1 on error

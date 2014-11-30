@@ -1,7 +1,7 @@
 /*
- * The internal type definitions
+ * The libfdata header wrapper
  *
- * Copyright (C) 2012-2014, Joachim Metz <joachim.metz@gmail.com>
+ * Copyright (c) 2012-2014, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *
@@ -19,31 +19,37 @@
  * along with this software.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if !defined( _LIBFSREFS_INTERNAL_TYPES_H )
-#define _LIBFSREFS_INTERNAL_TYPES_H
+#if !defined( _FSBTFSTOOLS_LIBFDATA_H )
+#define _FSBTFSTOOLS_LIBFDATA_H
 
 #include <common.h>
-#include <types.h>
 
-/* Define HAVE_LOCAL_LIBFSREFS for local use of libfsrefs
- * The definitions in <libfsrefs/types.h> are copied here
- * for local use of libfsrefs
+/* Define HAVE_LOCAL_LIBFDATA for local use of libfdata
  */
-#if defined( HAVE_LOCAL_LIBFSREFS )
+#if defined( HAVE_LOCAL_LIBFDATA )
 
-/* The following type definitions hide internal data structures
- */
-#if defined( HAVE_DEBUG_OUTPUT ) && !defined( WINAPI )
-typedef struct libfsrefs_file_entry {}		libfsrefs_file_entry_t;
-typedef struct libfsrefs_volume {}		libfsrefs_volume_t;
+#include <libfdata_definitions.h>
+#include <libfdata_list.h>
+#include <libfdata_list_element.h>
+#include <libfdata_range_list.h>
+#include <libfdata_stream.h>
+#include <libfdata_tree.h>
+#include <libfdata_tree_node.h>
+#include <libfdata_types.h>
+#include <libfdata_vector.h>
 
 #else
-typedef intptr_t libfsrefs_file_entry_t;
-typedef intptr_t libfsrefs_volume_t;
 
+/* If libtool DLL support is enabled set LIBFDATA_DLL_IMPORT
+ * before including libfdata.h
+ */
+#if defined( _WIN32 ) && defined( DLL_IMPORT )
+#define LIBFDATA_DLL_IMPORT
 #endif
 
-#endif /* defined( HAVE_LOCAL_LIBFSREFS ) */
+#include <libfdata.h>
+
+#endif
 
 #endif
 

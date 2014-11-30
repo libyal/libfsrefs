@@ -1,7 +1,7 @@
 /*
- * The internal type definitions
+ * The libfwnt header wrapper
  *
- * Copyright (C) 2012-2014, Joachim Metz <joachim.metz@gmail.com>
+ * Copyright (c) 2012-2014, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *
@@ -19,31 +19,32 @@
  * along with this software.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if !defined( _LIBFSREFS_INTERNAL_TYPES_H )
-#define _LIBFSREFS_INTERNAL_TYPES_H
+#if !defined( _FSREFSTOOLS_LIBFWNT_H )
+#define _FSREFSTOOLS_LIBFWNT_H
 
 #include <common.h>
-#include <types.h>
 
-/* Define HAVE_LOCAL_LIBFSREFS for local use of libfsrefs
- * The definitions in <libfsrefs/types.h> are copied here
- * for local use of libfsrefs
+/* Define HAVE_LOCAL_LIBFWNT for local use of libfwnt
  */
-#if defined( HAVE_LOCAL_LIBFSREFS )
+#if defined( HAVE_LOCAL_LIBFWNT )
 
-/* The following type definitions hide internal data structures
- */
-#if defined( HAVE_DEBUG_OUTPUT ) && !defined( WINAPI )
-typedef struct libfsrefs_file_entry {}		libfsrefs_file_entry_t;
-typedef struct libfsrefs_volume {}		libfsrefs_volume_t;
+#include <libfwnt_definitions.h>
+#include <libfwnt_locale_identifier.h>
+#include <libfwnt_security_identifier.h>
+#include <libfwnt_types.h>
 
 #else
-typedef intptr_t libfsrefs_file_entry_t;
-typedef intptr_t libfsrefs_volume_t;
 
+/* If libtool DLL support is enabled set LIBFWNT_DLL_IMPORT
+ * before including libfwnt.h
+ */
+#if defined( _WIN32 ) && defined( DLL_IMPORT )
+#define LIBFWNT_DLL_IMPORT
 #endif
 
-#endif /* defined( HAVE_LOCAL_LIBFSREFS ) */
+#include <libfwnt.h>
+
+#endif
 
 #endif
 

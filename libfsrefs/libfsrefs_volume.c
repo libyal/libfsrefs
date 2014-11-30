@@ -504,7 +504,7 @@ on_error:
         return( -1 );
 }
 
-#endif
+#endif /* defined( HAVE_WIDE_CHARACTER_TYPE ) */
 
 /* Opens a volume using a Basic File IO (bfio) handle
  * Returns 1 if successful or -1 on error
@@ -518,6 +518,8 @@ int libfsrefs_volume_open_file_io_handle(
 	libfsrefs_internal_volume_t *internal_volume = NULL;
 	static char *function                        = "libfsrefs_volume_open_file_io_handle";
 	int bfio_access_flags                        = 0;
+	int file_io_handle_is_open                   = 0;
+	int file_io_handle_opened_in_library         = 0;
 
 	if( volume == NULL )
 	{
@@ -532,6 +534,17 @@ int libfsrefs_volume_open_file_io_handle(
 	}
 	internal_volume = (libfsrefs_internal_volume_t *) volume;
 
+	if( internal_volume->file_io_handle != NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 "%s: invalid volume - file IO handle already set.",
+		 function );
+
+		return( -1 );
+	}
 	if( file_io_handle == NULL )
 	{
 		libcerror_error_set(
@@ -570,36 +583,66 @@ int libfsrefs_volume_open_file_io_handle(
 	{
 		bfio_access_flags = LIBBFIO_ACCESS_FLAG_READ;
 	}
-	internal_volume->file_io_handle = file_io_handle;
+	file_io_handle_is_open = libbfio_handle_is_open(
+	                          file_io_handle,
+	                          error );
 
-	if( libbfio_handle_open(
-	     internal_volume->file_io_handle,
-	     bfio_access_flags,
-	     error ) != 1 )
+	if( file_io_handle_is_open == -1 )
 	{
-                libcerror_error_set(
-                 error,
-                 LIBCERROR_ERROR_DOMAIN_IO,
-                 LIBCERROR_IO_ERROR_OPEN_FAILED,
-                 "%s: unable to open file IO handle.",
-                 function );
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_IO,
+		 LIBCERROR_IO_ERROR_OPEN_FAILED,
+		 "%s: unable to open volume.",
+		 function );
 
-                return( -1 );
+		goto on_error;
+	}
+	else if( file_io_handle_is_open == 0 )
+	{
+		if( libbfio_handle_open(
+		     file_io_handle,
+		     bfio_access_flags,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_IO,
+			 LIBCERROR_IO_ERROR_OPEN_FAILED,
+			 "%s: unable to open file IO handle.",
+			 function );
+
+			goto on_error;
+		}
+		file_io_handle_opened_in_library = 1;
 	}
 	if( libfsrefs_volume_open_read(
 	     internal_volume,
+	     file_io_handle,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_IO,
 		 LIBCERROR_IO_ERROR_READ_FAILED,
-		 "%s: unable to read from volume handle.",
+		 "%s: unable to read from file IO handle.",
 		 function );
 
-		return( -1 );
+		goto on_error;
 	}
+	internal_volume->file_io_handle                   = file_io_handle;
+	internal_volume->file_io_handle_opened_in_library = file_io_handle_opened_in_library;
+
 	return( 1 );
+
+on_error:
+	if( file_io_handle_opened_in_library != 0 )
+	{
+		libbfio_handle_close(
+		 file_io_handle,
+		 error );
+	}
+	return( -1 );
 }
 
 /* Closes a volume
@@ -637,10 +680,10 @@ int libfsrefs_volume_close(
 
 		return( -1 );
 	}
-	if( internal_volume->file_io_handle_created_in_library != 0 )
-	{
 #if defined( HAVE_DEBUG_OUTPUT )
-		if( libcnotify_verbose != 0 )
+	if( libcnotify_verbose != 0 )
+	{
+		if( internal_volume->file_io_handle_created_in_library != 0 )
 		{
 			if( libfsrefs_debug_print_read_offsets(
 			     internal_volume->file_io_handle,
@@ -652,9 +695,14 @@ int libfsrefs_volume_close(
 				 LIBCERROR_RUNTIME_ERROR_PRINT_FAILED,
 				 "%s: unable to print the read offsets.",
 				 function );
+
+				result = -1;
 			}
 		}
+	}
 #endif
+	if( internal_volume->file_io_handle_opened_in_library != 0 )
+	{
 		if( libbfio_handle_close(
 		     internal_volume->file_io_handle,
 		     error ) != 0 )
@@ -668,6 +716,10 @@ int libfsrefs_volume_close(
 
 			result = -1;
 		}
+		internal_volume->file_io_handle_opened_in_library = 0;
+	}
+	if( internal_volume->file_io_handle_created_in_library != 0 )
+	{
 		if( libbfio_handle_free(
 		     &( internal_volume->file_io_handle ),
 		     error ) != 1 )
@@ -681,12 +733,23 @@ int libfsrefs_volume_close(
 
 			result = -1;
 		}
+		internal_volume->file_io_handle_created_in_library = 0;
 	}
-	internal_volume->file_io_handle                    = NULL;
-	internal_volume->file_io_handle_created_in_library = 0;
+	internal_volume->file_io_handle = NULL;
 
-	/* TODO */
+	if( libfsrefs_io_handle_clear(
+	     internal_volume->io_handle,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+		 "%s: unable to clear IO handle.",
+		 function );
 
+		result = -1;
+	}
 	return( result );
 }
 
@@ -695,6 +758,7 @@ int libfsrefs_volume_close(
  */
 int libfsrefs_volume_open_read(
      libfsrefs_internal_volume_t *internal_volume,
+     libbfio_handle_t *file_io_handle,
      libcerror_error_t **error )
 {
 	libfsrefs_directory_t *directory                               = NULL;
@@ -748,7 +812,7 @@ int libfsrefs_volume_open_read(
 #endif
 	if( libfsrefs_io_handle_read_volume_header(
 	     internal_volume->io_handle,
-	     internal_volume->file_io_handle,
+	     file_io_handle,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
@@ -783,7 +847,7 @@ int libfsrefs_volume_open_read(
 	if( libfsrefs_level0_metadata_read(
 	     level0_metadata,
 	     internal_volume->io_handle,
-	     internal_volume->file_io_handle,
+	     file_io_handle,
 	     0x0000001eUL * internal_volume->io_handle->metadata_block_size,
 	     error ) != 1 )
 	{
@@ -819,7 +883,7 @@ int libfsrefs_volume_open_read(
 	if( libfsrefs_level1_metadata_read(
 	     level1_primary_metadata,
 	     internal_volume->io_handle,
-	     internal_volume->file_io_handle,
+	     file_io_handle,
 	     level0_metadata->primary_level1_metadata_block_number * internal_volume->io_handle->metadata_block_size,
 	     error ) != 1 )
 	{
@@ -855,7 +919,7 @@ int libfsrefs_volume_open_read(
 	if( libfsrefs_level1_metadata_read(
 	     level1_secondary_metadata,
 	     internal_volume->io_handle,
-	     internal_volume->file_io_handle,
+	     file_io_handle,
 	     level0_metadata->secondary_level1_metadata_block_number * internal_volume->io_handle->metadata_block_size,
 	     error ) != 1 )
 	{
@@ -979,7 +1043,7 @@ int libfsrefs_volume_open_read(
 		if( libfsrefs_level2_metadata_read(
 		     level2_metadata,
 		     internal_volume->io_handle,
-		     internal_volume->file_io_handle,
+		     file_io_handle,
 		     level2_metadata_block_descriptor->block_number * internal_volume->io_handle->metadata_block_size,
 		     error ) != 1 )
 		{
@@ -1067,7 +1131,7 @@ int libfsrefs_volume_open_read(
 				if( libfsrefs_directory_read(
 				     root_directory,
 				     internal_volume->io_handle,
-				     internal_volume->file_io_handle,
+				     file_io_handle,
 				     level3_metadata_block_descriptor->block_number * internal_volume->io_handle->metadata_block_size,
 				     4,
 				     error ) != 1 )
@@ -1114,7 +1178,7 @@ int libfsrefs_volume_open_read(
 				if( libfsrefs_directory_read(
 				     directory,
 				     internal_volume->io_handle,
-				     internal_volume->file_io_handle,
+				     file_io_handle,
 				     level3_metadata_block_descriptor->block_number * internal_volume->io_handle->metadata_block_size,
 				     4,
 				     error ) != 1 )
@@ -1159,7 +1223,7 @@ int libfsrefs_volume_open_read(
 				if( libfsrefs_block_descriptors_read(
 				     directory_block_descriptors,
 				     internal_volume->io_handle,
-				     internal_volume->file_io_handle,
+				     file_io_handle,
 				     level3_metadata_block_descriptor->block_number * internal_volume->io_handle->metadata_block_size,
 				     4,
 				     error ) != 1 )
@@ -1236,7 +1300,7 @@ int libfsrefs_volume_open_read(
 					if( libfsrefs_directory_read(
 					     directory,
 					     internal_volume->io_handle,
-					     internal_volume->file_io_handle,
+					     file_io_handle,
 					     level4_metadata_block_descriptor->block_number * internal_volume->io_handle->metadata_block_size,
 					     5,
 					     error ) != 1 )
@@ -1298,7 +1362,7 @@ int libfsrefs_volume_open_read(
 				if( libfsrefs_level3_metadata_read(
 				     level3_metadata,
 				     internal_volume->io_handle,
-				     internal_volume->file_io_handle,
+				     file_io_handle,
 				     level3_metadata_block_descriptor->block_number * internal_volume->io_handle->metadata_block_size,
 				     error ) != 1 )
 				{

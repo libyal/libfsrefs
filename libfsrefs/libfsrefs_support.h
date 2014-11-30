@@ -33,9 +33,27 @@
 extern "C" {
 #endif
 
+#if !defined( HAVE_LOCAL_LIBFSREFS )
+
 LIBFSREFS_EXTERN \
 const char *libfsrefs_get_version(
              void );
+
+LIBFSREFS_EXTERN \
+int libfsrefs_get_access_flags_read(
+     void );
+
+LIBFSREFS_EXTERN \
+int libfsrefs_get_codepage(
+     int *codepage,
+     libcerror_error_t **error );
+
+LIBFSREFS_EXTERN \
+int libfsrefs_set_codepage(
+     int codepage,
+     libcerror_error_t **error );
+
+#endif /* !defined( HAVE_LOCAL_LIBFSREFS ) */
 
 LIBFSREFS_EXTERN \
 int libfsrefs_check_volume_signature(
@@ -43,11 +61,13 @@ int libfsrefs_check_volume_signature(
      libcerror_error_t **error );
 
 #if defined( HAVE_WIDE_CHARACTER_TYPE )
+
 LIBFSREFS_EXTERN \
 int libfsrefs_check_volume_signature_wide(
      const wchar_t *filename,
      libcerror_error_t **error );
-#endif
+
+#endif /* defined( HAVE_WIDE_CHARACTER_TYPE ) */
 
 LIBFSREFS_EXTERN \
 int libfsrefs_check_volume_signature_file_io_handle(

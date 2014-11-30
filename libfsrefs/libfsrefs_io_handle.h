@@ -69,6 +69,10 @@ int libfsrefs_io_handle_free(
      libfsrefs_io_handle_t **io_handle,
      libcerror_error_t **error );
 
+int libfsrefs_io_handle_clear(
+     libfsrefs_io_handle_t *io_handle,
+     libcerror_error_t **error );
+
 int libfsrefs_io_handle_read_volume_header(
      libfsrefs_io_handle_t *io_handle,
      libbfio_handle_t *file_io_handle,

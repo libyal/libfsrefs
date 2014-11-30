@@ -33,7 +33,13 @@ fsrefsinfo_SOURCES = \
 	fsrefstools_libcnotify.h \
 	fsrefstools_libcstring.h \
 	fsrefstools_libcsystem.h \
+	fsrefstools_libfcache.h \
+	fsrefstools_libfdata.h \
+	fsrefstools_libfdatetime.h \
+	fsrefstools_libfguid.h \
 	fsrefstools_libfsrefs.h \
+	fsrefstools_libfwnt.h \
+	fsrefstools_libuna.h \
 	info_handle.c info_handle.h
 
 fsrefsinfo_LDADD = \

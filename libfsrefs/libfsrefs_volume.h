@@ -41,17 +41,21 @@ typedef struct libfsrefs_internal_volume libfsrefs_internal_volume_t;
 
 struct libfsrefs_internal_volume
 {
-	/* The file IO handle
-	 */
-	libbfio_handle_t *file_io_handle;
-
 	/* The IO handle
 	 */
 	libfsrefs_io_handle_t *io_handle;
 
+	/* The file IO handle
+	 */
+	libbfio_handle_t *file_io_handle;
+
 	/* Value to indicate if the file IO handle was created inside the library
 	 */
 	uint8_t file_io_handle_created_in_library;
+
+	/* Value to indicate if the file IO handle was opened inside the library
+	 */
+	uint8_t file_io_handle_opened_in_library;
 };
 
 LIBFSREFS_EXTERN \
@@ -77,13 +81,15 @@ int libfsrefs_volume_open(
      libcerror_error_t **error );
 
 #if defined( HAVE_WIDE_CHARACTER_TYPE )
+
 LIBFSREFS_EXTERN \
 int libfsrefs_volume_open_wide(
      libfsrefs_volume_t *volume,
      const wchar_t *filename,
      int access_flags,
      libcerror_error_t **error );
-#endif
+
+#endif /* defined( HAVE_WIDE_CHARACTER_TYPE ) */
 
 LIBFSREFS_EXTERN \
 int libfsrefs_volume_open_file_io_handle(
@@ -99,6 +105,7 @@ int libfsrefs_volume_close(
 
 int libfsrefs_volume_open_read(
      libfsrefs_internal_volume_t *internal_volume,
+     libbfio_handle_t *file_io_handle,
      libcerror_error_t **error );
 
 LIBFSREFS_EXTERN \
