@@ -10,8 +10,16 @@ Package: libfsrefs
 Section: libs
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
+Suggests: libfsrefs-dbg
 Description: Library to access the Windows Resiliant File System (REFS) format
  libfsrefs is a library to access the Windows Resiliant File System (REFS) format.
+
+Package: libfsrefs-dbg
+Architecture: any
+Section: debug
+Depends: libfsrefs (= ${Source-Version}), ${misc:Depends}
+Description: Debugging symbols for libfsrefs
+ Debugging symbols for libfsrefs.
 
 Package: libfsrefs-dev
 Section: libdevel
