@@ -1,13 +1,12 @@
 Source: libfsrefs
-Section: unknown
+Section: libs
 Priority: extra
 Maintainer: Joachim Metz <joachim.metz@gmail.com>
 Build-Depends: debhelper (>= 7), autotools-dev
-Standards-Version: 3.8.3
+Standards-Version: 3.9.5
 Homepage: https://github.com/libyal/libfsrefs/
 
 Package: libfsrefs
-Section: libs
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Suggests: libfsrefs-dbg
@@ -17,21 +16,21 @@ Description: Library to access the Windows Resiliant File System (REFS) format
 Package: libfsrefs-dbg
 Architecture: any
 Section: debug
-Depends: libfsrefs (= ${Source-Version}), ${misc:Depends}
+Depends: libfsrefs (= ${binary:Version}), ${misc:Depends}
 Description: Debugging symbols for libfsrefs
  Debugging symbols for libfsrefs.
 
 Package: libfsrefs-dev
 Section: libdevel
 Architecture: any
-Depends: libfsrefs (= ${Source-Version})
+Depends: libfsrefs (= ${binary:Version}), ${misc:Depends}
 Description: Header files and libraries for developing applications for libfsrefs
  Header files and libraries for developing applications for libfsrefs.
 
 Package: libfsrefs-tools
 Section: utils
 Architecture: any
-Depends: libfsrefs (= ${Source-Version}), ${shlibs:Depends}
+Depends: libfsrefs (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
 Description: Several tools for reading Windows Resiliant File System (REFS) volumes
  Several tools for reading Windows Resiliant File System (REFS) volumes.
 

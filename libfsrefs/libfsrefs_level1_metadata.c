@@ -1,7 +1,7 @@
 /*
  * Level 1 metadata functions
  *
- * Copyright (c) 2012-2014, Joachim Metz <joachim.metz@gmail.com>
+ * Copyright (C) 2012-2015, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *
