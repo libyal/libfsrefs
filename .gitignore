@@ -112,6 +112,7 @@ stamp-h[1-9]
 /include/libfsrefs/types.h
 /libfsrefs/libfsrefs.rc
 /libfsrefs/libfsrefs_definitions.h
+/fsrefstools/fsrefsinfo
 /tests/input
 /tests/tmp*
 
