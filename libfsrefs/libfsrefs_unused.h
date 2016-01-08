@@ -1,7 +1,7 @@
 /*
  * The internal unused definition
  *
- * Copyright (C) 2012-2015, Joachim Metz <joachim.metz@gmail.com>
+ * Copyright (C) 2012-2016, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *
