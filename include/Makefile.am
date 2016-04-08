@@ -1,17 +1,17 @@
 include_HEADERS = \
-        libfsrefs.h
+	libfsrefs.h
 
 pkginclude_HEADERS = \
-        libfsrefs/codepage.h \
-        libfsrefs/definitions.h \
-        libfsrefs/error.h \
-        libfsrefs/extern.h \
-        libfsrefs/features.h \
-        libfsrefs/types.h
+	libfsrefs/codepage.h \
+	libfsrefs/definitions.h \
+	libfsrefs/error.h \
+	libfsrefs/extern.h \
+	libfsrefs/features.h \
+	libfsrefs/types.h
 
 EXTRA_DIST = \
 	libfsrefs.h.in \
-        libfsrefs/codepage.h \
+	libfsrefs/codepage.h \
 	libfsrefs/definitions.h.in \
 	libfsrefs/features.h.in \
 	libfsrefs/types.h.in
