@@ -1,5 +1,5 @@
 /*
- * Configuration for the Borland/CodeGear C++ Builder compiler
+ * Memory allocation functions for testing
  *
  * Copyright (C) 2012-2016, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -19,8 +19,32 @@
  * along with this software.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if !defined( _CONFIG_BORLANDC_H )
-#define _CONFIG_BORLANDC_H
+#if !defined( _FSREFS_TEST_MEMORY_H )
+#define _FSREFS_TEST_MEMORY_H
 
-#endif /* !defined( _CONFIG_BORLANDC_H ) */
+#include <common.h>
+
+#if defined( __cplusplus )
+extern "C" {
+#endif
+
+#if defined( HAVE_GNU_DL_DLSYM ) && defined( __GNUC__ ) && !defined( __clang__ )
+
+#define HAVE_FSREFS_TEST_MEMORY		1
+
+extern int fsrefs_test_malloc_attempts_before_fail;
+
+extern int fsrefs_test_memcpy_attempts_before_fail;
+
+extern int fsrefs_test_memset_attempts_before_fail;
+
+extern int fsrefs_test_realloc_attempts_before_fail;
+
+#endif /* defined( HAVE_GNU_DL_DLSYM ) && defined( __GNUC__ ) && !defined( __clang__ ) */
+
+#if defined( __cplusplus )
+}
+#endif
+
+#endif /* !defined( _FSREFS_TEST_MEMORY_H ) */
 

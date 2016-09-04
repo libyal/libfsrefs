@@ -34,16 +34,16 @@
 /* The following type definitions hide internal data structures
  */
 #if defined( HAVE_DEBUG_OUTPUT ) && !defined( WINAPI )
-typedef struct libfsrefs_file_entry {}		libfsrefs_file_entry_t;
-typedef struct libfsrefs_volume {}		libfsrefs_volume_t;
+typedef struct libfsrefs_file_entry {}	libfsrefs_file_entry_t;
+typedef struct libfsrefs_volume {}	libfsrefs_volume_t;
 
 #else
 typedef intptr_t libfsrefs_file_entry_t;
 typedef intptr_t libfsrefs_volume_t;
 
-#endif
+#endif /* defined( HAVE_DEBUG_OUTPUT ) && !defined( WINAPI ) */
 
 #endif /* defined( HAVE_LOCAL_LIBFSREFS ) */
 
-#endif
+#endif /* !defined( _LIBFSREFS_INTERNAL_TYPES_H ) */
 

@@ -1,5 +1,5 @@
 /*
- * Notification function
+ * Notification functions
  *
  * Copyright (C) 2012-2016, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -53,11 +53,11 @@ LIBFSREFS_EXTERN \
 int libfsrefs_notify_stream_close(
      libcerror_error_t **error );
 
-#endif
+#endif /* !defined( HAVE_LOCAL_LIBFSREFS ) */
 
 #if defined( __cplusplus )
 }
 #endif
 
-#endif
+#endif /* !defined( _LIBFSREFS_NOTIFY_H ) */
 

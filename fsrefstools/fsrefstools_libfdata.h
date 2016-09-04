@@ -19,8 +19,8 @@
  * along with this software.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if !defined( _FSBTFSTOOLS_LIBFDATA_H )
-#define _FSBTFSTOOLS_LIBFDATA_H
+#if !defined( _FSREFSTOOLS_LIBFDATA_H )
+#define _FSREFSTOOLS_LIBFDATA_H
 
 #include <common.h>
 
@@ -28,6 +28,8 @@
  */
 #if defined( HAVE_LOCAL_LIBFDATA )
 
+#include <libfdata_area.h>
+#include <libfdata_btree.h>
 #include <libfdata_definitions.h>
 #include <libfdata_list.h>
 #include <libfdata_list_element.h>
@@ -43,13 +45,13 @@
 /* If libtool DLL support is enabled set LIBFDATA_DLL_IMPORT
  * before including libfdata.h
  */
-#if defined( _WIN32 ) && defined( DLL_IMPORT )
+#if defined( _WIN32 ) && defined( DLL_IMPORT ) && !defined( HAVE_STATIC_EXECUTABLES )
 #define LIBFDATA_DLL_IMPORT
 #endif
 
 #include <libfdata.h>
 
-#endif
+#endif /* defined( HAVE_LOCAL_LIBFDATA ) */
 
-#endif
+#endif /* !defined( _FSREFSTOOLS_LIBFDATA_H ) */
 

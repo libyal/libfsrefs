@@ -1,4 +1,5 @@
 MSVSCPP_FILES = \
+	fsrefs_test_error/fsrefs_test_error.vcproj \
 	fsrefs_test_get_version/fsrefs_test_get_version.vcproj \
 	fsrefsinfo/fsrefsinfo.vcproj \
 	libbfio/libbfio.vcproj \

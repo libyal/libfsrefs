@@ -28,8 +28,13 @@
  */
 #if defined( HAVE_LOCAL_LIBFWNT )
 
+#include <libfwnt_access_control_entry.h>
+#include <libfwnt_access_control_list.h>
 #include <libfwnt_definitions.h>
 #include <libfwnt_locale_identifier.h>
+#include <libfwnt_lznt1.h>
+#include <libfwnt_lzxpress.h>
+#include <libfwnt_security_descriptor.h>
 #include <libfwnt_security_identifier.h>
 #include <libfwnt_types.h>
 
@@ -38,13 +43,13 @@
 /* If libtool DLL support is enabled set LIBFWNT_DLL_IMPORT
  * before including libfwnt.h
  */
-#if defined( _WIN32 ) && defined( DLL_IMPORT )
+#if defined( _WIN32 ) && defined( DLL_IMPORT ) && !defined( HAVE_STATIC_EXECUTABLES )
 #define LIBFWNT_DLL_IMPORT
 #endif
 
 #include <libfwnt.h>
 
-#endif
+#endif /* defined( HAVE_LOCAL_LIBFWNT ) */
 
-#endif
+#endif /* !defined( _FSREFSTOOLS_LIBFWNT_H ) */
 

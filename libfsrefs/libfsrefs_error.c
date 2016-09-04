@@ -44,9 +44,13 @@ int libfsrefs_error_fprint(
      libfsrefs_error_t *error,
      FILE *stream )
 {
-	return( libcerror_error_fprint(
-	         (libcerror_error_t *) error,
-	         stream ) );
+	int print_count = 0;
+
+	print_count = libcerror_error_fprint(
+	               (libcerror_error_t *) error,
+	               stream );
+
+	return( print_count );
 }
 
 /* Prints a descriptive string of the error to the string
@@ -58,10 +62,14 @@ int libfsrefs_error_sprint(
      char *string,
      size_t size )
 {
-	return( libcerror_error_sprint(
-	         (libcerror_error_t *) error,
-	         string,
-	         size ) );
+	int print_count = 0;
+
+	print_count = libcerror_error_sprint(
+	               (libcerror_error_t *) error,
+	               string,
+	               size );
+
+	return( print_count );
 }
 
 /* Prints a backtrace of the error to the stream
@@ -71,9 +79,13 @@ int libfsrefs_error_backtrace_fprint(
      libfsrefs_error_t *error,
       FILE *stream )
 {
-	return( libcerror_error_backtrace_fprint(
-	         (libcerror_error_t *) error,
-	         stream ) );
+	int print_count = 0;
+
+	print_count = libcerror_error_backtrace_fprint(
+	               (libcerror_error_t *) error,
+	               stream );
+
+	return( print_count );
 }
 
 /* Prints a backtrace of the error to the string
@@ -85,11 +97,15 @@ int libfsrefs_error_backtrace_sprint(
      char *string,
      size_t size )
 {
-	return( libcerror_error_backtrace_sprint(
-	         (libcerror_error_t *) error,
-	         string,
-	         size ) );
+	int print_count = 0;
+
+	print_count = libcerror_error_backtrace_sprint(
+	               (libcerror_error_t *) error,
+	               string,
+	               size );
+
+	return( print_count );
 }
 
-#endif
+#endif /* !defined( HAVE_LOCAL_LIBFSREFS ) */
 

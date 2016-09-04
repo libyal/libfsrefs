@@ -38,13 +38,13 @@
 /* If libtool DLL support is enabled set LIBCLOCALE_DLL_IMPORT
  * before including libclocale.h
  */
-#if defined( _WIN32 ) && defined( DLL_IMPORT )
+#if defined( _WIN32 ) && defined( DLL_IMPORT ) && !defined( HAVE_STATIC_EXECUTABLES )
 #define LIBCLOCALE_DLL_IMPORT
 #endif
 
 #include <libclocale.h>
 
-#endif
+#endif /* defined( HAVE_LOCAL_LIBCLOCALE ) */
 
-#endif
+#endif /* !defined( _FSREFSTOOLS_LIBCLOCALE_H ) */
 

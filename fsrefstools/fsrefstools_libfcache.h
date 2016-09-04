@@ -38,13 +38,13 @@
 /* If libtool DLL support is enabled set LIBFCACHE_DLL_IMPORT
  * before including libfcache.h
  */
-#if defined( _WIN32 ) && defined( DLL_IMPORT )
+#if defined( _WIN32 ) && defined( DLL_IMPORT ) && !defined( HAVE_STATIC_EXECUTABLES )
 #define LIBFCACHE_DLL_IMPORT
 #endif
 
 #include <libfcache.h>
 
-#endif
+#endif /* defined( HAVE_LOCAL_LIBFCACHE ) */
 
-#endif
+#endif /* !defined( _FSREFSTOOLS_LIBFCACHE_H ) */
 

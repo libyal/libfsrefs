@@ -42,13 +42,13 @@
 /* If libtool DLL support is enabled set LIBCSYSTEM_DLL_IMPORT
  * before including libcsystem.h
  */
-#if defined( _WIN32 ) && defined( DLL_IMPORT )
+#if defined( _WIN32 ) && defined( DLL_IMPORT ) && !defined( HAVE_STATIC_EXECUTABLES )
 #define LIBCSYSTEM_DLL_IMPORT
 #endif
 
 #include <libcsystem.h>
 
-#endif
+#endif /* defined( HAVE_LOCAL_LIBCSYSTEM ) */
 
-#endif
+#endif /* !defined( _FSREFSTOOLS_LIBCSYSTEM_H ) */
 

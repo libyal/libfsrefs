@@ -30,9 +30,10 @@
 
 #include <libfdatetime_date_time_values.h>
 #include <libfdatetime_definitions.h>
-#include <libfdatetime_error.h>
 #include <libfdatetime_fat_date_time.h>
 #include <libfdatetime_filetime.h>
+#include <libfdatetime_floatingtime.h>
+#include <libfdatetime_hfs_time.h>
 #include <libfdatetime_nsf_timedate.h>
 #include <libfdatetime_posix_time.h>
 #include <libfdatetime_systemtime.h>
@@ -43,13 +44,13 @@
 /* If libtool DLL support is enabled set LIBFDATETIME_DLL_IMPORT
  * before including libfdatetime.h
  */
-#if defined( _WIN32 ) && defined( DLL_IMPORT )
+#if defined( _WIN32 ) && defined( DLL_IMPORT ) && !defined( HAVE_STATIC_EXECUTABLES )
 #define LIBFDATETIME_DLL_IMPORT
 #endif
 
 #include <libfdatetime.h>
 
-#endif
+#endif /* defined( HAVE_LOCAL_LIBFDATETIME ) */
 
-#endif
+#endif /* !defined( _FSREFSTOOLS_LIBFDATETIME_H ) */
 

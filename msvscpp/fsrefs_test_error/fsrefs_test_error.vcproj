@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9,00"
-	Name="fsrefs_test_get_version"
-	ProjectGUID="{639EC8C8-0090-440F-B2F4-E098B3C2CBDC}"
-	RootNamespace="fsrefs_test_get_version"
+	Name="fsrefs_test_error"
+	ProjectGUID="{F4A33415-A38B-4FCE-A9C5-C3298AB0DA31}"
+	RootNamespace="fsrefs_test_error"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="131072"
 	>
@@ -176,7 +176,7 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\..\tests\fsrefs_test_get_version.c"
+				RelativePath="..\..\tests\fsrefs_test_error.c"
 				>
 			</File>
 		</Filter>

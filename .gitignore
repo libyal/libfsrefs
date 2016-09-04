@@ -120,6 +120,7 @@ stamp-h[1-9]
 /libfsrefs/libfsrefs.rc
 /libfsrefs/libfsrefs_definitions.h
 /fsrefstools/fsrefsinfo
+/tests/fsrefs_test_error
 /tests/fsrefs_test_get_version
 /tests/input
 /tests/tmp*
