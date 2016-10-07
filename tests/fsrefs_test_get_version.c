@@ -74,7 +74,7 @@ int main(
 
 	FSREFS_TEST_RUN(
 	 "libfsrefs_get_version",
-	 fsrefs_test_get_version() )
+	 fsrefs_test_get_version );
 
 	return( EXIT_SUCCESS );
 

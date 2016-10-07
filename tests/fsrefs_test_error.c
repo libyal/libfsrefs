@@ -123,23 +123,23 @@ int main(
 
 	FSREFS_TEST_RUN(
 	 "libfsrefs_error_free",
-	 fsrefs_test_error_free() )
+	 fsrefs_test_error_free );
 
 	FSREFS_TEST_RUN(
 	 "libfsrefs_error_fprint",
-	 fsrefs_test_error_fprint() )
+	 fsrefs_test_error_fprint );
 
 	FSREFS_TEST_RUN(
 	 "libfsrefs_error_sprint",
-	 fsrefs_test_error_sprint() )
+	 fsrefs_test_error_sprint );
 
 	FSREFS_TEST_RUN(
 	 "libfsrefs_error_backtrace_fprint",
-	 fsrefs_test_error_backtrace_fprint() )
+	 fsrefs_test_error_backtrace_fprint );
 
 	FSREFS_TEST_RUN(
 	 "libfsrefs_error_backtrace_sprint",
-	 fsrefs_test_error_backtrace_sprint() )
+	 fsrefs_test_error_backtrace_sprint );
 
 	return( EXIT_SUCCESS );
 
