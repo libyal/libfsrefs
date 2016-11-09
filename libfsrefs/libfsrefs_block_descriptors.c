@@ -22,7 +22,10 @@
 #include <common.h>
 #include <byte_stream.h>
 #include <memory.h>
+#include <narrow_string.h>
+#include <system_string.h>
 #include <types.h>
+#include <wide_string.h>
 
 #include "libfsrefs_block_descriptor.h"
 #include "libfsrefs_block_descriptors.h"
@@ -191,7 +194,7 @@ int libfsrefs_block_descriptors_read(
 	int number_of_metadata_table_values            = 0;
 
 #if defined( HAVE_DEBUG_OUTPUT )
-	libcstring_system_character_t *value_string    = NULL;
+	system_character_t *value_string               = NULL;
 	size_t value_string_size                       = 0;
 	uint16_t value_16bit                           = 0;
 	int result                                     = 0;
@@ -341,7 +344,7 @@ int libfsrefs_block_descriptors_read(
 				 metadata_table_value_index,
 				 value_16bit );
 
-#if defined( LIBCSTRING_HAVE_WIDE_SYSTEM_CHARACTER )
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
 				result = libuna_utf16_string_size_from_utf16_stream(
 				          &( metadata_value->identifier_data[ 4 ] ),
 				          metadata_value->identifier_data_size - 4,
@@ -367,7 +370,7 @@ int libfsrefs_block_descriptors_read(
 
 					goto on_error;
 				}
-				value_string = libcstring_system_string_allocate(
+				value_string = system_string_allocate(
 						value_string_size );
 
 				if( value_string == NULL )
@@ -381,7 +384,7 @@ int libfsrefs_block_descriptors_read(
 
 					goto on_error;
 				}
-#if defined( LIBCSTRING_HAVE_WIDE_SYSTEM_CHARACTER )
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
 				result = libuna_utf16_string_copy_from_utf16_stream(
 					  (libuna_utf16_character_t *) value_string,
 					  value_string_size,
@@ -410,7 +413,7 @@ int libfsrefs_block_descriptors_read(
 					goto on_error;
 				}
 				libcnotify_printf(
-				 "%s: level: %d value: %02d identifier string\t\t: %" PRIs_LIBCSTRING_SYSTEM "\n",
+				 "%s: level: %d value: %02d identifier string\t\t: %" PRIs_SYSTEM "\n",
 				 function,
 				 level,
 				 metadata_table_value_index,

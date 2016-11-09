@@ -118,5 +118,5 @@ enum LIBFSREFS_CODEPAGES
 }
 #endif
 
-#endif
+#endif /* !defined( _LIBFSREFS_CODEPAGE_H ) */
 

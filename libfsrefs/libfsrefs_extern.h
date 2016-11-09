@@ -28,22 +28,19 @@
  */
 #if !defined( HAVE_LOCAL_LIBFSREFS )
 
-/* If Cygwin libtool DLL support is enabled set LIBFSREFS_DLL_EXPORT
+/* If libtool DLL support is enabled set LIBFSREFS_DLL_EXPORT
  * before including libfsrefs/extern.h
  */
 #if defined( _WIN32 ) && defined( DLL_EXPORT )
-#if !defined( HAVE_STATIC_EXECUTABLES )
 #define LIBFSREFS_DLL_EXPORT
-#endif
 #endif
 
 #include <libfsrefs/extern.h>
 
 #else
-
-#define LIBFSREFS_EXTERN  extern
-
-#endif
+#define LIBFSREFS_EXTERN	extern
 
 #endif
+
+#endif /* !defined( _LIBFSREFS_INTERNAL_EXTERN_H ) */
 

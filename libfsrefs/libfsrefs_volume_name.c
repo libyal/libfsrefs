@@ -22,11 +22,13 @@
 #include <common.h>
 #include <byte_stream.h>
 #include <memory.h>
+#include <narrow_string.h>
+#include <system_string.h>
 #include <types.h>
+#include <wide_string.h>
 
 #include "libfsrefs_libcerror.h"
 #include "libfsrefs_libcnotify.h"
-#include "libfsrefs_libcstring.h"
 #include "libfsrefs_libuna.h"
 #include "libfsrefs_metadata_value.h"
 #include "libfsrefs_volume_name.h"
@@ -147,13 +149,13 @@ int libfsrefs_volume_name_read(
      libfsrefs_metadata_value_t *metadata_value,
      libcerror_error_t **error )
 {
-	static char *function                       = "libfsrefs_volume_name_read";
-	uint64_t value_identifier                   = 0;
+	static char *function            = "libfsrefs_volume_name_read";
+	uint64_t value_identifier        = 0;
 
 #if defined( HAVE_DEBUG_OUTPUT )
-	libcstring_system_character_t *value_string = NULL;
-	size_t value_string_size                    = 0;
-	int result                                  = 0;
+	system_character_t *value_string = NULL;
+	size_t value_string_size         = 0;
+	int result                       = 0;
 #endif
 
 	if( volume_name == NULL )
@@ -284,7 +286,7 @@ int libfsrefs_volume_name_read(
 #if defined( HAVE_DEBUG_OUTPUT )
 		if( libcnotify_verbose != 0 )
 		{
-#if defined( LIBCSTRING_HAVE_WIDE_SYSTEM_CHARACTER )
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
 			result = libuna_utf16_string_size_from_utf16_stream(
 				  volume_name->name,
 				  volume_name->name_size,
@@ -310,7 +312,7 @@ int libfsrefs_volume_name_read(
 
 				goto on_error;
 			}
-			value_string = libcstring_system_string_allocate(
+			value_string = system_string_allocate(
 			                value_string_size );
 
 			if( value_string == NULL )
@@ -324,7 +326,7 @@ int libfsrefs_volume_name_read(
 
 				goto on_error;
 			}
-#if defined( LIBCSTRING_HAVE_WIDE_SYSTEM_CHARACTER )
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
 			result = libuna_utf16_string_copy_from_utf16_stream(
 				  (libuna_utf16_character_t *) value_string,
 				  value_string_size,
@@ -353,7 +355,7 @@ int libfsrefs_volume_name_read(
 				goto on_error;
 			}
 			libcnotify_printf(
-			 "%s: name\t\t\t\t\t: %" PRIs_LIBCSTRING_SYSTEM "\n",
+			 "%s: name\t\t\t\t\t: %" PRIs_SYSTEM "\n",
 			 function,
 			 value_string );
 

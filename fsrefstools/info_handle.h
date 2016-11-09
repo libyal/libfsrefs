@@ -28,7 +28,6 @@
 
 #include "fsrefstools_libbfio.h"
 #include "fsrefstools_libcerror.h"
-#include "fsrefstools_libcstring.h"
 #include "fsrefstools_libfsrefs.h"
 
 #if defined( __cplusplus )
@@ -78,17 +77,17 @@ int info_handle_signal_abort(
 
 int info_handle_set_entry_index(
      info_handle_t *info_handle,
-     const libcstring_system_character_t *string,
+     const system_character_t *string,
      libcerror_error_t **error );
 
 int info_handle_set_volume_offset(
      info_handle_t *info_handle,
-     const libcstring_system_character_t *string,
+     const system_character_t *string,
      libcerror_error_t **error );
 
 int info_handle_open_input(
      info_handle_t *info_handle,
-     const libcstring_system_character_t *filename,
+     const system_character_t *filename,
      libcerror_error_t **error );
 
 int info_handle_close_input(

@@ -1,7 +1,6 @@
 AM_CPPFLAGS = \
 	-I$(top_srcdir)/include \
 	-I$(top_srcdir)/common \
-	@LIBCSTRING_CPPFLAGS@ \
 	@LIBCERROR_CPPFLAGS@ \
 	@LIBCDATA_CPPFLAGS@ \
 	@LIBCLOCALE_CPPFLAGS@ \
@@ -42,7 +41,6 @@ libfsrefs_la_SOURCES = \
 	libfsrefs_libcerror.h \
 	libfsrefs_libclocale.h \
 	libfsrefs_libcnotify.h \
-	libfsrefs_libcstring.h \
 	libfsrefs_libfcache.h \
 	libfsrefs_libfdata.h \
 	libfsrefs_libfdatetime.h \
@@ -61,7 +59,6 @@ libfsrefs_la_SOURCES = \
 	libfsrefs_volume_name.c libfsrefs_volume_name.h
 
 libfsrefs_la_LIBADD = \
-	@LIBCSTRING_LIBADD@ \
 	@LIBCERROR_LIBADD@ \
 	@LIBCDATA_LIBADD@ \
 	@LIBCLOCALE_LIBADD@ \

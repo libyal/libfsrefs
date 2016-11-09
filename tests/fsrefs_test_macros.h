@@ -57,6 +57,13 @@
 		goto on_error; \
 	}
 
+#define FSREFS_TEST_ASSERT_EQUAL_SIZE( name, value, expected_value ) \
+	if( value != expected_value ) \
+	{ \
+		fprintf( stdout, "%s:%d %s != %" PRIzd "\n", __FILE__, __LINE__, name, expected_value ); \
+		goto on_error; \
+	}
+
 #define FSREFS_TEST_ASSERT_EQUAL_SSIZE( name, value, expected_value ) \
 	if( value != expected_value ) \
 	{ \
@@ -137,6 +144,9 @@
 	}
 
 #endif /* !defined( __BORLANDC__ ) || ( __BORLANDC__ >= 0x0560 ) */
+
+#define FSREFS_TEST_FPRINT_ERROR( error ) \
+	libcerror_error_backtrace_fprint( error, stdout );
 
 #endif /* !defined( _FSREFS_TEST_MACROS_H ) */
 

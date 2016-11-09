@@ -1,7 +1,6 @@
 AM_CPPFLAGS = \
 	-I$(top_srcdir)/include \
 	-I$(top_srcdir)/common \
-	@LIBCSTRING_CPPFLAGS@ \
 	@LIBCERROR_CPPFLAGS@ \
 	@LIBFSREFS_DLL_IMPORT@
 
@@ -17,29 +16,27 @@ EXTRA_DIST = \
 
 check_PROGRAMS = \
 	fsrefs_test_error \
-	fsrefs_test_get_version
+	fsrefs_test_support
 
 fsrefs_test_error_SOURCES = \
 	fsrefs_test_error.c \
 	fsrefs_test_libfsrefs.h \
-	fsrefs_test_libcstring.h \
 	fsrefs_test_macros.h \
 	fsrefs_test_unused.h
 
 fsrefs_test_error_LDADD = \
-	../libfsrefs/libfsrefs.la \
-	@LIBCSTRING_LIBADD@
+	../libfsrefs/libfsrefs.la
 
-fsrefs_test_get_version_SOURCES = \
-	fsrefs_test_get_version.c \
+fsrefs_test_support_SOURCES = \
+	fsrefs_test_libcerror.h \
 	fsrefs_test_libfsrefs.h \
-	fsrefs_test_libcstring.h \
 	fsrefs_test_macros.h \
+	fsrefs_test_support.c \
 	fsrefs_test_unused.h
 
-fsrefs_test_get_version_LDADD = \
-	../libfsrefs/libfsrefs.la \
-	@LIBCSTRING_LIBADD@
+fsrefs_test_support_LDADD = \
+	@LIBCERROR_LIBADD@ \
+	../libfsrefs/libfsrefs.la
 
 MAINTAINERCLEANFILES = \
 	Makefile.in

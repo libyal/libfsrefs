@@ -29,7 +29,6 @@
 #include "fsrefstools_libcerror.h"
 #include "fsrefstools_libclocale.h"
 #include "fsrefstools_libcnotify.h"
-#include "fsrefstools_libcstring.h"
 #include "fsrefstools_libcsystem.h"
 #include "fsrefstools_libfcache.h"
 #include "fsrefstools_libfdata.h"

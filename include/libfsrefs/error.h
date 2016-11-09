@@ -39,7 +39,7 @@ enum LIBFSREFS_ERROR_DOMAINS
 	LIBFSREFS_ERROR_DOMAIN_INPUT			= (int) 'i',
 	LIBFSREFS_ERROR_DOMAIN_MEMORY			= (int) 'm',
 	LIBFSREFS_ERROR_DOMAIN_OUTPUT			= (int) 'o',
-	LIBFSREFS_ERROR_DOMAIN_RUNTIME			= (int) 'r',
+	LIBFSREFS_ERROR_DOMAIN_RUNTIME			= (int) 'r'
 };
 
 /* The argument error codes
@@ -208,6 +208,17 @@ enum LIBFSREFS_MEMORY_ERROR
 	LIBFSREFS_MEMORY_ERROR_SET_FAILED		= 3
 };
 
+/* The output error codes
+ */
+enum LIBFSREFS_OUTPUT_ERROR
+{
+	LIBFSREFS_OUTPUT_ERROR_GENERIC			= 0,
+
+	/* There is insuficient space to write the output
+	 */
+	LIBFSREFS_OUTPUT_ERROR_INSUFFICIENT_SPACE	= 1
+};
+
 /* The runtime error codes
  * to signify errors regarding runtime processing
  */
@@ -276,16 +287,5 @@ enum LIBFSREFS_RUNTIME_ERROR
 	LIBFSREFS_RUNTIME_ERROR_ABORT_REQUESTED		= 15
 };
 
-/* The output error codes
- */
-enum LIBFSREFS_OUTPUT_ERROR
-{
-	LIBFSREFS_OUTPUT_ERROR_GENERIC			= 0,
-
-	/* There is insuficient space to write the output
-	 */
-	LIBFSREFS_OUTPUT_ERROR_INSUFFICIENT_SPACE	= 1
-};
-
-#endif
+#endif /* !defined( _LIBFSREFS_ERROR_H ) */
 

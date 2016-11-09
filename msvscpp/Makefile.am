@@ -1,6 +1,6 @@
 MSVSCPP_FILES = \
 	fsrefs_test_error/fsrefs_test_error.vcproj \
-	fsrefs_test_get_version/fsrefs_test_get_version.vcproj \
+	fsrefs_test_support/fsrefs_test_support.vcproj \
 	fsrefsinfo/fsrefsinfo.vcproj \
 	libbfio/libbfio.vcproj \
 	libcdata/libcdata.vcproj \
@@ -10,7 +10,6 @@ MSVSCPP_FILES = \
 	libcnotify/libcnotify.vcproj \
 	libcpath/libcpath.vcproj \
 	libcsplit/libcsplit.vcproj \
-	libcstring/libcstring.vcproj \
 	libcsystem/libcsystem.vcproj \
 	libcthreads/libcthreads.vcproj \
 	libfcache/libfcache.vcproj \

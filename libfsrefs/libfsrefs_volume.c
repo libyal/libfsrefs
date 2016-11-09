@@ -21,7 +21,9 @@
 
 #include <common.h>
 #include <memory.h>
+#include <narrow_string.h>
 #include <types.h>
+#include <wide_string.h>
 
 #include "libfsrefs_block_descriptor.h"
 #include "libfsrefs_block_descriptors.h"
@@ -36,7 +38,6 @@
 #include "libfsrefs_libbfio.h"
 #include "libfsrefs_libcerror.h"
 #include "libfsrefs_libcnotify.h"
-#include "libfsrefs_libcstring.h"
 #include "libfsrefs_libfcache.h"
 #include "libfsrefs_libfdata.h"
 #include "libfsrefs_metadata_block.h"
@@ -324,7 +325,7 @@ int libfsrefs_volume_open(
 	if( libbfio_file_set_name(
 	     file_io_handle,
 	     filename,
-	     libcstring_narrow_string_length(
+	     narrow_string_length(
 	      filename ) + 1,
 	     error ) != 1 )
 	{
@@ -461,7 +462,7 @@ int libfsrefs_volume_open_wide(
 	if( libbfio_file_set_name_wide(
 	     file_io_handle,
 	     filename,
-	     libcstring_wide_string_length(
+	     wide_string_length(
 	      filename ) + 1,
 	     error ) != 1 )
 	{

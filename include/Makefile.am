@@ -11,7 +11,6 @@ pkginclude_HEADERS = \
 
 EXTRA_DIST = \
 	libfsrefs.h.in \
-	libfsrefs/codepage.h \
 	libfsrefs/definitions.h.in \
 	libfsrefs/features.h.in \
 	libfsrefs/types.h.in
