@@ -1,7 +1,7 @@
 /*
  * Metadata block functions
  *
- * Copyright (C) 2012-2016, Joachim Metz <joachim.metz@gmail.com>
+ * Copyright (C) 2012-2017, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *
@@ -70,5 +70,5 @@ int libfsrefs_metadata_block_read(
 }
 #endif
 
-#endif
+#endif /* !defined( _LIBFSREFS_METADATA_BLOCK_H ) */
 

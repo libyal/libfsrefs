@@ -1,7 +1,7 @@
 /*
  * Input/Output (IO) handle functions
  *
- * Copyright (C) 2012-2016, Joachim Metz <joachim.metz@gmail.com>
+ * Copyright (C) 2012-2017, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *
@@ -82,5 +82,5 @@ int libfsrefs_io_handle_read_volume_header(
 }
 #endif
 
-#endif
+#endif /* !defined( _LIBFSREFS_IO_HANDLE_H ) */
 

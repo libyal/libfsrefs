@@ -1,7 +1,7 @@
 /*
  * Common output functions for the fsrefstools
  *
- * Copyright (C) 2012-2016, Joachim Metz <joachim.metz@gmail.com>
+ * Copyright (C) 2012-2017, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *
@@ -51,7 +51,7 @@ void fsrefsoutput_copyright_fprint(
 	 */
 	fprintf(
 	 stream,
-	 _( "Copyright (C) 2012-2016, %s.\n" ),
+	 _( "Copyright (C) 2012-2017, %s.\n" ),
 	 _( "Joachim Metz" ) );
 
 	fprintf(

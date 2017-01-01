@@ -1,7 +1,7 @@
 /*
  * Level 1 metadata functions
  *
- * Copyright (C) 2012-2016, Joachim Metz <joachim.metz@gmail.com>
+ * Copyright (C) 2012-2017, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *
@@ -78,5 +78,5 @@ int libfsrefs_level1_metadata_get_level2_metadata_block_descriptor_by_index(
 }
 #endif
 
-#endif
+#endif /* !defined( _LIBFSREFS_LEVEL1_METADATA_H ) */
 

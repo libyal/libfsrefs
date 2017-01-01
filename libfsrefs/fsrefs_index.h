@@ -1,7 +1,7 @@
 /*
  * The REFS index definition
  *
- * Copyright (C) 2012-2016, Joachim Metz <joachim.metz@gmail.com>
+ * Copyright (C) 2012-2017, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *
@@ -150,5 +150,5 @@ struct fsrefs_index_value
 }
 #endif
 
-#endif
+#endif /* !defined( _FSREFS_INDEX_H ) */
 

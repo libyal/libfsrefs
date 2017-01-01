@@ -1,7 +1,7 @@
 /*
  * The internal libfsrefs header
  *
- * Copyright (C) 2012-2016, Joachim Metz <joachim.metz@gmail.com>
+ * Copyright (C) 2012-2017, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *
@@ -27,11 +27,11 @@
 /* If Cygwin libtool DLL support is enabled set LIBFSREFS_DLL_IMPORT
  * before including libfsrefs.h
  */
-#if defined( _WIN32 ) && defined( DLL_EXPORT )
+#if defined( _WIN32 ) && defined( DLL_IMPORT ) && !defined( HAVE_STATIC_EXECUTABLES )
 #define LIBFSREFS_DLL_IMPORT
 #endif
 
 #include <libfsrefs.h>
 
-#endif
+#endif /* !defined( _FSREFSTOOLS_LIBFSREFS_H ) */
 

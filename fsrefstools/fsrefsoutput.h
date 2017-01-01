@@ -1,7 +1,7 @@
 /*
  * Common output functions for the fsrefstools
  *
- * Copyright (C) 2012-2016, Joachim Metz <joachim.metz@gmail.com>
+ * Copyright (C) 2012-2017, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *
@@ -45,5 +45,5 @@ void fsrefsoutput_version_detailed_fprint(
 }
 #endif
 
-#endif
+#endif /* !defined( _FSREFSOUTPUT_H ) */
 

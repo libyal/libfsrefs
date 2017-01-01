@@ -1,9 +1,10 @@
 /*
  * The extern definition
+ *
  * This header should be included in header files that export or import
  * library functions
  *
- * Copyright (C) 2012-2016, Joachim Metz <joachim.metz@gmail.com>
+ * Copyright (C) 2012-2017, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *
@@ -39,5 +40,5 @@
 
 #endif
 
-#endif
+#endif /* !defined( _LIBFSREFS_EXTERN_H ) */
 

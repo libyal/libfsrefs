@@ -121,8 +121,22 @@ stamp-h[1-9]
 /libfsrefs/libfsrefs.rc
 /libfsrefs/libfsrefs_definitions.h
 /fsrefstools/fsrefsinfo
+/tests/fsrefs_test_block_descriptor
+/tests/fsrefs_test_block_descriptors
+/tests/fsrefs_test_directory
 /tests/fsrefs_test_error
+/tests/fsrefs_test_io_handle
+/tests/fsrefs_test_level0_metadata
+/tests/fsrefs_test_level1_metadata
+/tests/fsrefs_test_level2_metadata
+/tests/fsrefs_test_level3_metadata
+/tests/fsrefs_test_metadata_block
+/tests/fsrefs_test_metadata_table
+/tests/fsrefs_test_metadata_value
+/tests/fsrefs_test_notify
 /tests/fsrefs_test_support
+/tests/fsrefs_test_volume
+/tests/fsrefs_test_volume_name
 /tests/input
 /tests/tmp*
 

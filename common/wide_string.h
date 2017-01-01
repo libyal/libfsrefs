@@ -1,7 +1,7 @@
 /*
  * Wide character string functions
  *
- * Copyright (C) 2012-2016, Joachim Metz <joachim.metz@gmail.com>
+ * Copyright (C) 2012-2017, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *
@@ -77,7 +77,7 @@ extern "C" {
 #define wide_string_compare_no_case( string1, string2, size ) \
 	_wcsnicmp( string1, string2, size )
 
-#elif defined( WINAPI ) || defined( HAVE_WCSNICMP )
+#elif ( defined( WINAPI ) && !defined( __CYGWIN__ ) ) || defined( HAVE_WCSNICMP )
 #define wide_string_compare_no_case( string1, string2, size ) \
 	wcsnicmp( string1, string2, size )
 

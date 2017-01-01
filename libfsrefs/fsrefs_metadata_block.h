@@ -1,7 +1,7 @@
 /*
  * The REFS metadata block definition
  *
- * Copyright (C) 2012-2016, Joachim Metz <joachim.metz@gmail.com>
+ * Copyright (C) 2012-2017, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *
@@ -63,5 +63,5 @@ struct fsrefs_metadata_block_header
 }
 #endif
 
-#endif
+#endif /* !defined( _FSREFS_METADATA_BLOCK_H ) */
 
