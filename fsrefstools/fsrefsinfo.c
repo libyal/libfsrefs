@@ -33,12 +33,14 @@
 #include <stdlib.h>
 #endif
 
-#include "fsrefsoutput.h"
+#include "fsrefstools_getopt.h"
 #include "fsrefstools_libcerror.h"
 #include "fsrefstools_libclocale.h"
 #include "fsrefstools_libcnotify.h"
-#include "fsrefstools_libcsystem.h"
 #include "fsrefstools_libfsrefs.h"
+#include "fsrefstools_output.h"
+#include "fsrefstools_signal.h"
+#include "fsrefstools_unused.h"
 #include "info_handle.h"
 
 info_handle_t *fsrefsinfo_info_handle = NULL;
@@ -72,12 +74,12 @@ void usage_fprint(
 /* Signal handler for fsrefsinfo
  */
 void fsrefsinfo_signal_handler(
-      libcsystem_signal_t signal LIBCSYSTEM_ATTRIBUTE_UNUSED )
+      fsrefstools_signal_t signal FSREFSTOOLS_ATTRIBUTE_UNUSED )
 {
 	libcerror_error_t *error = NULL;
-	static char *function   = "fsrefsinfo_signal_handler";
+	static char *function    = "fsrefsinfo_signal_handler";
 
-	LIBCSYSTEM_UNREFERENCED_PARAMETER( signal )
+	FSREFSTOOLS_UNREFERENCED_PARAMETER( signal )
 
 	fsrefsinfo_abort = 1;
 
@@ -99,8 +101,13 @@ void fsrefsinfo_signal_handler(
 	}
 	/* Force stdin to close otherwise any function reading it will remain blocked
 	 */
-	if( libcsystem_file_io_close(
+#if defined( WINAPI ) && !defined( __CYGWIN__ )
+	if( _close(
 	     0 ) != 0 )
+#else
+	if( close(
+	     0 ) != 0 )
+#endif
 	{
 		libcnotify_printf(
 		 "%s: unable to close stdin.\n",
@@ -140,13 +147,13 @@ int main( int argc, char * const argv[] )
 
 		goto on_error;
 	}
-        if( libcsystem_initialize(
+        if( fsrefstools_output_initialize(
              _IONBF,
              &error ) != 1 )
 	{
 		fprintf(
 		 stderr,
-		 "Unable to initialize system values.\n" );
+		 "Unable to initialize output settings.\n" );
 
 		goto on_error;
 	}
@@ -154,7 +161,7 @@ int main( int argc, char * const argv[] )
 	 stdout,
 	 program );
 
-	while( ( option = libcsystem_getopt(
+	while( ( option = fsrefstools_getopt(
 	                   argc,
 	                   argv,
 	                   _SYSTEM_STRING( "e:ho:vV" ) ) ) != (system_integer_t) -1 )

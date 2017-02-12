@@ -15,7 +15,6 @@ AM_CPPFLAGS = \
 	@LIBFDATETIME_CPPFLAGS@ \
 	@LIBFGUID_CPPFLAGS@ \
 	@LIBFWNT_CPPFLAGS@ \
-	@LIBCSYSTEM_CPPFLAGS@ \
 	@LIBFSREFS_DLL_IMPORT@
 
 AM_LDFLAGS = @STATIC_LDFLAGS@
@@ -25,12 +24,12 @@ bin_PROGRAMS = \
 
 fsrefsinfo_SOURCES = \
 	fsrefsinfo.c \
-	fsrefsoutput.c fsrefsoutput.h \
+	fsrefstools_getopt.c fsrefstools_getopt.h \
+	fsrefstools_i18n.h \
 	fsrefstools_libbfio.h \
 	fsrefstools_libcerror.h \
 	fsrefstools_libclocale.h \
 	fsrefstools_libcnotify.h \
-	fsrefstools_libcsystem.h \
 	fsrefstools_libfcache.h \
 	fsrefstools_libfdata.h \
 	fsrefstools_libfdatetime.h \
@@ -38,17 +37,19 @@ fsrefsinfo_SOURCES = \
 	fsrefstools_libfsrefs.h \
 	fsrefstools_libfwnt.h \
 	fsrefstools_libuna.h \
+	fsrefstools_output.c fsrefstools_output.h \
+	fsrefstools_signal.c fsrefstools_signal.h \
+	fsrefstools_unused.h \
 	info_handle.c info_handle.h
 
 fsrefsinfo_LDADD = \
-	@LIBCSYSTEM_LIBADD@ \
 	@LIBBFIO_LIBADD@ \
 	@LIBCPATH_LIBADD@ \
 	@LIBCFILE_LIBADD@ \
 	@LIBCSPLIT_LIBADD@ \
-	../libfsrefs/libfsrefs.la \
 	@LIBCNOTIFY_LIBADD@ \
 	@LIBCLOCALE_LIBADD@ \
+	../libfsrefs/libfsrefs.la \
 	@LIBCERROR_LIBADD@ \
 	@LIBINTL@
 

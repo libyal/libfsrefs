@@ -20,7 +20,6 @@ SUBDIRS = \
 	libfwnt \
 	libfsrefs \
 	libfusn \
-	libcsystem \
 	fsrefstools \
 	po \
 	manuals \
@@ -120,7 +119,6 @@ splint:
 	(cd $(srcdir)/libfwnt && $(MAKE) splint $(AM_MAKEFLAGS))
 	(cd $(srcdir)/libfsrefs && $(MAKE) splint $(AM_MAKEFLAGS))
 	(cd $(srcdir)/libfusn && $(MAKE) splint $(AM_MAKEFLAGS))
-	(cd $(srcdir)/libcsystem && $(MAKE) splint $(AM_MAKEFLAGS))
 	(cd $(srcdir)/fsrefstools && $(MAKE) splint $(AM_MAKEFLAGS))
 	(cd $(srcdir)/po && $(MAKE) splint $(AM_MAKEFLAGS))
 	(cd $(srcdir)/tests && $(MAKE) splint $(AM_MAKEFLAGS))
