@@ -50,6 +50,7 @@ fsrefsinfo_LDADD = \
 	@LIBCSPLIT_LIBADD@ \
 	@LIBCNOTIFY_LIBADD@ \
 	@LIBCLOCALE_LIBADD@ \
+	@LIBCDATA_LIBADD@ \
 	../libfsrefs/libfsrefs.la \
 	@LIBCERROR_LIBADD@ \
 	@LIBINTL@
