@@ -32,11 +32,10 @@ DPKG_FILES = \
 	dpkg/compat \
 	dpkg/control \
 	dpkg/copyright \
-	dpkg/copyright.in \
 	dpkg/rules \
-	dpkg/libfsrefs-dev.docs \
-	dpkg/libfsrefs.docs \
-	dpkg/libfsrefs-tools.docs \
+	dpkg/libfsrefs-dev.install \
+	dpkg/libfsrefs.install \
+	dpkg/libfsrefs-tools.install \
 	dpkg/source/format
 
 GETTEXT_FILES = \
