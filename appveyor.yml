@@ -3,32 +3,35 @@ environment:
   - TARGET: vs2008
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2013
     VisualStudioVersion: 9.0
+    platform: Win32
+    configuration: Release
   - TARGET: vs2010
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2013
     VisualStudioVersion: 10.0
+    platform: Win32
+    configuration: VSDebug
   - TARGET: vs2012
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2013
     VisualStudioVersion: 11.0
+    platform: x64
+    configuration: Release
   - TARGET: vs2013
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2013
     VisualStudioVersion: 12.0
+    platform: Win32
+    configuration: Release
   - TARGET: vs2015
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
     VisualStudioVersion: 14.0
+    platform: Win32
+    configuration: Release
   - TARGET: cygwin
-  - TARGET: mingw32
-  - TARGET: mingw64
-
-# TODO: add x64, fix issue: LNK1158: cannot run 'cvtres.exe'
-platform:
-- Win32
-
-# TODO: add VSDebug
-configuration:
-- Release
+  - TARGET: cygwin64
+  - TARGET: mingw
+  - TARGET: mingw-w64
 
 install:
-- cmd: git clone https://github.com/libyal/libyal.git && move libyal ..\
+- cmd: git clone https://github.com/libyal/vstools.git && move vstools ..\
 
 build_script:
 - ps: .\synclibs.ps1
@@ -36,32 +39,38 @@ build_script:
 - cmd: if [%TARGET%]==[vs2008] (
     msbuild msvscpp\libfsrefs.sln /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" )
 - cmd: if [%TARGET%]==[vs2010] (
-    C:\Python27\python.exe ..\libyal\scripts\msvscpp-convert.py --to 2010 msvscpp\libfsrefs.sln &&
+    set PYTHONPATH=..\vstools &&
+    C:\Python27\python.exe ..\vstools\scripts\msvscpp-convert.py --to 2010 msvscpp\libfsrefs.sln &&
     msbuild vs2010\libfsrefs.sln /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" )
 - cmd: if [%TARGET%]==[vs2012] (
-    C:\Python27\python.exe ..\libyal\scripts\msvscpp-convert.py --to 2012 msvscpp\libfsrefs.sln &&
+    set PYTHONPATH=..\vstools &&
+    C:\Python27\python.exe ..\vstools\scripts\msvscpp-convert.py --to 2012 msvscpp\libfsrefs.sln &&
     msbuild vs2012\libfsrefs.sln /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" )
 - cmd: if [%TARGET%]==[vs2013] (
-    C:\Python27\python.exe ..\libyal\scripts\msvscpp-convert.py --to 2013 msvscpp\libfsrefs.sln &&
+    set PYTHONPATH=..\vstools &&
+    C:\Python27\python.exe ..\vstools\scripts\msvscpp-convert.py --to 2013 msvscpp\libfsrefs.sln &&
     msbuild vs2013\libfsrefs.sln /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" )
 - cmd: if [%TARGET%]==[vs2015] (
-    C:\Python27\python.exe ..\libyal\scripts\msvscpp-convert.py --to 2015 msvscpp\libfsrefs.sln &&
+    set PYTHONPATH=..\vstools &&
+    C:\Python27\python.exe ..\vstools\scripts\msvscpp-convert.py --to 2015 msvscpp\libfsrefs.sln &&
     msbuild vs2015\libfsrefs.sln /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" )
 - cmd: if [%TARGET%]==[cygwin] (
     xcopy /q /s C:\projects\libfsrefs C:\cygwin\home\appveyor\ &&
     C:\cygwin\bin\bash -e -l -c "cd libfsrefs" &&
-    C:\cygwin\bin\bash -e -l -c "./synclibs.sh && ./autogen.sh" &&
-    C:\cygwin\bin\bash -e -l -c "./configure && make -j4" )
-- cmd: if [%TARGET%]==[mingw32] (
+    C:\cygwin\bin\bash -e -l -c "./synclibs.sh && ./autogen.sh" )
+- cmd: if [%TARGET%]==[cygwin64] (
+    xcopy /q /s C:\projects\libfsrefs C:\cygwin64\home\appveyor\ &&
+    C:\cygwin64\bin\bash -e -l -c "cd libfsrefs" &&
+    C:\cygwin64\bin\bash -e -l -c "./synclibs.sh && ./autogen.sh" )
+- cmd: if [%TARGET%]==[mingw] (
+    xcopy /q /s C:\projects\libfsrefs C:\MinGW\msys\1.0\home\appveyor\ &&
+    C:\MinGW\msys\1.0\bin\bash -e -l -c "cd libfsrefs" &&
+    C:\MinGW\msys\1.0\bin\bash -e -l -c "sed 's/@VERSION@/0.29/g' m4/pkg.m4.in > m4/pkg.m4" &&
+    C:\MinGW\msys\1.0\bin\bash -e -l -c "./synclibs.sh && ./autogen.sh" )
+- cmd: if [%TARGET%]==[mingw-w64] (
     xcopy /q /s C:\projects\libfsrefs C:\msys64\home\appveyor\ &&
     C:\msys64\usr\bin\bash -e -l -c "cd libfsrefs" &&
-    C:\msys64\usr\bin\bash -e -l -c "./synclibs.sh && ./autogen.sh" &&
-    C:\msys64\usr\bin\bash -e -l -c "./configure --host=i686-w64-mingw32 && make -j4" )
-- cmd: if [%TARGET%]==[mingw64] (
-    xcopy /q /s C:\projects\libfsrefs C:\msys64\home\appveyor\ &&
-    C:\msys64\usr\bin\bash -e -l -c "cd libfsrefs" &&
-    C:\msys64\usr\bin\bash -e -l -c "./synclibs.sh && ./autogen.sh" &&
-    C:\msys64\usr\bin\bash -e -l -c "./configure --host=x86_64-w64-mingw32 && make -j4" )
+    C:\msys64\usr\bin\bash -e -l -c "./synclibs.sh && ./autogen.sh" )
 
 test_script:
 - cmd: rem Run tests
@@ -75,4 +84,12 @@ test_script:
     .\runtests.ps1 }
 - ps: if ($env:TARGET -eq "vs2015") {
     .\runtests.ps1 }
+- cmd: if [%TARGET%]==[cygwin] (
+    C:\cygwin\bin\bash -e -l -c "./runtests.sh" )
+- cmd: if [%TARGET%]==[cygwin64] (
+    C:\cygwin64\bin\bash -e -l -c "./runtests.sh" )
+- cmd: if [%TARGET%]==[mingw] (
+    C:\MinGW\msys\1.0\bin\bash -e -l -c "./runtests.sh" )
+- cmd: if [%TARGET%]==[mingw-w64] (
+    C:\msys64\usr\bin\bash -e -l -c "./runtests.sh" )
 
