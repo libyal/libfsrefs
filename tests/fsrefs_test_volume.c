@@ -1789,11 +1789,11 @@ int main(
 		 fsrefs_test_volume_signal_abort,
 		 volume );
 
-#if defined( __GNUC__ )
+#if defined( __GNUC__ ) && !defined( LIBFSREFS_DLL_IMPORT )
 
 		/* TODO: add tests for libfsrefs_volume_open_read */
 
-#endif /* defined( __GNUC__ ) */
+#endif /* defined( __GNUC__ ) && !defined( LIBFSREFS_DLL_IMPORT ) */
 
 		FSREFS_TEST_RUN_WITH_ARGS(
 		 "libfsrefs_volume_get_utf8_name_size",

@@ -35,7 +35,7 @@
 
 #include "../libfsrefs/libfsrefs_block_descriptor.h"
 
-#if defined( __GNUC__ )
+#if defined( __GNUC__ ) && !defined( LIBFSREFS_DLL_IMPORT )
 
 /* Tests the libfsrefs_block_descriptor_initialize function
  * Returns 1 if successful or 0 if not
@@ -270,7 +270,7 @@ on_error:
 	return( 0 );
 }
 
-#endif /* defined( __GNUC__ ) */
+#endif /* defined( __GNUC__ ) && !defined( LIBFSREFS_DLL_IMPORT ) */
 
 /* The main program
  */
@@ -287,7 +287,7 @@ int main(
 	FSREFS_TEST_UNREFERENCED_PARAMETER( argc )
 	FSREFS_TEST_UNREFERENCED_PARAMETER( argv )
 
-#if defined( __GNUC__ )
+#if defined( __GNUC__ ) && !defined( LIBFSREFS_DLL_IMPORT )
 
 	FSREFS_TEST_RUN(
 	 "libfsrefs_block_descriptor_initialize",
@@ -299,7 +299,7 @@ int main(
 
 	/* TODO: add tests for libfsrefs_block_descriptor_set_identifier */
 
-#endif /* defined( __GNUC__ ) */
+#endif /* defined( __GNUC__ ) && !defined( LIBFSREFS_DLL_IMPORT ) */
 
 	return( EXIT_SUCCESS );
 
