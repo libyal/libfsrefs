@@ -64,13 +64,13 @@ int fsrefs_test_metadata_value_initialize(
 	 result,
 	 1 );
 
-        FSREFS_TEST_ASSERT_IS_NOT_NULL(
-         "metadata_value",
-         metadata_value );
+	FSREFS_TEST_ASSERT_IS_NOT_NULL(
+	 "metadata_value",
+	 metadata_value );
 
-        FSREFS_TEST_ASSERT_IS_NULL(
-         "error",
-         error );
+	FSREFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
 
 	result = libfsrefs_metadata_value_free(
 	          &metadata_value,
@@ -81,13 +81,13 @@ int fsrefs_test_metadata_value_initialize(
 	 result,
 	 1 );
 
-        FSREFS_TEST_ASSERT_IS_NULL(
-         "metadata_value",
-         metadata_value );
+	FSREFS_TEST_ASSERT_IS_NULL(
+	 "metadata_value",
+	 metadata_value );
 
-        FSREFS_TEST_ASSERT_IS_NULL(
-         "error",
-         error );
+	FSREFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
 
 	/* Test error cases
 	 */
@@ -100,9 +100,9 @@ int fsrefs_test_metadata_value_initialize(
 	 result,
 	 -1 );
 
-        FSREFS_TEST_ASSERT_IS_NOT_NULL(
-         "error",
-         error );
+	FSREFS_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
 
 	libcerror_error_free(
 	 &error );
@@ -118,9 +118,9 @@ int fsrefs_test_metadata_value_initialize(
 	 result,
 	 -1 );
 
-        FSREFS_TEST_ASSERT_IS_NOT_NULL(
-         "error",
-         error );
+	FSREFS_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
 
 	libcerror_error_free(
 	 &error );
@@ -252,9 +252,9 @@ int fsrefs_test_metadata_value_free(
 	 result,
 	 -1 );
 
-        FSREFS_TEST_ASSERT_IS_NOT_NULL(
-         "error",
-         error );
+	FSREFS_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
 
 	libcerror_error_free(
 	 &error );
