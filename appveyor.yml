@@ -35,46 +35,47 @@ environment:
   - TARGET: mingw-w64
 
 install:
+- cmd: git clone https://github.com/codecov/codecov-bash.git ..\codecov-bash
 - cmd: git clone https://github.com/libyal/vstools.git ..\vstools
 
 build_script:
 - ps: .\synclibs.ps1
 - ps: .\autogen.ps1
 - cmd: if [%TARGET%]==[vs2008] (
-    msbuild msvscpp\libfsrefs.sln /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" )
+    msbuild /verbosity:quiet msvscpp\libfsrefs.sln /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" )
 - cmd: if [%TARGET%]==[vs2010] (
     set PYTHONPATH=..\vstools &&
     C:\Python27\python.exe ..\vstools\scripts\msvscpp-convert.py --no-python-dll --output-format 2010 msvscpp\libfsrefs.sln &&
-    msbuild vs2010\libfsrefs.sln /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" )
+    msbuild /verbosity:quiet vs2010\libfsrefs.sln /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" )
 - cmd: if [%TARGET%]==[vs2012] (
     set PYTHONPATH=..\vstools &&
     C:\Python27\python.exe ..\vstools\scripts\msvscpp-convert.py --extend-with-x64 --output-format 2012 --python-path "C:\\Python27-x64" msvscpp\libfsrefs.sln &&
-    msbuild vs2012\libfsrefs.sln /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" )
+    msbuild /verbosity:quiet vs2012\libfsrefs.sln /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" )
 - cmd: if [%TARGET%]==[vs2013] (
     set PYTHONPATH=..\vstools &&
     C:\Python27\python.exe ..\vstools\scripts\msvscpp-convert.py --output-format 2013 msvscpp\libfsrefs.sln &&
-    msbuild vs2013\libfsrefs.sln /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" )
+    msbuild /verbosity:quiet vs2013\libfsrefs.sln /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" )
 - cmd: if [%TARGET%]==[vs2015] (
     set PYTHONPATH=..\vstools &&
     C:\Python27\python.exe ..\vstools\scripts\msvscpp-convert.py --output-format 2015 msvscpp\libfsrefs.sln &&
-    msbuild vs2015\libfsrefs.sln /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" )
+    msbuild /verbosity:quiet vs2015\libfsrefs.sln /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" )
 - cmd: if [%TARGET%]==[vs2017] (
     set PYTHONPATH=..\vstools &&
     C:\Python27\python.exe ..\vstools\scripts\msvscpp-convert.py --extend-with-x64 --no-python-dll --output-format 2017 msvscpp\libfsrefs.sln &&
-    msbuild vs2017\libfsrefs.sln /property:Platform=Win32 /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" &&
-    msbuild vs2017\libfsrefs.sln /property:Platform=x64 /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" )
+    msbuild /verbosity:quiet vs2017\libfsrefs.sln /property:Platform=Win32 /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" &&
+    msbuild /verbosity:quiet vs2017\libfsrefs.sln /property:Platform=x64 /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" )
 - cmd: if [%TARGET%]==[cygwin] (
     xcopy /i /q /s C:\projects\libfsrefs C:\cygwin\home\appveyor\libfsrefs &&
-    C:\cygwin\bin\bash -e -l -c "cd libfsrefs && ./synclibs.sh && ./autogen.sh" )
+    C:\cygwin\bin\bash -e -l -c "cd libfsrefs && ./synclibs.sh --use-head && ./autogen.sh" )
 - cmd: if [%TARGET%]==[cygwin64] (
     xcopy /i /q /s C:\projects\libfsrefs C:\cygwin64\home\appveyor\libfsrefs &&
-    C:\cygwin64\bin\bash -e -l -c "cd libfsrefs && ./synclibs.sh && ./autogen.sh" )
+    C:\cygwin64\bin\bash -e -l -c "cd libfsrefs && ./synclibs.sh --use-head && ./autogen.sh" )
 - cmd: if [%TARGET%]==[mingw] (
     xcopy /i /q /s C:\projects\libfsrefs C:\MinGW\msys\1.0\home\appveyor\libfsrefs &&
-    C:\MinGW\msys\1.0\bin\bash -e -l -c "cd libfsrefs && sed 's/@VERSION@/0.29/g' m4/pkg.m4.in > m4/pkg.m4 && ./synclibs.sh && ./autogen.sh" )
+    C:\MinGW\msys\1.0\bin\bash -e -l -c "cd libfsrefs && sed 's/@VERSION@/0.29/g' m4/pkg.m4.in > m4/pkg.m4 && ./synclibs.sh --use-head && ./autogen.sh" )
 - cmd: if [%TARGET%]==[mingw-w64] (
     xcopy /i /q /s C:\projects\libfsrefs C:\msys64\home\appveyor\libfsrefs &&
-    C:\msys64\usr\bin\bash -e -l -c "cd libfsrefs && ./synclibs.sh && ./autogen.sh" )
+    C:\msys64\usr\bin\bash -e -l -c "cd libfsrefs && ./synclibs.sh --use-head && ./autogen.sh" )
 
 test_script:
 - cmd: rem Run tests
@@ -98,4 +99,9 @@ test_script:
     C:\MinGW\msys\1.0\bin\bash -e -l -c "cd libfsrefs && ./runtests.sh" )
 - cmd: if [%TARGET%]==[mingw-w64] (
     C:\msys64\usr\bin\bash -e -l -c "cd libfsrefs && ./runtests.sh" )
+
+after_test:
+- cmd: if [%TARGET%]==[mingw] (
+    copy C:\projects\codecov-bash\codecov C:\MinGW\msys\1.0\home\appveyor\libfsrefs\codecov.sh &&
+    C:\MinGW\msys\1.0\bin\bash -e -l -c "cd libfsrefs && chmod a+x ./codecov.sh && ./codecov.sh" )
 
