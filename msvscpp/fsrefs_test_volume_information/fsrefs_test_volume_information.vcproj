@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9,00"
-	Name="fsrefs_test_notify"
-	ProjectGUID="{C6939822-15BF-4CD9-8DF1-6444B30DF640}"
-	RootNamespace="fsrefs_test_notify"
+	Name="fsrefs_test_volume_information"
+	ProjectGUID="{CEC29D44-A0A6-47A8-ABBE-327C0367A3E1}"
+	RootNamespace="fsrefs_test_volume_information"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="131072"
 	>
@@ -176,7 +176,11 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\..\tests\fsrefs_test_notify.c"
+				RelativePath="..\..\tests\fsrefs_test_memory.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\tests\fsrefs_test_volume_information.c"
 				>
 			</File>
 		</Filter>
@@ -195,6 +199,10 @@
 			</File>
 			<File
 				RelativePath="..\..\tests\fsrefs_test_macros.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\tests\fsrefs_test_memory.h"
 				>
 			</File>
 			<File

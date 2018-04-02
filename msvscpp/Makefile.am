@@ -14,6 +14,7 @@ MSVSCPP_FILES = \
 	fsrefs_test_notify/fsrefs_test_notify.vcproj \
 	fsrefs_test_support/fsrefs_test_support.vcproj \
 	fsrefs_test_volume/fsrefs_test_volume.vcproj \
+	fsrefs_test_volume_information/fsrefs_test_volume_information.vcproj \
 	fsrefs_test_volume_name/fsrefs_test_volume_name.vcproj \
 	fsrefsinfo/fsrefsinfo.vcproj \
 	libbfio/libbfio.vcproj \

@@ -43,6 +43,7 @@ check_PROGRAMS = \
 	fsrefs_test_notify \
 	fsrefs_test_support \
 	fsrefs_test_volume \
+	fsrefs_test_volume_information \
 	fsrefs_test_volume_name
 
 fsrefs_test_block_descriptor_SOURCES = \
@@ -187,15 +188,18 @@ fsrefs_test_metadata_value_LDADD = \
 	@LIBCERROR_LIBADD@
 
 fsrefs_test_notify_SOURCES = \
+	fsrefs_test_libcerror.h \
 	fsrefs_test_libfsrefs.h \
 	fsrefs_test_macros.h \
 	fsrefs_test_notify.c \
 	fsrefs_test_unused.h
 
 fsrefs_test_notify_LDADD = \
-	../libfsrefs/libfsrefs.la
+	../libfsrefs/libfsrefs.la \
+	@LIBCERROR_LIBADD@
 
 fsrefs_test_support_SOURCES = \
+	fsrefs_test_functions.c fsrefs_test_functions.h \
 	fsrefs_test_getopt.c fsrefs_test_getopt.h \
 	fsrefs_test_libbfio.h \
 	fsrefs_test_libcerror.h \
@@ -204,7 +208,9 @@ fsrefs_test_support_SOURCES = \
 	fsrefs_test_libfsrefs.h \
 	fsrefs_test_libuna.h \
 	fsrefs_test_macros.h \
-	fsrefs_test_support.c
+	fsrefs_test_memory.c fsrefs_test_memory.h \
+	fsrefs_test_support.c \
+	fsrefs_test_unused.h
 
 fsrefs_test_support_LDADD = \
 	@LIBBFIO_LIBADD@ \
@@ -219,6 +225,7 @@ fsrefs_test_support_LDADD = \
 	@LIBCERROR_LIBADD@
 
 fsrefs_test_volume_SOURCES = \
+	fsrefs_test_functions.c fsrefs_test_functions.h \
 	fsrefs_test_getopt.c fsrefs_test_getopt.h \
 	fsrefs_test_libcerror.h \
 	fsrefs_test_libclocale.h \
@@ -227,10 +234,15 @@ fsrefs_test_volume_SOURCES = \
 	fsrefs_test_libuna.h \
 	fsrefs_test_macros.h \
 	fsrefs_test_memory.c fsrefs_test_memory.h \
-	fsrefs_test_volume.c
+	fsrefs_test_volume.c \
+	fsrefs_test_unused.h
 
 fsrefs_test_volume_LDADD = \
+	@LIBBFIO_LIBADD@ \
+	@LIBCPATH_LIBADD@ \
+	@LIBCFILE_LIBADD@ \
 	@LIBUNA_LIBADD@ \
+	@LIBCSPLIT_LIBADD@ \
 	@LIBCNOTIFY_LIBADD@ \
 	@LIBCLOCALE_LIBADD@ \
 	@LIBCDATA_LIBADD@ \
@@ -238,6 +250,18 @@ fsrefs_test_volume_LDADD = \
 	@LIBCTHREADS_LIBADD@ \
 	@LIBCERROR_LIBADD@ \
 	@PTHREAD_LIBADD@
+
+fsrefs_test_volume_information_SOURCES = \
+	fsrefs_test_libcerror.h \
+	fsrefs_test_libfsrefs.h \
+	fsrefs_test_macros.h \
+	fsrefs_test_memory.c fsrefs_test_memory.h \
+	fsrefs_test_unused.h \
+	fsrefs_test_volume_information.c
+
+fsrefs_test_volume_information_LDADD = \
+	../libfsrefs/libfsrefs.la \
+	@LIBCERROR_LIBADD@
 
 fsrefs_test_volume_name_SOURCES = \
 	fsrefs_test_libcerror.h \
