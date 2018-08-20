@@ -18,9 +18,11 @@ AM_CPPFLAGS = \
 	@LIBFSREFS_DLL_IMPORT@
 
 TESTS = \
-	test_library.sh
+	test_library.sh \
+	test_fsrefsinfo.sh
 
 check_SCRIPTS = \
+	test_fsrefsinfo.sh \
 	test_library.sh \
 	test_runner.sh
 
@@ -227,6 +229,7 @@ fsrefs_test_support_LDADD = \
 fsrefs_test_volume_SOURCES = \
 	fsrefs_test_functions.c fsrefs_test_functions.h \
 	fsrefs_test_getopt.c fsrefs_test_getopt.h \
+	fsrefs_test_libbfio.h \
 	fsrefs_test_libcerror.h \
 	fsrefs_test_libclocale.h \
 	fsrefs_test_libcnotify.h \
@@ -234,8 +237,8 @@ fsrefs_test_volume_SOURCES = \
 	fsrefs_test_libuna.h \
 	fsrefs_test_macros.h \
 	fsrefs_test_memory.c fsrefs_test_memory.h \
-	fsrefs_test_volume.c \
-	fsrefs_test_unused.h
+	fsrefs_test_unused.h \
+	fsrefs_test_volume.c
 
 fsrefs_test_volume_LDADD = \
 	@LIBBFIO_LIBADD@ \

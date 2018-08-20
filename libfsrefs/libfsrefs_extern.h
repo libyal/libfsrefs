@@ -28,17 +28,13 @@
  */
 #if !defined( HAVE_LOCAL_LIBFSREFS )
 
-/* If libtool DLL support is enabled set LIBFSREFS_DLL_EXPORT
- * before including libfsrefs/extern.h
- */
-#if defined( _WIN32 ) && defined( DLL_EXPORT )
-#define LIBFSREFS_DLL_EXPORT
-#endif
-
 #include <libfsrefs/extern.h>
 
+#define LIBFSREFS_EXTERN_VARIABLE	LIBFSREFS_EXTERN
+
 #else
-#define LIBFSREFS_EXTERN	/* extern */
+#define LIBFSREFS_EXTERN		/* extern */
+#define LIBFSREFS_EXTERN_VARIABLE	extern
 
 #endif /* !defined( HAVE_LOCAL_LIBFSREFS ) */
 

@@ -113,6 +113,8 @@ int fsrefs_test_io_handle_initialize(
 	          &io_handle,
 	          &error );
 
+	io_handle = NULL;
+
 	FSREFS_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
@@ -124,8 +126,6 @@ int fsrefs_test_io_handle_initialize(
 
 	libcerror_error_free(
 	 &error );
-
-	io_handle = NULL;
 
 #if defined( HAVE_FSREFS_TEST_MEMORY )
 
@@ -270,6 +270,134 @@ on_error:
 	return( 0 );
 }
 
+/* Tests the libfsrefs_io_handle_clear function
+ * Returns 1 if successful or 0 if not
+ */
+int fsrefs_test_io_handle_clear(
+     void )
+{
+	libcerror_error_t *error         = NULL;
+	libfsrefs_io_handle_t *io_handle = NULL;
+	int result                       = 0;
+
+	/* Initialize test
+	 */
+	result = libfsrefs_io_handle_initialize(
+	          &io_handle,
+	          &error );
+
+	FSREFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	FSREFS_TEST_ASSERT_IS_NOT_NULL(
+	 "io_handle",
+	 io_handle );
+
+	FSREFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	/* Test regular cases
+	 */
+	result = libfsrefs_io_handle_clear(
+	          io_handle,
+	          &error );
+
+	FSREFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	FSREFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	/* Test error cases
+	 */
+	result = libfsrefs_io_handle_clear(
+	          NULL,
+	          &error );
+
+	FSREFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	FSREFS_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+#if defined( HAVE_FSREFS_TEST_MEMORY )
+
+	/* Test libfsrefs_io_handle_clear with memset failing
+	 */
+	fsrefs_test_memset_attempts_before_fail = 0;
+
+	result = libfsrefs_io_handle_clear(
+	          io_handle,
+	          &error );
+
+	if( fsrefs_test_memset_attempts_before_fail != -1 )
+	{
+		fsrefs_test_memset_attempts_before_fail = -1;
+	}
+	else
+	{
+		FSREFS_TEST_ASSERT_EQUAL_INT(
+		 "result",
+		 result,
+		 -1 );
+
+		FSREFS_TEST_ASSERT_IS_NOT_NULL(
+		 "error",
+		 error );
+
+		libcerror_error_free(
+		 &error );
+	}
+#endif /* defined( HAVE_FSREFS_TEST_MEMORY ) */
+
+	/* Clean up
+	 */
+	result = libfsrefs_io_handle_free(
+	          &io_handle,
+	          &error );
+
+	FSREFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	FSREFS_TEST_ASSERT_IS_NULL(
+	 "io_handle",
+	 io_handle );
+
+	FSREFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	return( 1 );
+
+on_error:
+	if( error != NULL )
+	{
+		libcerror_error_free(
+		 &error );
+	}
+	if( io_handle != NULL )
+	{
+		libfsrefs_io_handle_free(
+		 &io_handle,
+		 NULL );
+	}
+	return( 0 );
+}
+
 #endif /* defined( __GNUC__ ) && !defined( LIBFSREFS_DLL_IMPORT ) */
 
 /* The main program
@@ -297,7 +425,9 @@ int main(
 	 "libfsrefs_io_handle_free",
 	 fsrefs_test_io_handle_free );
 
-	/* TODO: add tests for libfsrefs_io_handle_clear */
+	FSREFS_TEST_RUN(
+	 "libfsrefs_io_handle_clear",
+	 fsrefs_test_io_handle_clear );
 
 	/* TODO: add tests for libfsrefs_io_handle_read_volume_header */
 
