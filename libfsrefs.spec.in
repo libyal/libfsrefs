@@ -10,24 +10,32 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 @libfsrefs_spec_requires@ @ax_libbfio_spec_requires@ @ax_libcdata_spec_requires@ @ax_libcerror_spec_requires@ @ax_libcfile_spec_requires@ @ax_libclocale_spec_requires@ @ax_libcnotify_spec_requires@ @ax_libcpath_spec_requires@ @ax_libcsplit_spec_requires@ @ax_libcthreads_spec_requires@ @ax_libfcache_spec_requires@ @ax_libfdata_spec_requires@ @ax_libfdatetime_spec_requires@ @ax_libfguid_spec_requires@ @ax_libfwnt_spec_requires@ @ax_libuna_spec_requires@
 BuildRequires: gcc @ax_libbfio_spec_build_requires@ @ax_libcdata_spec_build_requires@ @ax_libcerror_spec_build_requires@ @ax_libcfile_spec_build_requires@ @ax_libclocale_spec_build_requires@ @ax_libcnotify_spec_build_requires@ @ax_libcpath_spec_build_requires@ @ax_libcsplit_spec_build_requires@ @ax_libcthreads_spec_build_requires@ @ax_libfcache_spec_build_requires@ @ax_libfdata_spec_build_requires@ @ax_libfdatetime_spec_build_requires@ @ax_libfguid_spec_build_requires@ @ax_libfwnt_spec_build_requires@ @ax_libuna_spec_build_requires@
 
-%description
+%description -n libfsrefs
 Library to access the Windows Resiliant File System (REFS) format
 
-%package devel
+%package -n libfsrefs-static
+Summary: Library to access the Windows Resiliant File System (REFS) format
+Group: Development/Libraries
+Requires: libfsrefs = %{version}-%{release}
+
+%description -n libfsrefs-static
+Static library version of libfsrefs.
+
+%package -n libfsrefs-devel
 Summary: Header files and libraries for developing applications for libfsrefs
 Group: Development/Libraries
 Requires: libfsrefs = %{version}-%{release}
 
-%description devel
+%description -n libfsrefs-devel
 Header files and libraries for developing applications for libfsrefs.
 
-%package tools
+%package -n libfsrefs-tools
 Summary: Several tools for reading Windows Resiliant File System (REFS) volumes
 Group: Applications/System
 Requires: libfsrefs = %{version}-%{release} @ax_libfusn_spec_requires@
 @libfsrefs_spec_tools_build_requires@ @ax_libfusn_spec_build_requires@
 
-%description tools
+%description -n libfsrefs-tools
 Several tools for reading Windows Resiliant File System (REFS) volumes
 
 %prep
@@ -48,24 +56,29 @@ rm -rf %{buildroot}
 
 %postun -p /sbin/ldconfig
 
-%files
+%files -n libfsrefs
 %defattr(644,root,root,755)
 %license COPYING
 %doc AUTHORS README
 %attr(755,root,root) %{_libdir}/*.so.*
 
-%files devel
+%files -n libfsrefs-static
 %defattr(644,root,root,755)
 %license COPYING
-%doc AUTHORS README ChangeLog
-%{_libdir}/*.a
+%doc AUTHORS README
+%attr(755,root,root) %{_libdir}/*.a
+
+%files -n libfsrefs-devel
+%defattr(644,root,root,755)
+%license COPYING
+%doc AUTHORS README
 %{_libdir}/*.la
 %{_libdir}/*.so
 %{_libdir}/pkgconfig/libfsrefs.pc
 %{_includedir}/*
 %{_mandir}/man3/*
 
-%files tools
+%files -n libfsrefs-tools
 %defattr(644,root,root,755)
 %license COPYING
 %doc AUTHORS README

@@ -9,6 +9,8 @@ Homepage: https://github.com/libyal/libfsrefs
 Package: libfsrefs
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
+Conflicts: libfsrefs1
+Replaces: libfsrefs1
 Suggests: libfsrefs-dbg
 Description: Library to access the Windows Resiliant File System (REFS) format
  libfsrefs is a library to access the Windows Resiliant File System (REFS) format.
@@ -31,6 +33,8 @@ Package: libfsrefs-tools
 Section: utils
 Architecture: any
 Depends: libfsrefs (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
+Conflicts: libfsrefs-utils
+Replaces: libfsrefs-utils
 Description: Several tools for reading Windows Resiliant File System (REFS) volumes
  Several tools for reading Windows Resiliant File System (REFS) volumes.
 

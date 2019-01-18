@@ -1,7 +1,7 @@
 /*
  * Common output functions for the fsrefstools
  *
- * Copyright (C) 2012-2018, Joachim Metz <joachim.metz@gmail.com>
+ * Copyright (C) 2012-2019, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *
@@ -98,7 +98,7 @@ int fsrefstools_output_initialize(
 
 /* Prints the copyright information
  */
-void fsrefsoutput_copyright_fprint(
+void fsrefstools_output_copyright_fprint(
       FILE *stream )
 {
 	if( stream == NULL )
@@ -109,7 +109,7 @@ void fsrefsoutput_copyright_fprint(
 	 */
 	fprintf(
 	 stream,
-	 _( "Copyright (C) 2012-2018, %s.\n" ),
+	 _( "Copyright (C) 2012-2019, %s.\n" ),
 	 _( "Joachim Metz" ) );
 
 	fprintf(
@@ -130,7 +130,7 @@ void fsrefsoutput_copyright_fprint(
 
 /* Prints the version information
  */
-void fsrefsoutput_version_fprint(
+void fsrefstools_output_version_fprint(
       FILE *stream,
       const char *program )
 {
@@ -151,7 +151,7 @@ void fsrefsoutput_version_fprint(
 
 /* Prints the detailed version information
  */
-void fsrefsoutput_version_detailed_fprint(
+void fsrefstools_output_version_detailed_fprint(
       FILE *stream,
       const char *program )
 {

@@ -11,7 +11,7 @@ matrix:
     - TARGET="coverity"
     compiler: clang
     os: linux
-    dist: trusty
+    dist: xenial
     sudo: required
     group: edge
     addons:
@@ -31,7 +31,7 @@ matrix:
     - TARGET="linux-clang"
     compiler: clang
     os: linux
-    dist: trusty
+    dist: xenial
     sudo: required
     group: edge
   - name: "Linux with gcc"
@@ -42,7 +42,7 @@ matrix:
     - TARGET="linux-gcc"
     compiler: gcc
     os: linux
-    dist: trusty
+    dist: xenial
     sudo: required
     group: edge
   - name: "Linux with gcc and wide character type (wchar_t) support"
@@ -53,7 +53,7 @@ matrix:
     - TARGET="linux-gcc-wide-character-type"
     compiler: gcc
     os: linux
-    dist: trusty
+    dist: xenial
     sudo: required
     group: edge
   - name: "Linux with gcc without optimization"
@@ -65,7 +65,7 @@ matrix:
     - TARGET="linux-gcc-no-optimization"
     compiler: gcc
     os: linux
-    dist: trusty
+    dist: xenial
     sudo: required
     group: edge
   - name: "Linux with gcc and shared libraries"
@@ -76,7 +76,7 @@ matrix:
     - TARGET="linux-gcc-shared"
     compiler: gcc
     os: linux
-    dist: trusty
+    dist: xenial
     sudo: required
     group: edge
   - name: "Linux with gcc, shared libraries and wide character type (wchar_t) support"
@@ -87,7 +87,7 @@ matrix:
     - TARGET="linux-gcc-shared-wide-character-type"
     compiler: gcc
     os: linux
-    dist: trusty
+    dist: xenial
     sudo: required
     group: edge
   - name: "Linux with gcc and static executables support"
@@ -98,35 +98,33 @@ matrix:
     - TARGET="linux-gcc-static-executables"
     compiler: gcc
     os: linux
-    dist: trusty
+    dist: xenial
     sudo: required
     group: edge
-  - name: "MacOS with clang"
+  - name: "Mac OS with clang"
     env:
     - CONFIGURE_OPTIONS=""
     - TARGET="macos-clang"
     compiler: clang
     os: osx
     osx_image: xcode8.3
-  - name: "MacOS with gcc"
+  - name: "Mac OS with gcc"
     env:
     - CONFIGURE_OPTIONS=""
     - TARGET="macos-gcc"
-    compiler: clang
     compiler: gcc
     os: osx
     osx_image: xcode8.3
-  - name: "MacOS gcc and pkgbuild"
+  - name: "Mac OS gcc and pkgbuild"
     env:
     - CONFIGURE_OPTIONS="--disable-dependency-tracking --prefix=/usr/local"
     - TARGET="macos-gcc-pkgbuild"
-    compiler: clang
     compiler: gcc
     os: osx
     osx_image: xcode8.3
 before_install:
   - if test ${TRAVIS_OS_NAME} = "linux"; then
-      sudo apt-get update && sudo apt-mark hold oracle-java8-installer oracle-java9-installer postgresql-9.2 postgresql-9.3 postgresql-9.4 postgresql-9.5 postgresql-9.6 postgresql-client postgresql-client-common postgresql-common postgresql-contrib-9.2 postgresql-contrib-9.3 postgresql-contrib-9.4 postgresql-contrib-9.5 postgresql-contrib-9.6 postgresql-doc && sudo apt-get --fix-missing -o Dpkg::Options::="--force-confold" upgrade -y --allow-unauthenticated && sudo apt-get install -y autopoint;
+      sudo apt-get update && sudo apt-get --fix-missing -o Dpkg::Options::="--force-confold" upgrade -y --allow-unauthenticated && sudo apt-get install -y autopoint;
     elif test ${TRAVIS_OS_NAME} = "osx"; then
       brew update && brew install gettext gnu-sed && brew link --force gettext;
     fi
@@ -163,5 +161,5 @@ script:
     fi
 after_success:
   - if test ${TARGET} = "linux-gcc-no-optimization"; then
-      curl -o codecov.sh -s https://codecov.io/bash && /bin/bash ./codecov.sh -n ${TARGET} -y .codecov.yml;
+      curl -o codecov.sh -s https://codecov.io/bash && sed 's/ -execdir / -exec /' -i ./codecov.sh && /bin/bash ./codecov.sh -n ${TARGET} -y .codecov.yml;
     fi
