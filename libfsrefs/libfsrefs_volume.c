@@ -1505,7 +1505,7 @@ on_error:
  */
 int libfsrefs_volume_get_utf8_name_size(
      libfsrefs_volume_t *volume,
-     size_t *utf8_name_size,
+     size_t *utf8_string_size,
      libcerror_error_t **error )
 {
 	libfsrefs_internal_volume_t *internal_volume = NULL;
@@ -1528,7 +1528,7 @@ int libfsrefs_volume_get_utf8_name_size(
 
 	if( libfsrefs_volume_name_get_utf8_name_size(
 	     NULL,
-	     utf8_name_size,
+	     utf8_string_size,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
@@ -1549,8 +1549,8 @@ int libfsrefs_volume_get_utf8_name_size(
  */
 int libfsrefs_volume_get_utf8_name(
      libfsrefs_volume_t *volume,
-     uint8_t *utf8_name,
-     size_t utf8_name_size,
+     uint8_t *utf8_string,
+     size_t utf8_string_size,
      libcerror_error_t **error )
 {
 	libfsrefs_internal_volume_t *internal_volume = NULL;
@@ -1573,8 +1573,8 @@ int libfsrefs_volume_get_utf8_name(
 
 	if( libfsrefs_volume_name_get_utf8_name(
 	     NULL,
-	     utf8_name,
-	     utf8_name_size,
+	     utf8_string,
+	     utf8_string_size,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
@@ -1595,7 +1595,7 @@ int libfsrefs_volume_get_utf8_name(
  */
 int libfsrefs_volume_get_utf16_name_size(
      libfsrefs_volume_t *volume,
-     size_t *utf16_name_size,
+     size_t *utf16_string_size,
      libcerror_error_t **error )
 {
 	libfsrefs_internal_volume_t *internal_volume = NULL;
@@ -1618,7 +1618,7 @@ int libfsrefs_volume_get_utf16_name_size(
 
 	if( libfsrefs_volume_name_get_utf16_name_size(
 	     NULL,
-	     utf16_name_size,
+	     utf16_string_size,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
@@ -1639,8 +1639,8 @@ int libfsrefs_volume_get_utf16_name_size(
  */
 int libfsrefs_volume_get_utf16_name(
      libfsrefs_volume_t *volume,
-     uint16_t *utf16_name,
-     size_t utf16_name_size,
+     uint16_t *utf16_string,
+     size_t utf16_string_size,
      libcerror_error_t **error )
 {
 	libfsrefs_internal_volume_t *internal_volume = NULL;
@@ -1663,8 +1663,8 @@ int libfsrefs_volume_get_utf16_name(
 
 	if( libfsrefs_volume_name_get_utf16_name(
 	     NULL,
-	     utf16_name,
-	     utf16_name_size,
+	     utf16_string,
+	     utf16_string_size,
 	     error ) != 1 )
 	{
 		libcerror_error_set(

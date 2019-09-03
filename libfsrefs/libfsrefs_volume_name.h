@@ -60,24 +60,24 @@ int libfsrefs_volume_name_read(
 
 int libfsrefs_volume_name_get_utf8_name_size(
      libfsrefs_volume_name_t *volume_name,
-     size_t *utf8_name_size,
+     size_t *utf8_string_size,
      libcerror_error_t **error );
 
 int libfsrefs_volume_name_get_utf8_name(
      libfsrefs_volume_name_t *volume_name,
-     uint8_t *utf8_name,
-     size_t utf8_name_size,
+     uint8_t *utf8_string,
+     size_t utf8_string_size,
      libcerror_error_t **error );
 
 int libfsrefs_volume_name_get_utf16_name_size(
      libfsrefs_volume_name_t *volume_name,
-     size_t *utf16_name_size,
+     size_t *utf16_string_size,
      libcerror_error_t **error );
 
 int libfsrefs_volume_name_get_utf16_name(
      libfsrefs_volume_name_t *volume_name,
-     uint16_t *utf16_name,
-     size_t utf16_name_size,
+     uint16_t *utf16_string,
+     size_t utf16_string_size,
      libcerror_error_t **error );
 
 #if defined( __cplusplus )

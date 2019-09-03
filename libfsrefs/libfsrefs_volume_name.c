@@ -397,7 +397,7 @@ on_error:
  */
 int libfsrefs_volume_name_get_utf8_name_size(
      libfsrefs_volume_name_t *volume_name,
-     size_t *utf8_name_size,
+     size_t *utf8_string_size,
      libcerror_error_t **error )
 {
 	static char *function = "libfsrefs_volume_name_get_utf8_name_size";
@@ -415,18 +415,18 @@ int libfsrefs_volume_name_get_utf8_name_size(
 	}
 	if( volume_name->name_size == 0 )
 	{
-		if( utf8_name_size == NULL )
+		if( utf8_string_size == NULL )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 			 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-			 "%s: invalid UTF-8 name size.",
+			 "%s: invalid UTF-8 string size.",
 			 function );
 
 			return( -1 );
 		}
-		*utf8_name_size = 0;
+		*utf8_string_size = 0;
 	}
 	else
 	{
@@ -434,7 +434,7 @@ int libfsrefs_volume_name_get_utf8_name_size(
 		     volume_name->name,
 		     (size_t) volume_name->name_size,
 		     LIBUNA_ENDIAN_LITTLE,
-		     utf8_name_size,
+		     utf8_string_size,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
@@ -456,8 +456,8 @@ int libfsrefs_volume_name_get_utf8_name_size(
  */
 int libfsrefs_volume_name_get_utf8_name(
      libfsrefs_volume_name_t *volume_name,
-     uint8_t *utf8_name,
-     size_t utf8_name_size,
+     uint8_t *utf8_string,
+     size_t utf8_string_size,
      libcerror_error_t **error )
 {
 	static char *function = "libfsrefs_volume_name_get_utf8_name";
@@ -475,46 +475,46 @@ int libfsrefs_volume_name_get_utf8_name(
 	}
 	if( volume_name->name_size == 0 )
 	{
-		if( utf8_name == NULL )
+		if( utf8_string == NULL )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 			 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-			 "%s: invalid UTF-8 name.",
+			 "%s: invalid UTF-8 string.",
 			 function );
 
 			return( -1 );
 		}
-		if( utf8_name_size > (size_t) SSIZE_MAX )
+		if( utf8_string_size > (size_t) SSIZE_MAX )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_VALUE_EXCEEDS_MAXIMUM,
-			 "%s: invalid UTF-8 name size value exceeds maximum.",
+			 "%s: invalid UTF-8 string size value exceeds maximum.",
 			 function );
 
 			return( -1 );
 		}
-		if( utf8_name_size < 1 )
+		if( utf8_string_size < 1 )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 			 LIBCERROR_ARGUMENT_ERROR_VALUE_TOO_SMALL,
-			 "%s: TF-8 name size value too small.",
+			 "%s: UTF-8 string size value too small.",
 			 function );
 
 			return( -1 );
 		}
-		utf8_name[ 0 ] = 0;
+		utf8_string[ 0 ] = 0;
 	}
 	else
 	{
 		if( libuna_utf8_string_copy_from_utf16_stream(
-		     utf8_name,
-		     utf8_name_size,
+		     utf8_string,
+		     utf8_string_size,
 		     volume_name->name,
 		     (size_t) volume_name->name_size,
 		     LIBUNA_ENDIAN_LITTLE,
@@ -539,7 +539,7 @@ int libfsrefs_volume_name_get_utf8_name(
  */
 int libfsrefs_volume_name_get_utf16_name_size(
      libfsrefs_volume_name_t *volume_name,
-     size_t *utf16_name_size,
+     size_t *utf16_string_size,
      libcerror_error_t **error )
 {
 	static char *function = "libfsrefs_volume_name_get_utf16_name_size";
@@ -557,18 +557,18 @@ int libfsrefs_volume_name_get_utf16_name_size(
 	}
 	if( volume_name->name_size == 0 )
 	{
-		if( utf16_name_size == NULL )
+		if( utf16_string_size == NULL )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 			 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-			 "%s: invalid UTF-16 name size.",
+			 "%s: invalid UTF-16 string size.",
 			 function );
 
 			return( -1 );
 		}
-		*utf16_name_size = 0;
+		*utf16_string_size = 0;
 	}
 	else
 	{
@@ -576,7 +576,7 @@ int libfsrefs_volume_name_get_utf16_name_size(
 		     volume_name->name,
 		     (size_t) volume_name->name_size,
 		     LIBUNA_ENDIAN_LITTLE,
-		     utf16_name_size,
+		     utf16_string_size,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
@@ -598,8 +598,8 @@ int libfsrefs_volume_name_get_utf16_name_size(
  */
 int libfsrefs_volume_name_get_utf16_name(
      libfsrefs_volume_name_t *volume_name,
-     uint16_t *utf16_name,
-     size_t utf16_name_size,
+     uint16_t *utf16_string,
+     size_t utf16_string_size,
      libcerror_error_t **error )
 {
 	static char *function = "libfsrefs_volume_name_get_utf16_name";
@@ -617,46 +617,46 @@ int libfsrefs_volume_name_get_utf16_name(
 	}
 	if( volume_name->name_size == 0 )
 	{
-		if( utf16_name == NULL )
+		if( utf16_string == NULL )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 			 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-			 "%s: invalid UTF-16 name.",
+			 "%s: invalid UTF-16 string.",
 			 function );
 
 			return( -1 );
 		}
-		if( utf16_name_size > (size_t) SSIZE_MAX )
+		if( utf16_string_size > (size_t) SSIZE_MAX )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_VALUE_EXCEEDS_MAXIMUM,
-			 "%s: invalid UTF-16 name size value exceeds maximum.",
+			 "%s: invalid UTF-16 string size value exceeds maximum.",
 			 function );
 
 			return( -1 );
 		}
-		if( utf16_name_size < 1 )
+		if( utf16_string_size < 1 )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 			 LIBCERROR_ARGUMENT_ERROR_VALUE_TOO_SMALL,
-			 "%s: TF-16 name size value too small.",
+			 "%s: UTF-16 name string value too small.",
 			 function );
 
 			return( -1 );
 		}
-		utf16_name[ 0 ] = 0;
+		utf16_string[ 0 ] = 0;
 	}
 	else
 	{
 		if( libuna_utf16_string_copy_from_utf16_stream(
-		     utf16_name,
-		     utf16_name_size,
+		     utf16_string,
+		     utf16_string_size,
 		     volume_name->name,
 		     (size_t) volume_name->name_size,
 		     LIBUNA_ENDIAN_LITTLE,

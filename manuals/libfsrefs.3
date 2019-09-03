@@ -1,11 +1,9 @@
-.Dd January  1, 2017
+.Dd September  3, 2019
 .Dt libfsrefs 3
 .Os libfsrefs
 .Sh NAME
 .Nm libfsrefs.h
 .Nd Library to access the Windows Resiliant File System (REFS) format
-.Sh LIBRARY
-.Lb libfsrefs
 .Sh SYNOPSIS
 .In libfsrefs.h
 .Pp
@@ -15,27 +13,27 @@ Support functions
 .Ft int
 .Fn libfsrefs_get_access_flags_read "void"
 .Ft int
-.Fn libfsrefs_get_codepage "int *codepage, libfsrefs_error_t **error"
+.Fn libfsrefs_get_codepage "int *codepage" "libfsrefs_error_t **error"
 .Ft int
-.Fn libfsrefs_set_codepage "int codepage, libfsrefs_error_t **error"
+.Fn libfsrefs_set_codepage "int codepage" "libfsrefs_error_t **error"
 .Ft int
-.Fn libfsrefs_check_volume_signature "const char *filename, libfsrefs_error_t **error"
+.Fn libfsrefs_check_volume_signature "const char *filename" "libfsrefs_error_t **error"
 .Pp
 Available when compiled with wide character string support:
 .Ft int
-.Fn libfsrefs_check_volume_signature_wide "const wchar_t *filename, libfsrefs_error_t **error"
+.Fn libfsrefs_check_volume_signature_wide "const wchar_t *filename" "libfsrefs_error_t **error"
 .Pp
 Available when compiled with libbfio support:
 .Ft int
-.Fn libfsrefs_check_volume_signature_file_io_handle "libbfio_handle_t *file_io_handle, libfsrefs_error_t **error"
+.Fn libfsrefs_check_volume_signature_file_io_handle "libbfio_handle_t *file_io_handle" "libfsrefs_error_t **error"
 .Pp
 Notify functions
 .Ft void
 .Fn libfsrefs_notify_set_verbose "int verbose"
 .Ft int
-.Fn libfsrefs_notify_set_stream "FILE *stream, libfsrefs_error_t **error"
+.Fn libfsrefs_notify_set_stream "FILE *stream" "libfsrefs_error_t **error"
 .Ft int
-.Fn libfsrefs_notify_stream_open "const char *filename, libfsrefs_error_t **error"
+.Fn libfsrefs_notify_stream_open "const char *filename" "libfsrefs_error_t **error"
 .Ft int
 .Fn libfsrefs_notify_stream_close "libfsrefs_error_t **error"
 .Pp
@@ -43,41 +41,41 @@ Error functions
 .Ft void
 .Fn libfsrefs_error_free "libfsrefs_error_t **error"
 .Ft int
-.Fn libfsrefs_error_fprint "libfsrefs_error_t *error, FILE *stream"
+.Fn libfsrefs_error_fprint "libfsrefs_error_t *error" "FILE *stream"
 .Ft int
-.Fn libfsrefs_error_sprint "libfsrefs_error_t *error, char *string, size_t size"
+.Fn libfsrefs_error_sprint "libfsrefs_error_t *error" "char *string" "size_t size"
 .Ft int
-.Fn libfsrefs_error_backtrace_fprint "libfsrefs_error_t *error, FILE *stream"
+.Fn libfsrefs_error_backtrace_fprint "libfsrefs_error_t *error" "FILE *stream"
 .Ft int
-.Fn libfsrefs_error_backtrace_sprint "libfsrefs_error_t *error, char *string, size_t size"
+.Fn libfsrefs_error_backtrace_sprint "libfsrefs_error_t *error" "char *string" "size_t size"
 .Pp
 Volume functions
 .Ft int
-.Fn libfsrefs_volume_initialize "libfsrefs_volume_t **volume, libfsrefs_error_t **error"
+.Fn libfsrefs_volume_initialize "libfsrefs_volume_t **volume" "libfsrefs_error_t **error"
 .Ft int
-.Fn libfsrefs_volume_free "libfsrefs_volume_t **volume, libfsrefs_error_t **error"
+.Fn libfsrefs_volume_free "libfsrefs_volume_t **volume" "libfsrefs_error_t **error"
 .Ft int
-.Fn libfsrefs_volume_signal_abort "libfsrefs_volume_t *volume, libfsrefs_error_t **error"
+.Fn libfsrefs_volume_signal_abort "libfsrefs_volume_t *volume" "libfsrefs_error_t **error"
 .Ft int
-.Fn libfsrefs_volume_open "libfsrefs_volume_t *volume, const char *filename, int access_flags, libfsrefs_error_t **error"
+.Fn libfsrefs_volume_open "libfsrefs_volume_t *volume" "const char *filename" "int access_flags" "libfsrefs_error_t **error"
 .Ft int
-.Fn libfsrefs_volume_close "libfsrefs_volume_t *volume, libfsrefs_error_t **error"
+.Fn libfsrefs_volume_close "libfsrefs_volume_t *volume" "libfsrefs_error_t **error"
 .Ft int
-.Fn libfsrefs_volume_get_utf8_name_size "libfsrefs_volume_t *volume, size_t *utf8_name_size, libfsrefs_error_t **error"
+.Fn libfsrefs_volume_get_utf8_name_size "libfsrefs_volume_t *volume" "size_t *utf8_string_size" "libfsrefs_error_t **error"
 .Ft int
-.Fn libfsrefs_volume_get_utf8_name "libfsrefs_volume_t *volume, uint8_t *utf8_name, size_t utf8_name_size, libfsrefs_error_t **error"
+.Fn libfsrefs_volume_get_utf8_name "libfsrefs_volume_t *volume" "uint8_t *utf8_string" "size_t utf8_string_size" "libfsrefs_error_t **error"
 .Ft int
-.Fn libfsrefs_volume_get_utf16_name_size "libfsrefs_volume_t *volume, size_t *utf16_name_size, libfsrefs_error_t **error"
+.Fn libfsrefs_volume_get_utf16_name_size "libfsrefs_volume_t *volume" "size_t *utf16_string_size" "libfsrefs_error_t **error"
 .Ft int
-.Fn libfsrefs_volume_get_utf16_name "libfsrefs_volume_t *volume, uint16_t *utf16_name, size_t utf16_name_size, libfsrefs_error_t **error"
+.Fn libfsrefs_volume_get_utf16_name "libfsrefs_volume_t *volume" "uint16_t *utf16_string" "size_t utf16_string_size" "libfsrefs_error_t **error"
 .Pp
 Available when compiled with wide character string support:
 .Ft int
-.Fn libfsrefs_volume_open_wide "libfsrefs_volume_t *volume, const wchar_t *filename, int access_flags, libfsrefs_error_t **error"
+.Fn libfsrefs_volume_open_wide "libfsrefs_volume_t *volume" "const wchar_t *filename" "int access_flags" "libfsrefs_error_t **error"
 .Pp
 Available when compiled with libbfio support:
 .Ft int
-.Fn libfsrefs_volume_open_file_io_handle "libfsrefs_volume_t *volume, libbfio_handle_t *file_io_handle, int access_flags, libfsrefs_error_t **error"
+.Fn libfsrefs_volume_open_file_io_handle "libfsrefs_volume_t *volume" "libbfio_handle_t *file_io_handle" "int access_flags" "libfsrefs_error_t **error"
 .Sh DESCRIPTION
 The
 .Fn libfsrefs_get_version
@@ -90,8 +88,8 @@ None
 .Sh FILES
 None
 .Sh NOTES
-libfsrefs allows to be compiled with wide character support (wchar_t).
-
+libfsrefs can be compiled with wide character support (wchar_t).
+.sp
 To compile libfsrefs with wide character support use:
 .Ar ./configure --enable-wide-character-type=yes
  or define:
@@ -99,7 +97,7 @@ To compile libfsrefs with wide character support use:
  or
 .Ar UNICODE
  during compilation.
-
+.sp
 .Ar LIBFSREFS_WIDE_CHARACTER_TYPE
  in libfsrefs/features.h can be used to determine if libfsrefs was compiled with wide character support.
 .Sh BUGS
@@ -108,7 +106,7 @@ Please report bugs of any kind on the project issue tracker: https://github.com/
 These man pages are generated from "libfsrefs.h".
 .Sh COPYRIGHT
 Copyright (C) 2012-2019, Joachim Metz <joachim.metz@gmail.com>.
-
+.sp
 This is free software; see the source for copying conditions.
 There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 .Sh SEE ALSO
