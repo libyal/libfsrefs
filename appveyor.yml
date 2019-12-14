@@ -106,7 +106,7 @@ install:
     git clone https://github.com/libyal/vstools.git ..\vstools )
 
 build_script:
-- ps: If ($env:BUILD_ENVIRONMENT -eq "msbuild" -or $env:BUILD_ENVIRONMENT -eq "python") {
+- ps: If ($env:BUILD_ENVIRONMENT -eq "msbuild" -or ($env:BUILD_ENVIRONMENT -eq "python" -and $isWindows)) {
     .\synclibs.ps1;
     .\autogen.ps1 }
 - cmd: if [%TARGET%]==[vs2008] (

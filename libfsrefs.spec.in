@@ -58,19 +58,19 @@ rm -rf %{buildroot}
 
 %files -n libfsrefs
 %defattr(644,root,root,755)
-%license COPYING
+%license COPYING COPYING.LESSER
 %doc AUTHORS README
 %attr(755,root,root) %{_libdir}/*.so.*
 
 %files -n libfsrefs-static
 %defattr(644,root,root,755)
-%license COPYING
+%license COPYING COPYING.LESSER
 %doc AUTHORS README
 %attr(755,root,root) %{_libdir}/*.a
 
 %files -n libfsrefs-devel
 %defattr(644,root,root,755)
-%license COPYING
+%license COPYING COPYING.LESSER
 %doc AUTHORS README
 %{_libdir}/*.la
 %{_libdir}/*.so
@@ -80,7 +80,7 @@ rm -rf %{buildroot}
 
 %files -n libfsrefs-tools
 %defattr(644,root,root,755)
-%license COPYING
+%license COPYING COPYING.LESSER
 %doc AUTHORS README
 %attr(755,root,root) %{_bindir}/*
 %{_mandir}/man1/*

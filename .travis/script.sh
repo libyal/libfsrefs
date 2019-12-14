@@ -1,12 +1,12 @@
 #!/bin/sh
 # Script to run script step on Travis-CI
 #
-# Version: 20190808
+# Version: 20191209
 
 # Exit on error.
 set -e;
 
-if test ${TRAVIS_OS_NAME} = "linux" || test ${TRAVIS_OS_NAME} = "linux-ppc64le";
+if test ${TRAVIS_OS_NAME} = "linux";
 then
 	export PATH=$(echo $PATH | tr ":" "\n" | sed '/\/opt\/python/d' | tr "\n" ":" | sed "s/::/:/g");
 fi
@@ -25,7 +25,7 @@ then
 
 		make install DESTDIR=${PWD}/osx-pkg;
 		mkdir -p ${PWD}/osx-pkg/usr/share/doc/libfsrefs;
-		cp AUTHORS COPYING NEWS README ${PWD}/osx-pkg/usr/share/doc/libfsrefs;
+		cp AUTHORS COPYING COPYING.LESSER NEWS README ${PWD}/osx-pkg/usr/share/doc/libfsrefs;
 
 		pkgbuild --root osx-pkg --identifier com.github.libyal.libfsrefs --version ${VERSION} --ownership recommended ../libfsrefs-${VERSION}.pkg;
 	fi
