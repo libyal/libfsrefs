@@ -11,7 +11,7 @@ matrix:
     - TARGET="coverity"
     compiler: clang
     os: linux
-    dist: xenial
+    dist: bionic
     sudo: required
     group: edge
     addons:
@@ -31,7 +31,7 @@ matrix:
     - TARGET="linux-clang"
     compiler: clang
     os: linux
-    dist: xenial
+    dist: bionic
     sudo: required
     group: edge
   - name: "Linux with gcc"
@@ -42,7 +42,7 @@ matrix:
     - TARGET="linux-gcc"
     compiler: gcc
     os: linux
-    dist: xenial
+    dist: bionic
     sudo: required
     group: edge
   - name: "Linux with gcc on s390x (Docker)"
@@ -55,7 +55,7 @@ matrix:
     - TARGET="docker"
     compiler: gcc
     os: linux
-    dist: xenial
+    dist: bionic
     sudo: required
     group: edge
     services:
@@ -68,7 +68,7 @@ matrix:
     - TARGET="linux-gcc-wide-character-type"
     compiler: gcc
     os: linux
-    dist: xenial
+    dist: bionic
     sudo: required
     group: edge
   - name: "Linux with gcc without optimization"
@@ -80,7 +80,7 @@ matrix:
     - TARGET="linux-gcc-no-optimization"
     compiler: gcc
     os: linux
-    dist: xenial
+    dist: bionic
     sudo: required
     group: edge
   - name: "Linux with gcc and shared libraries"
@@ -91,7 +91,7 @@ matrix:
     - TARGET="linux-gcc-shared"
     compiler: gcc
     os: linux
-    dist: xenial
+    dist: bionic
     sudo: required
     group: edge
   - name: "Linux with gcc, shared libraries and wide character type (wchar_t) support"
@@ -102,7 +102,7 @@ matrix:
     - TARGET="linux-gcc-shared-wide-character-type"
     compiler: gcc
     os: linux
-    dist: xenial
+    dist: bionic
     sudo: required
     group: edge
   - name: "Linux with gcc and static executables support"
@@ -113,7 +113,7 @@ matrix:
     - TARGET="linux-gcc-static-executables"
     compiler: gcc
     os: linux
-    dist: xenial
+    dist: bionic
     sudo: required
     group: edge
   - name: "Mac OS with clang"

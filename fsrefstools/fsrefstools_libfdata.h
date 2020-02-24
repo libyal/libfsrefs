@@ -1,7 +1,7 @@
 /*
  * The libfdata header wrapper
  *
- * Copyright (C) 2012-2019, Joachim Metz <joachim.metz@gmail.com>
+ * Copyright (C) 2012-2020, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *
@@ -29,7 +29,6 @@
 #if defined( HAVE_LOCAL_LIBFDATA )
 
 #include <libfdata_area.h>
-#include <libfdata_btree.h>
 #include <libfdata_definitions.h>
 #include <libfdata_list.h>
 #include <libfdata_list_element.h>

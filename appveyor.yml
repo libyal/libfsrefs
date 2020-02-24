@@ -35,6 +35,11 @@ environment:
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
     VisualStudioVersion: 15.0
     configuration: Release
+  - TARGET: vs2019
+    BUILD_ENVIRONMENT: msbuild
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+    VisualStudioVersion: 16.0
+    configuration: Release
   - TARGET: cygwin-gcc
     BUILD_ENVIRONMENT: cygwin
     CONFIGURE_OPTIONS: ""
@@ -109,54 +114,46 @@ build_script:
 - ps: If ($env:BUILD_ENVIRONMENT -eq "msbuild" -or ($env:BUILD_ENVIRONMENT -eq "python" -and $isWindows)) {
     .\synclibs.ps1;
     .\autogen.ps1 }
-- cmd: if [%TARGET%]==[vs2008] (
-    msbuild /verbosity:quiet msvscpp\libfsrefs.sln /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" )
-- cmd: if [%TARGET%]==[vs2010] (
-    set PYTHONPATH=..\vstools &&
-    C:\Python27\python.exe ..\vstools\scripts\msvscpp-convert.py --no-python-dll --output-format 2010 msvscpp\libfsrefs.sln &&
-    msbuild /verbosity:quiet vs2010\libfsrefs.sln /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" )
-- cmd: if [%TARGET%]==[vs2012] (
-    set PYTHONPATH=..\vstools &&
-    C:\Python27\python.exe ..\vstools\scripts\msvscpp-convert.py --extend-with-x64 --output-format 2012 --python-path "C:\\Python27-x64" msvscpp\libfsrefs.sln &&
-    msbuild /verbosity:quiet vs2012\libfsrefs.sln /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" )
-- cmd: if [%TARGET%]==[vs2013] (
-    set PYTHONPATH=..\vstools &&
-    C:\Python27\python.exe ..\vstools\scripts\msvscpp-convert.py --output-format 2013 msvscpp\libfsrefs.sln &&
-    msbuild /verbosity:quiet vs2013\libfsrefs.sln /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" )
-- cmd: if [%TARGET%]==[vs2015] (
-    set PYTHONPATH=..\vstools &&
-    C:\Python27\python.exe ..\vstools\scripts\msvscpp-convert.py --output-format 2015 msvscpp\libfsrefs.sln &&
-    msbuild /verbosity:quiet vs2015\libfsrefs.sln /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" )
-- cmd: if [%TARGET%]==[vs2017] (
-    set PYTHONPATH=..\vstools &&
-    C:\Python27\python.exe ..\vstools\scripts\msvscpp-convert.py --extend-with-x64 --no-python-dll --output-format 2017 --with-dokany msvscpp\libfsrefs.sln &&
-    msbuild /verbosity:quiet vs2017\libfsrefs.sln /property:Platform=Win32 /property:PlatformToolset=v141 /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" &&
-    msbuild /verbosity:quiet vs2017\libfsrefs.sln /property:Platform=x64 /property:PlatformToolset=v141 /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" )
+- ps: If ($env:TARGET -eq "vs2008") {
+    .\build.ps1 -VisualStudioVersion 2008 -VSToolsOptions "" }
+- ps: If ($env:TARGET -eq "vs2010") {
+    .\build.ps1 -VisualStudioVersion 2010 -VSToolsOptions "--no-python-dll" }
+- ps: If ($env:TARGET -eq "vs2012") {
+    .\build.ps1 -VisualStudioVersion 2012 -VSToolsOptions "--extend-with-x64 --python-path C:\\Python27-x64" }
+- ps: If ($env:TARGET -eq "vs2013") {
+    .\build.ps1 -VisualStudioVersion 2013 -VSToolsOptions "" }
+- ps: If ($env:TARGET -eq "vs2015") {
+    .\build.ps1 -VisualStudioVersion 2015 -VSToolsOptions "" }
+- ps: If ($env:TARGET -eq "vs2017") {
+    .\build.ps1 -VisualStudioVersion 2017 -Platform Win32 -VSToolsOptions "--extend-with-x64 --no-python-dll --with-dokany";
+    .\build.ps1 -VisualStudioVersion 2017 -Platform x64 -VSToolsOptions "--extend-with-x64 --no-python-dll --with-dokany" }
+- ps: If ($env:TARGET -eq "vs2019") {
+    .\build.ps1 -VisualStudioVersion 2019 -VSToolsOptions "--extend-with-x64 --no-python-dll --with-dokany" }
 - cmd: if [%BUILD_ENVIRONMENT%]==[cygwin] (
     xcopy /i /q /s C:\projects\libfsrefs C:\cygwin\home\appveyor\libfsrefs &&
-    C:\cygwin\bin\bash -e -l -c "cd libfsrefs && ./synclibs.sh --use-head && ./autogen.sh" )
+    C:\cygwin\bin\bash -e -l -c "cd libfsrefs && ./synclibs.sh --use-head && ./autogen.sh && ./configure ${CONFIGURE_OPTIONS} && make > /dev/null" )
 - cmd: if [%BUILD_ENVIRONMENT%]==[cygwin64] (
     xcopy /i /q /s C:\projects\libfsrefs C:\cygwin64\home\appveyor\libfsrefs &&
-    C:\cygwin64\bin\bash -e -l -c "cd libfsrefs && ./synclibs.sh --use-head && ./autogen.sh" )
+    C:\cygwin64\bin\bash -e -l -c "cd libfsrefs && ./synclibs.sh --use-head && ./autogen.sh && ./configure ${CONFIGURE_OPTIONS} && make > /dev/null" )
 - cmd: if [%BUILD_ENVIRONMENT%]==[mingw] (
     xcopy /i /q /s C:\projects\libfsrefs C:\MinGW\msys\1.0\home\appveyor\libfsrefs &&
-    C:\MinGW\msys\1.0\bin\bash -e -l -c "cd libfsrefs && sed 's/@VERSION@/0.29/g' m4/pkg.m4.in > m4/pkg.m4 && ./synclibs.sh --use-head && ./autogen.sh" )
+    C:\MinGW\msys\1.0\bin\bash -e -l -c "cd libfsrefs && sed 's/@VERSION@/0.29/g' m4/pkg.m4.in > m4/pkg.m4 && ./synclibs.sh --use-head && ./autogen.sh && ./configure ${CONFIGURE_OPTIONS} && make > /dev/null" )
 - cmd: if [%BUILD_ENVIRONMENT%]==[mingw-w64] (
     xcopy /i /q /s C:\projects\libfsrefs C:\msys64\home\appveyor\libfsrefs &&
-    C:\msys64\usr\bin\bash -e -l -c "cd libfsrefs && ./synclibs.sh --use-head && ./autogen.sh" )
+    C:\msys64\usr\bin\bash -e -l -c "cd libfsrefs && ./synclibs.sh --use-head && ./autogen.sh && ./configure ${CONFIGURE_OPTIONS} && make > /dev/null" )
 
 test_script:
 - cmd: rem Run tests
 - ps: If ($env:BUILD_ENVIRONMENT -eq "msbuild") {
     .\runtests.ps1 }
 - cmd: if [%BUILD_ENVIRONMENT%]==[cygwin] (
-    C:\cygwin\bin\bash -l -c "cd libfsrefs && ./configure ${CONFIGURE_OPTIONS} && make > /dev/null && make check CHECK_WITH_STDERR=1; RESULT=$?; if test ${RESULT} -ne 0 && test -f tests/test-suite.log; then cat tests/test-suite.log; fi; exit ${RESULT};" )
+    C:\cygwin\bin\bash -l -c "cd libfsrefs && make check CHECK_WITH_STDERR=1; RESULT=$?; if test ${RESULT} -ne 0 && test -f tests/test-suite.log; then cat tests/test-suite.log; fi; exit ${RESULT};" )
 - cmd: if [%BUILD_ENVIRONMENT%]==[cygwin64] (
-    C:\cygwin64\bin\bash -l -c "cd libfsrefs && ./configure ${CONFIGURE_OPTIONS} && make > /dev/null && make check CHECK_WITH_STDERR=1; RESULT=$?; if test ${RESULT} -ne 0 && test -f tests/test-suite.log; then cat tests/test-suite.log; fi; exit ${RESULT};" )
+    C:\cygwin64\bin\bash -l -c "cd libfsrefs && make check CHECK_WITH_STDERR=1; RESULT=$?; if test ${RESULT} -ne 0 && test -f tests/test-suite.log; then cat tests/test-suite.log; fi; exit ${RESULT};" )
 - cmd: if [%BUILD_ENVIRONMENT%]==[mingw] (
-    C:\MinGW\msys\1.0\bin\bash -l -c "cd libfsrefs && ./configure ${CONFIGURE_OPTIONS} && make > /dev/null && make check CHECK_WITH_STDERR=1; RESULT=$?; if test ${RESULT} -ne 0 && test -f tests/test-suite.log; then cat tests/test-suite.log; fi; exit ${RESULT};" )
+    C:\MinGW\msys\1.0\bin\bash -l -c "cd libfsrefs && make check CHECK_WITH_STDERR=1; RESULT=$?; if test ${RESULT} -ne 0 && test -f tests/test-suite.log; then cat tests/test-suite.log; fi; exit ${RESULT};" )
 - cmd: if [%BUILD_ENVIRONMENT%]==[mingw-w64] (
-    C:\msys64\usr\bin\bash -l -c "cd libfsrefs && ./configure ${CONFIGURE_OPTIONS} && make > /dev/null && make check CHECK_WITH_STDERR=1; RESULT=$?; if test ${RESULT} -ne 0 && test -f tests/test-suite.log; then cat tests/test-suite.log; fi; exit ${RESULT};" )
+    C:\msys64\usr\bin\bash -l -c "cd libfsrefs && make check CHECK_WITH_STDERR=1; RESULT=$?; if test ${RESULT} -ne 0 && test -f tests/test-suite.log; then cat tests/test-suite.log; fi; exit ${RESULT};" )
 
 after_test:
 - cmd: if [%TARGET%]==[mingw-gcc-no-optimization] (
