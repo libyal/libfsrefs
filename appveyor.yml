@@ -43,8 +43,6 @@ environment:
   - TARGET: cygwin-gcc
     BUILD_ENVIRONMENT: cygwin
     CONFIGURE_OPTIONS: ""
-    CFLAGS: "--coverage"
-    LDFLAGS: "--coverage"
   - TARGET: cygwin-gcc-no-optimization
     BUILD_ENVIRONMENT: cygwin
     CONFIGURE_OPTIONS: "--enable-shared=no"
@@ -54,13 +52,9 @@ environment:
   - TARGET: cygwin-gcc-static-executables
     BUILD_ENVIRONMENT: cygwin
     CONFIGURE_OPTIONS: "--enable-static-executables"
-    CFLAGS: "--coverage"
-    LDFLAGS: "--coverage"
   - TARGET: cygwin64-gcc
     BUILD_ENVIRONMENT: cygwin64
     CONFIGURE_OPTIONS: ""
-    CFLAGS: "--coverage"
-    LDFLAGS: "--coverage"
   - TARGET: cygwin64-gcc-no-optimization
     BUILD_ENVIRONMENT: cygwin64
     CONFIGURE_OPTIONS: "--enable-shared=no"
@@ -70,13 +64,9 @@ environment:
   - TARGET: cygwin64-gcc-static-executables
     BUILD_ENVIRONMENT: cygwin64
     CONFIGURE_OPTIONS: "--enable-static-executables"
-    CFLAGS: "--coverage"
-    LDFLAGS: "--coverage"
   - TARGET: mingw-gcc
     BUILD_ENVIRONMENT: mingw
     CONFIGURE_OPTIONS: ""
-    CFLAGS: "--coverage"
-    LDFLAGS: "--coverage"
   - TARGET: mingw-gcc-no-optimization
     BUILD_ENVIRONMENT: mingw
     CONFIGURE_OPTIONS: "--enable-shared=no"
@@ -86,13 +76,9 @@ environment:
   - TARGET: mingw-gcc-static-executables
     BUILD_ENVIRONMENT: mingw
     CONFIGURE_OPTIONS: "--enable-static-executables"
-    CFLAGS: "--coverage"
-    LDFLAGS: "--coverage"
   - TARGET: mingw-w64-gcc
     BUILD_ENVIRONMENT: mingw-w64
     CONFIGURE_OPTIONS: ""
-    CFLAGS: "--coverage"
-    LDFLAGS: "--coverage"
   - TARGET: mingw-w64-gcc-no-optimization
     BUILD_ENVIRONMENT: mingw-w64
     CONFIGURE_OPTIONS: "--enable-shared=no"
@@ -102,8 +88,6 @@ environment:
   - TARGET: mingw-w64-gcc-static-executables
     BUILD_ENVIRONMENT: mingw-w64
     CONFIGURE_OPTIONS: "--enable-static-executables"
-    CFLAGS: "--coverage"
-    LDFLAGS: "--coverage"
 
 install:
 - cmd: git clone https://github.com/codecov/codecov-bash.git ..\codecov-bash
@@ -158,5 +142,5 @@ test_script:
 after_test:
 - cmd: if [%TARGET%]==[mingw-gcc-no-optimization] (
     copy C:\projects\codecov-bash\codecov C:\MinGW\msys\1.0\home\appveyor\libfsrefs\codecov.sh &&
-    C:\MinGW\msys\1.0\bin\bash -e -l -c "cd libfsrefs && chmod a+x ./codecov.sh && sed -i 's/-execdir /-exec /' ./codecov.sh && ./codecov.sh -n ${TARGET} -y .codecov.yml" )
+    C:\MinGW\msys\1.0\bin\bash -e -l -c "cd libfsrefs && chmod a+x ./codecov.sh && ./codecov.sh -n ${TARGET}" )
 

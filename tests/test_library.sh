@@ -1,7 +1,7 @@
 #!/bin/bash
 # Tests library functions and types.
 #
-# Version: 20190216
+# Version: 20200705
 
 EXIT_SUCCESS=0;
 EXIT_FAILURE=1;
@@ -9,7 +9,7 @@ EXIT_IGNORE=77;
 
 LIBRARY_TESTS="block_descriptor block_descriptors directory error io_handle level0_metadata level1_metadata level2_metadata level3_metadata metadata_block metadata_table metadata_value notify volume_information volume_name";
 LIBRARY_TESTS_WITH_INPUT="support volume";
-OPTION_SETS="";
+OPTION_SETS="offset";
 
 INPUT_GLOB="*";
 
@@ -129,7 +129,7 @@ run_test_with_input()
 	return ${RESULT};
 }
 
-if ! test -z ${SKIP_LIBRARY_TESTS};
+if test -n "${SKIP_LIBRARY_TESTS}";
 then
 	exit ${EXIT_IGNORE};
 fi

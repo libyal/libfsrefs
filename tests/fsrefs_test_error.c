@@ -27,7 +27,6 @@
 #include <stdlib.h>
 #endif
 
-#include "fsrefs_test_libcerror.h"
 #include "fsrefs_test_libfsrefs.h"
 #include "fsrefs_test_macros.h"
 #include "fsrefs_test_unused.h"

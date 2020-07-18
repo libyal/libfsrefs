@@ -2,7 +2,7 @@ AC_PREREQ( 2.59 )
 
 AC_INIT(
  [libfsrefs],
- [20200224],
+ [20200718],
  [joachim.metz@gmail.com])
 
 AC_CONFIG_SRCDIR(
@@ -44,6 +44,9 @@ AC_SYS_LARGEFILE
 
 dnl Check if shared library support should be disabled
 AX_COMMON_CHECK_DISABLE_SHARED_LIBS
+
+dnl Check if tools should be build as static executables
+AX_COMMON_CHECK_ENABLE_STATIC_EXECUTABLES
 
 dnl Check if WINAPI support should be enabled
 AX_COMMON_CHECK_ENABLE_WINAPI
@@ -117,32 +120,11 @@ AX_LIBFUSN_CHECK_ENABLE
 dnl Check if fsrefstools required headers and functions are available
 AX_FSREFSTOOLS_CHECK_LOCAL
 
+dnl Check if DLL support is needed
+AX_LIBFSREFS_CHECK_DLL_SUPPORT
+
 dnl Check if tests required headers and functions are available
 AX_TESTS_CHECK_LOCAL
-
-dnl Check if DLL support is needed
-AS_IF(
- [test "x$enable_shared" = xyes],
- [AS_CASE(
-  [$host],
-  [*cygwin* | *mingw* | *msys*],
-  [AC_DEFINE(
-   [HAVE_DLLMAIN],
-   [1],
-   [Define to 1 to enable the DllMain function.])
-  AC_SUBST(
-   [HAVE_DLLMAIN],
-   [1])
-
-  AC_SUBST(
-   [LIBFSREFS_DLL_EXPORT],
-   ["-DLIBFSREFS_DLL_EXPORT"])
-
-  AC_SUBST(
-   [LIBFSREFS_DLL_IMPORT],
-   ["-DLIBFSREFS_DLL_IMPORT"])
-  ])
- ])
 
 dnl Set additional compiler flags
 CFLAGS="$CFLAGS -Wall";

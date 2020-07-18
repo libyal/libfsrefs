@@ -1,7 +1,7 @@
 #!/bin/bash
 # Info tool testing script
 #
-# Version: 20200223
+# Version: 20200705
 
 EXIT_SUCCESS=0;
 EXIT_FAILURE=1;
@@ -9,11 +9,11 @@ EXIT_IGNORE=77;
 
 PROFILES=("fsrefsinfo");
 OPTIONS_PER_PROFILE=("");
-OPTION_SETS="";
+OPTION_SETS="offset";
 
 INPUT_GLOB="*";
 
-if ! test -z ${SKIP_TOOLS_TESTS};
+if test -n "${SKIP_TOOLS_TESTS}" || test -n "${SKIP_TOOLS_END_TO_END_TESTS}";
 then
 	exit ${EXIT_IGNORE};
 fi
