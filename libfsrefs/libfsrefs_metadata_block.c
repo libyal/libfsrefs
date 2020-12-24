@@ -197,34 +197,6 @@ int libfsrefs_metadata_block_read(
 	}
 	calculated_metadata_block_number = (uint64_t) ( file_offset / io_handle->metadata_block_size );
 
-#if defined( HAVE_DEBUG_OUTPUT )
-	if( libcnotify_verbose != 0 )
-	{
-		libcnotify_printf(
-		 "%s: reading level: %d metadata block: %" PRIu64 " at offset: %" PRIi64 " (0x%08" PRIx64 ")\n",
-		 function,
-		 level,
-		 calculated_metadata_block_number,
-		 file_offset,
-		 file_offset );
-	}
-#endif
-	if( libbfio_handle_seek_offset(
-	     file_io_handle,
-	     file_offset,
-	     SEEK_SET,
-	     error ) == -1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_IO,
-		 LIBCERROR_IO_ERROR_SEEK_FAILED,
-		 "%s: unable to seek metadata block offset: %" PRIi64 ".",
-		 function,
-		 file_offset );
-
-		goto on_error;
-	}
 	metadata_block->data = (uint8_t *) memory_allocate(
 	                                    io_handle->metadata_block_size );
 
@@ -241,10 +213,23 @@ int libfsrefs_metadata_block_read(
 	}
 	metadata_block->data_size = io_handle->metadata_block_size;
 
-	read_count = libbfio_handle_read_buffer(
+#if defined( HAVE_DEBUG_OUTPUT )
+	if( libcnotify_verbose != 0 )
+	{
+		libcnotify_printf(
+		 "%s: reading level: %d metadata block: %" PRIu64 " at offset: %" PRIi64 " (0x%08" PRIx64 ")\n",
+		 function,
+		 level,
+		 calculated_metadata_block_number,
+		 file_offset,
+		 file_offset );
+	}
+#endif
+	read_count = libbfio_handle_read_buffer_at_offset(
 	              file_io_handle,
 	              metadata_block->data,
 	              metadata_block->data_size,
+	              file_offset,
 	              error );
 
 	if( read_count != (ssize_t) metadata_block->data_size )
@@ -253,8 +238,12 @@ int libfsrefs_metadata_block_read(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_IO,
 		 LIBCERROR_IO_ERROR_READ_FAILED,
-		 "%s: unable to read metadata block data.",
-		 function );
+		 "%s: unable to read level: %d metadata block: %" PRIu64 " data at offset: %" PRIi64 " (0x%08" PRIx64 ").",
+		 function,
+		 level,
+		 calculated_metadata_block_number,
+		 file_offset,
+		 file_offset );
 
 		goto on_error;
 	}

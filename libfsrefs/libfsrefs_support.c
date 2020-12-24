@@ -356,7 +356,7 @@ int libfsrefs_check_volume_signature_file_io_handle(
 		 "%s: unable to open file.",
 		 function );
 
-		return( -1 );
+		goto on_error;
 	}
 	else if( file_io_handle_is_open == 0 )
 	{
@@ -372,34 +372,14 @@ int libfsrefs_check_volume_signature_file_io_handle(
 			 "%s: unable to open file.",
 			 function );
 
-			return( -1 );
+			goto on_error;
 		}
 	}
-	if( libbfio_handle_seek_offset(
-	     file_io_handle,
-	     0,
-	     SEEK_SET,
-	     error ) == -1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_IO,
-		 LIBCERROR_IO_ERROR_SEEK_FAILED,
-		 "%s: unable to seek file header offset: 0.",
-		 function );
-
-		if( file_io_handle_is_open == 0 )
-		{
-			libbfio_handle_close(
-			 file_io_handle,
-			 error );
-		}
-		return( -1 );
-	}
-	read_count = libbfio_handle_read_buffer(
+	read_count = libbfio_handle_read_buffer_at_offset(
 	              file_io_handle,
 	              signature,
 	              12,
+	              0,
 	              error );
 
 	if( read_count != 12 )
@@ -408,16 +388,10 @@ int libfsrefs_check_volume_signature_file_io_handle(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_IO,
 		 LIBCERROR_IO_ERROR_READ_FAILED,
-		 "%s: unable to read signature.",
+		 "%s: unable to read signature at offset: 0 (0x00000000).",
 		 function );
 
-		if( file_io_handle_is_open == 0 )
-		{
-			libbfio_handle_close(
-			 file_io_handle,
-			 error );
-		}
-		return( -1 );
+		goto on_error;
 	}
 	if( file_io_handle_is_open == 0 )
 	{
@@ -432,7 +406,7 @@ int libfsrefs_check_volume_signature_file_io_handle(
 			 "%s: unable to close file.",
 			 function );
 
-			return( -1 );
+			goto on_error;
 		}
 	}
 	if( memory_compare(
@@ -445,5 +419,14 @@ int libfsrefs_check_volume_signature_file_io_handle(
 	/* TODO also check sector signature ? */
 
 	return( 0 );
+
+on_error:
+	if( file_io_handle_is_open == 0 )
+	{
+		libbfio_handle_close(
+		 file_io_handle,
+		 error );
+	}
+	return( -1 );
 }
 
