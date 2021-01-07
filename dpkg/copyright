@@ -3,7 +3,7 @@ Upstream-Name: libfsrefs
 Source: https://github.com/libyal/libfsrefs
 
 Files: *
-Copyright: 2012-2020, Joachim Metz <joachim.metz@gmail.com>
+Copyright: 2012-2021, Joachim Metz <joachim.metz@gmail.com>
 License: LGPL-3.0+
 
 License: LGPL-3.0+
