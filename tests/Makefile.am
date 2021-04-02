@@ -1,3 +1,5 @@
+AUTOMAKE_OPTIONS = subdir-objects
+
 AM_CPPFLAGS = \
 	-I$(top_srcdir)/include \
 	-I$(top_srcdir)/common \
@@ -19,12 +21,14 @@ AM_CPPFLAGS = \
 
 TESTS = \
 	test_library.sh \
+	test_tools.sh \
 	test_fsrefsinfo.sh
 
 check_SCRIPTS = \
 	test_fsrefsinfo.sh \
 	test_library.sh \
-	test_runner.sh
+	test_runner.sh \
+	test_tools.sh
 
 EXTRA_DIST = \
 	$(check_SCRIPTS)
@@ -44,6 +48,9 @@ check_PROGRAMS = \
 	fsrefs_test_metadata_value \
 	fsrefs_test_notify \
 	fsrefs_test_support \
+	fsrefs_test_tools_info_handle \
+	fsrefs_test_tools_output \
+	fsrefs_test_tools_signal \
 	fsrefs_test_volume \
 	fsrefs_test_volume_information \
 	fsrefs_test_volume_name
@@ -223,6 +230,41 @@ fsrefs_test_support_LDADD = \
 	@LIBCNOTIFY_LIBADD@ \
 	@LIBCLOCALE_LIBADD@ \
 	@LIBCDATA_LIBADD@ \
+	../libfsrefs/libfsrefs.la \
+	@LIBCERROR_LIBADD@
+
+fsrefs_test_tools_info_handle_SOURCES = \
+	../fsrefstools/info_handle.c ../fsrefstools/info_handle.h \
+	fsrefs_test_libcerror.h \
+	fsrefs_test_macros.h \
+	fsrefs_test_memory.c fsrefs_test_memory.h \
+	fsrefs_test_tools_info_handle.c \
+	fsrefs_test_unused.h
+
+fsrefs_test_tools_info_handle_LDADD = \
+	@LIBCLOCALE_LIBADD@ \
+	../libfsrefs/libfsrefs.la \
+	@LIBCERROR_LIBADD@
+
+fsrefs_test_tools_output_SOURCES = \
+	../fsrefstools/fsrefstools_output.c ../fsrefstools/fsrefstools_output.h \
+	fsrefs_test_libcerror.h \
+	fsrefs_test_macros.h \
+	fsrefs_test_tools_output.c \
+	fsrefs_test_unused.h
+
+fsrefs_test_tools_output_LDADD = \
+	../libfsrefs/libfsrefs.la \
+	@LIBCERROR_LIBADD@
+
+fsrefs_test_tools_signal_SOURCES = \
+	../fsrefstools/fsrefstools_signal.c ../fsrefstools/fsrefstools_signal.h \
+	fsrefs_test_libcerror.h \
+	fsrefs_test_macros.h \
+	fsrefs_test_tools_signal.c \
+	fsrefs_test_unused.h
+
+fsrefs_test_tools_signal_LDADD = \
 	../libfsrefs/libfsrefs.la \
 	@LIBCERROR_LIBADD@
 

@@ -13,6 +13,9 @@ MSVSCPP_FILES = \
 	fsrefs_test_metadata_value/fsrefs_test_metadata_value.vcproj \
 	fsrefs_test_notify/fsrefs_test_notify.vcproj \
 	fsrefs_test_support/fsrefs_test_support.vcproj \
+	fsrefs_test_tools_info_handle/fsrefs_test_tools_info_handle.vcproj \
+	fsrefs_test_tools_output/fsrefs_test_tools_output.vcproj \
+	fsrefs_test_tools_signal/fsrefs_test_tools_signal.vcproj \
 	fsrefs_test_volume/fsrefs_test_volume.vcproj \
 	fsrefs_test_volume_information/fsrefs_test_volume_information.vcproj \
 	fsrefs_test_volume_name/fsrefs_test_volume_name.vcproj \
