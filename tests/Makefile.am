@@ -242,7 +242,14 @@ fsrefs_test_tools_info_handle_SOURCES = \
 	fsrefs_test_unused.h
 
 fsrefs_test_tools_info_handle_LDADD = \
+	@LIBBFIO_LIBADD@ \
+	@LIBCPATH_LIBADD@ \
+	@LIBCFILE_LIBADD@ \
+	@LIBUNA_LIBADD@ \
+	@LIBCSPLIT_LIBADD@ \
+	@LIBCNOTIFY_LIBADD@ \
 	@LIBCLOCALE_LIBADD@ \
+	@LIBCDATA_LIBADD@ \
 	../libfsrefs/libfsrefs.la \
 	@LIBCERROR_LIBADD@
 
