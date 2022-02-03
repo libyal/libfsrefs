@@ -24,7 +24,7 @@ BEGIN
       VALUE "FileDescription",		"Library to access the Windows Resiliant File System (REFS) format\0"
       VALUE "FileVersion",		"@VERSION@" "\0"
       VALUE "InternalName",		"libfsrefs.dll\0"
-      VALUE "LegalCopyright",		"(C) 2012-2021, Joachim Metz <joachim.metz@gmail.com>\0"
+      VALUE "LegalCopyright",		"(C) 2012-2022, Joachim Metz <joachim.metz@gmail.com>\0"
       VALUE "OriginalFilename",		"libfsrefs.dll\0"
       VALUE "ProductName",		"libfsrefs\0"
       VALUE "ProductVersion",		"@VERSION@" "\0"

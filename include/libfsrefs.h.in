@@ -1,7 +1,7 @@
 /*
  * Library to access the Windows Resiliant File System (REFS) format
  *
- * Copyright (C) 2012-2021, Joachim Metz <joachim.metz@gmail.com>
+ * Copyright (C) 2012-2022, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *
