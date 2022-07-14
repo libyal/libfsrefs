@@ -72,7 +72,6 @@ rm -rf %{buildroot}
 %defattr(644,root,root,755)
 %license COPYING COPYING.LESSER
 %doc AUTHORS README
-%{_libdir}/*.la
 %{_libdir}/*.so
 %{_libdir}/pkgconfig/libfsrefs.pc
 %{_includedir}/*
