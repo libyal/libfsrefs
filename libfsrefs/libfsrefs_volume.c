@@ -27,12 +27,11 @@
 
 #include "libfsrefs_block_descriptor.h"
 #include "libfsrefs_block_descriptors.h"
+#include "libfsrefs_checkpoint.h"
 #include "libfsrefs_debug.h"
 #include "libfsrefs_definitions.h"
 #include "libfsrefs_directory.h"
 #include "libfsrefs_io_handle.h"
-#include "libfsrefs_level0_metadata.h"
-#include "libfsrefs_level1_metadata.h"
 #include "libfsrefs_level2_metadata.h"
 #include "libfsrefs_level3_metadata.h"
 #include "libfsrefs_libbfio.h"
@@ -41,6 +40,7 @@
 #include "libfsrefs_libfcache.h"
 #include "libfsrefs_libfdata.h"
 #include "libfsrefs_metadata_block.h"
+#include "libfsrefs_superblock.h"
 #include "libfsrefs_volume.h"
 #include "libfsrefs_volume_header.h"
 #include "libfsrefs_volume_name.h"
@@ -763,19 +763,21 @@ int libfsrefs_volume_open_read(
      libbfio_handle_t *file_io_handle,
      libcerror_error_t **error )
 {
-	libfsrefs_directory_t *directory                               = NULL;
-	libfsrefs_directory_t *root_directory                          = NULL;
 	libfsrefs_block_descriptor_t *level2_metadata_block_descriptor = NULL;
 	libfsrefs_block_descriptor_t *level3_metadata_block_descriptor = NULL;
 	libfsrefs_block_descriptor_t *level4_metadata_block_descriptor = NULL;
 	libfsrefs_block_descriptors_t *directory_block_descriptors     = NULL;
-	libfsrefs_level0_metadata_t *level0_metadata                   = NULL;
-	libfsrefs_level1_metadata_t *level1_primary_metadata           = NULL;
-	libfsrefs_level1_metadata_t *level1_secondary_metadata         = NULL;
+	libfsrefs_checkpoint_t *primary_checkpoint                     = NULL;
+	libfsrefs_checkpoint_t *secondary_checkpoint                   = NULL;
+	libfsrefs_directory_t *directory                               = NULL;
+	libfsrefs_directory_t *root_directory                          = NULL;
 	libfsrefs_level2_metadata_t *level2_metadata                   = NULL;
 	libfsrefs_level3_metadata_t *level3_metadata                   = NULL;
+	libfsrefs_superblock_t *superblock                             = NULL;
 	libfsrefs_volume_header_t *volume_header                       = NULL;
 	static char *function                                          = "libfsrefs_volume_open_read";
+	off64_t checkpoint_offset                                      = 0;
+	off64_t superblock_offset                                      = 0;
 	uint64_t value_identifier                                      = 0;
 	int level2_metadata_block_descriptor_index                     = 0;
 	int level3_metadata_block_descriptor_index                     = 0;
@@ -841,80 +843,50 @@ int libfsrefs_volume_open_read(
 
 		goto on_error;
 	}
-	internal_volume->io_handle->block_size          = volume_header->block_size;
-	internal_volume->io_handle->metadata_block_size = volume_header->metadata_block_size;
-	internal_volume->io_handle->bytes_per_sector    = volume_header->bytes_per_sector;
-	internal_volume->io_handle->volume_size         = volume_header->volume_size;
+	internal_volume->io_handle->bytes_per_sector     = volume_header->bytes_per_sector;
+	internal_volume->io_handle->volume_size          = volume_header->volume_size;
+	internal_volume->io_handle->major_format_version = volume_header->major_format_version;
+	internal_volume->io_handle->minor_format_version = volume_header->minor_format_version;
+	internal_volume->io_handle->block_size           = volume_header->block_size;
+	internal_volume->io_handle->metadata_block_size  = volume_header->metadata_block_size;
+
+	superblock_offset = 30 * internal_volume->io_handle->metadata_block_size;
 
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )
 	{
 		libcnotify_printf(
-		 "Reading level 0 metadata:\n" );
+		 "Reading superblock:\n" );
 	}
 #endif
-	if( libfsrefs_level0_metadata_initialize(
-	     &level0_metadata,
+	if( libfsrefs_superblock_initialize(
+	     &superblock,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-		 "%s: unable to create level 0 metadata.",
+		 "%s: unable to create superblock.",
 		 function );
 
 		goto on_error;
 	}
-	if( libfsrefs_level0_metadata_read(
-	     level0_metadata,
+	if( libfsrefs_superblock_read_file_io_handle(
+	     superblock,
 	     internal_volume->io_handle,
 	     file_io_handle,
-	     0x0000001eUL * internal_volume->io_handle->metadata_block_size,
+	     superblock_offset,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_IO,
 		 LIBCERROR_IO_ERROR_READ_FAILED,
-		 "%s: unable to read level 0 metadata.",
-		 function );
-
-		goto on_error;
-	}
-#if defined( HAVE_DEBUG_OUTPUT )
-	if( libcnotify_verbose != 0 )
-	{
-		libcnotify_printf(
-		 "Reading level 1 primary metadata:\n" );
-	}
-#endif
-	if( libfsrefs_level1_metadata_initialize(
-	     &level1_primary_metadata,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-		 "%s: unable to create level 1 primary metadata.",
-		 function );
-
-		goto on_error;
-	}
-	if( libfsrefs_level1_metadata_read(
-	     level1_primary_metadata,
-	     internal_volume->io_handle,
-	     file_io_handle,
-	     level0_metadata->primary_level1_metadata_block_number * internal_volume->io_handle->metadata_block_size,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_IO,
-		 LIBCERROR_IO_ERROR_READ_FAILED,
-		 "%s: unable to read level 1 primary metadata.",
-		 function );
+		 "%s: unable to read superblock at offset: %" PRIi64 " (0x%08" PRIx64 ").",
+		 function,
+		 superblock_offset,
+		 superblock_offset );
 
 		goto on_error;
 	}
@@ -922,35 +894,79 @@ int libfsrefs_volume_open_read(
 	if( libcnotify_verbose != 0 )
 	{
 		libcnotify_printf(
-		 "Reading level 1 secondary metadata:\n" );
+		 "Reading primary checkpoint:\n" );
 	}
 #endif
-	if( libfsrefs_level1_metadata_initialize(
-	     &level1_secondary_metadata,
+	if( libfsrefs_checkpoint_initialize(
+	     &primary_checkpoint,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-		 "%s: unable to create level 1 secondary metadata.",
+		 "%s: unable to create primary checkpoint.",
 		 function );
 
 		goto on_error;
 	}
-	if( libfsrefs_level1_metadata_read(
-	     level1_secondary_metadata,
+	checkpoint_offset = superblock->primary_checkpoint_block_number * internal_volume->io_handle->metadata_block_size;
+
+	if( libfsrefs_checkpoint_read_file_io_handle(
+	     primary_checkpoint,
 	     internal_volume->io_handle,
 	     file_io_handle,
-	     level0_metadata->secondary_level1_metadata_block_number * internal_volume->io_handle->metadata_block_size,
+	     checkpoint_offset,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_IO,
 		 LIBCERROR_IO_ERROR_READ_FAILED,
-		 "%s: unable to read level 1 secondary metadata.",
+		 "%s: unable to read primary checkpoint at offset: %" PRIi64 " (0x%08" PRIx64 ").",
+		 function,
+		 checkpoint_offset,
+		 checkpoint_offset );
+
+		goto on_error;
+	}
+#if defined( HAVE_DEBUG_OUTPUT )
+	if( libcnotify_verbose != 0 )
+	{
+		libcnotify_printf(
+		 "Reading secondary checkpoint:\n" );
+	}
+#endif
+	if( libfsrefs_checkpoint_initialize(
+	     &secondary_checkpoint,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to create secondary checkpoint.",
 		 function );
+
+		goto on_error;
+	}
+	checkpoint_offset = superblock->secondary_checkpoint_block_number * internal_volume->io_handle->metadata_block_size;
+
+	if( libfsrefs_checkpoint_read_file_io_handle(
+	     secondary_checkpoint,
+	     internal_volume->io_handle,
+	     file_io_handle,
+	     checkpoint_offset,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_IO,
+		 LIBCERROR_IO_ERROR_READ_FAILED,
+		 "%s: unable to read secondary checkpoint at offset: %" PRIi64 " (0x%08" PRIx64 ").",
+		 function,
+		 checkpoint_offset,
+		 checkpoint_offset );
 
 		goto on_error;
 	}
@@ -961,10 +977,10 @@ int libfsrefs_volume_open_read(
 		 "Reading level 2 metadata:\n" );
 	}
 #endif
-	if( level1_primary_metadata->sequence_number >= level1_secondary_metadata->sequence_number )
+	if( primary_checkpoint->sequence_number >= secondary_checkpoint->sequence_number )
 	{
-		if( libfsrefs_level1_metadata_get_number_of_level2_metadata_block_descriptors(
-		     level1_primary_metadata,
+		if( libfsrefs_checkpoint_get_number_of_level2_metadata_block_descriptors(
+		     primary_checkpoint,
 		     &number_of_level2_metadata_block_descriptors,
 		     error ) != 1 )
 		{
@@ -972,7 +988,7 @@ int libfsrefs_volume_open_read(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve number of level 2 metadata block descriptors from primary level 1 metadata.",
+			 "%s: unable to retrieve number of level 2 metadata block descriptors from primary checkpoint.",
 			 function );
 
 			goto on_error;
@@ -980,8 +996,8 @@ int libfsrefs_volume_open_read(
 	}
 	else
 	{
-		if( libfsrefs_level1_metadata_get_number_of_level2_metadata_block_descriptors(
-		     level1_secondary_metadata,
+		if( libfsrefs_checkpoint_get_number_of_level2_metadata_block_descriptors(
+		     secondary_checkpoint,
 		     &number_of_level2_metadata_block_descriptors,
 		     error ) != 1 )
 		{
@@ -989,7 +1005,7 @@ int libfsrefs_volume_open_read(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve number of level 2 metadata block descriptors from secondary level 1 metadata.",
+			 "%s: unable to retrieve number of level 2 metadata block descriptors from secondary checkpoint.",
 			 function );
 
 			goto on_error;
@@ -999,10 +1015,10 @@ int libfsrefs_volume_open_read(
 	     level2_metadata_block_descriptor_index < number_of_level2_metadata_block_descriptors;
 	     level2_metadata_block_descriptor_index++ )
 	{
-		if( level1_primary_metadata->sequence_number >= level1_secondary_metadata->sequence_number )
+		if( primary_checkpoint->sequence_number >= secondary_checkpoint->sequence_number )
 		{
-			if( libfsrefs_level1_metadata_get_level2_metadata_block_descriptor_by_index(
-			     level1_primary_metadata,
+			if( libfsrefs_checkpoint_get_level2_metadata_block_descriptor_by_index(
+			     primary_checkpoint,
 			     level2_metadata_block_descriptor_index,
 			     &level2_metadata_block_descriptor,
 			     error ) != 1 )
@@ -1011,7 +1027,7 @@ int libfsrefs_volume_open_read(
 				 error,
 				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 				 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-				 "%s: unable to retrieve level 2 metadata block descriptor: %d from primary level 1 metadata.",
+				 "%s: unable to retrieve level 2 metadata block descriptor: %d from primary checkpoint.",
 				 function,
 				 level2_metadata_block_descriptor_index );
 
@@ -1020,8 +1036,8 @@ int libfsrefs_volume_open_read(
 		}
 		else
 		{
-			if( libfsrefs_level1_metadata_get_level2_metadata_block_descriptor_by_index(
-			     level1_secondary_metadata,
+			if( libfsrefs_checkpoint_get_level2_metadata_block_descriptor_by_index(
+			     secondary_checkpoint,
 			     level2_metadata_block_descriptor_index,
 			     &level2_metadata_block_descriptor,
 			     error ) != 1 )
@@ -1030,7 +1046,7 @@ int libfsrefs_volume_open_read(
 				 error,
 				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 				 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-				 "%s: unable to retrieve level 2 metadata block descriptor: %d from secondary level 1 metadata.",
+				 "%s: unable to retrieve level 2 metadata block descriptor: %d from secondary checkpoint.",
 				 function,
 				 level2_metadata_block_descriptor_index );
 
@@ -1427,41 +1443,41 @@ int libfsrefs_volume_open_read(
 			goto on_error;
 		}
 	}
-	if( libfsrefs_level1_metadata_free(
-	     &level1_secondary_metadata,
+	if( libfsrefs_checkpoint_free(
+	     &secondary_checkpoint,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-		 "%s: unable to free level 1 secondary metadata.",
+		 "%s: unable to free secondary checkpoint.",
 		 function );
 
 		goto on_error;
 	}
-	if( libfsrefs_level1_metadata_free(
-	     &level1_primary_metadata,
+	if( libfsrefs_checkpoint_free(
+	     &primary_checkpoint,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-		 "%s: unable to free level 1 primary metadata.",
+		 "%s: unable to free primary checkpoint.",
 		 function );
 
 		goto on_error;
 	}
-	if( libfsrefs_level0_metadata_free(
-	     &level0_metadata,
+	if( libfsrefs_superblock_free(
+	     &superblock,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-		 "%s: unable to free level 0 metadata.",
+		 "%s: unable to free superblock.",
 		 function );
 
 		goto on_error;
@@ -1499,22 +1515,22 @@ on_error:
 		 &level2_metadata,
 		 NULL );
 	}
-	if( level1_secondary_metadata != NULL )
+	if( secondary_checkpoint != NULL )
 	{
-		libfsrefs_level1_metadata_free(
-		 &level1_secondary_metadata,
+		libfsrefs_checkpoint_free(
+		 &secondary_checkpoint,
 		 NULL );
 	}
-	if( level1_primary_metadata != NULL )
+	if( primary_checkpoint != NULL )
 	{
-		libfsrefs_level1_metadata_free(
-		 &level1_primary_metadata,
+		libfsrefs_checkpoint_free(
+		 &primary_checkpoint,
 		 NULL );
 	}
-	if( level0_metadata != NULL )
+	if( superblock != NULL )
 	{
-		libfsrefs_level0_metadata_free(
-		 &level0_metadata,
+		libfsrefs_superblock_free(
+		 &superblock,
 		 NULL );
 	}
 	if( volume_header != NULL )
@@ -1703,6 +1719,71 @@ int libfsrefs_volume_get_utf16_name(
 
 		return( -1 );
 	}
+	return( 1 );
+}
+
+/* Retrieves the format version
+ * Returns 1 if successful or -1 on error
+ */
+int libfsrefs_volume_get_version(
+     libfsrefs_volume_t *volume,
+     uint8_t *major_version,
+     uint8_t *minor_version,
+     libcerror_error_t **error )
+{
+	libfsrefs_internal_volume_t *internal_volume = NULL;
+	static char *function                        = "libfsrefs_volume_get_version";
+	int result                                   = 0;
+
+	if( volume == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid volume.",
+		 function );
+
+		return( -1 );
+	}
+	internal_volume = (libfsrefs_internal_volume_t *) volume;
+
+	if( internal_volume->io_handle == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 "%s: invalid volume - missing IO handle.",
+		 function );
+
+		return( -1 );
+	}
+	if( major_version == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid major version.",
+		 function );
+
+		return( -1 );
+	}
+	if( minor_version == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid minor version.",
+		 function );
+
+		return( -1 );
+	}
+	*major_version = internal_volume->io_handle->major_format_version;
+	*minor_version = internal_volume->io_handle->minor_format_version;
+
 	return( 1 );
 }
 

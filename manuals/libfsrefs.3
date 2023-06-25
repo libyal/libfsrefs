@@ -1,4 +1,4 @@
-.Dd September  3, 2019
+.Dd Jun 25, 2023
 .Dt libfsrefs 3
 .Os libfsrefs
 .Sh NAME
@@ -68,6 +68,8 @@ Volume functions
 .Fn libfsrefs_volume_get_utf16_name_size "libfsrefs_volume_t *volume" "size_t *utf16_string_size" "libfsrefs_error_t **error"
 .Ft int
 .Fn libfsrefs_volume_get_utf16_name "libfsrefs_volume_t *volume" "uint16_t *utf16_string" "size_t utf16_string_size" "libfsrefs_error_t **error"
+.Ft int
+.Fn libfsrefs_volume_get_version "libfsrefs_volume_t *volume" "uint8_t *major_version" "uint8_t *minor_version" "libfsrefs_error_t **error"
 .Pp
 Available when compiled with wide character string support:
 .Ft int

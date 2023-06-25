@@ -1,5 +1,5 @@
 /*
- * The ReFS volume information attribute ($VOLUME_INFORMATION) definition
+ * The ReFS metadata block definition
  *
  * Copyright (C) 2012-2023, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -19,8 +19,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if !defined( _FSREFS_VOLUME_INFORMATION_H )
-#define _FSREFS_VOLUME_INFORMATION_H
+#if !defined( _FSREFS_CHECKPOINT_H )
+#define _FSREFS_CHECKPOINT_H
 
 #include <common.h>
 #include <types.h>
@@ -29,64 +29,79 @@
 extern "C" {
 #endif
 
-typedef struct fsrefs_volume_information fsrefs_volume_information_t;
+typedef struct fsrefs_checkpoint_v1 fsrefs_checkpoint_v1_t;
 
-struct fsrefs_volume_information
+struct fsrefs_checkpoint_v1
 {
 	/* Unknown
-	 * Consists of 128 bytes
+	 * Consists of 4 bytes
 	 */
-	uint8_t unknown1[ 128 ];
+	uint8_t unknown1[ 4 ];
+
+	/* Unknown
+	 * Consists of 2 bytes
+	 */
+	uint8_t unknown2[ 2 ];
+
+	/* Unknown
+	 * Consists of 2 bytes
+	 */
+	uint8_t unknown3[ 2 ];
 
 	/* Unknown
 	 * Consists of 4 bytes
 	 */
-	uint8_t unknown2[ 4 ];
+	uint8_t unknown4[ 4 ];
 
-	/* Unknown
-	 * Consists of 12 bytes
+	/* Table entry size
+	 * Consists of 4 bytes
 	 */
-	uint8_t unknown3[ 12 ];
+	uint8_t table_entry_size[ 4 ];
 
-	/* Unknown
+	/* Sequence number
 	 * Consists of 8 bytes
 	 */
-	uint8_t unknown4[ 8 ];
+	uint8_t sequence_number[ 8 ];
 
 	/* Unknown
-	 * Consists of 8 bytes
+	 * Consists of 4 bytes
 	 */
-	uint8_t unknown5[ 8 ];
+	uint8_t unknown5[ 4 ];
 
 	/* Unknown
-	 * Consists of 8 bytes
+	 * Consists of 4 bytes
 	 */
-	uint8_t unknown6[ 8 ];
+	uint8_t unknown6[ 4 ];
 
 	/* Unknown
 	 * Consists of 8 bytes
 	 */
 	uint8_t unknown7[ 8 ];
 
-	/* Unknown
-	 * Consists of 8 bytes
+	/* Number of entries
+	 * Consists of 4 bytes
 	 */
-	uint8_t unknown8[ 8 ];
+	uint8_t number_of_entries[ 4 ];
+};
+
+typedef struct fsrefs_checkpoint_v3 fsrefs_checkpoint_v3_t;
+
+struct fsrefs_checkpoint_v3
+{
+	/* The volume identifier
+	 * Consists of 16 bytes
+	 */
+	uint8_t volume_identifier[ 16 ];
 
 	/* Unknown
-	 * Consists of 8 bytes
+	 * Consists of 136 bytes
 	 */
-	uint8_t unknown9[ 8 ];
-
-	/* Unknown
-	 * Consists of 272 bytes
-	 */
-	uint8_t unknown10[ 272 ];
+	uint8_t unknown1[ 136 ];
 };
 
 #if defined( __cplusplus )
 }
 #endif
 
-#endif /* !defined( _FSREFS_VOLUME_INFORMATION_H ) */
+#endif /* !defined( _FSREFS_CHECKPOINT_H ) */
 

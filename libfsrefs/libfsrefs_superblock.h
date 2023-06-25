@@ -1,5 +1,5 @@
 /*
- * Level 0 metadata functions
+ * Superblock (or level 0 metadata) functions
  *
  * Copyright (C) 2012-2023, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -19,8 +19,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if !defined( _LIBFSREFS_LEVEL0_METADATA_H )
-#define _LIBFSREFS_LEVEL0_METADATA_H
+#if !defined( _LIBFSREFS_SUPERBLOCK_H )
+#define _LIBFSREFS_SUPERBLOCK_H
 
 #include <common.h>
 #include <types.h>
@@ -33,29 +33,40 @@
 extern "C" {
 #endif
 
-typedef struct libfsrefs_level0_metadata libfsrefs_level0_metadata_t;
+typedef struct libfsrefs_superblock libfsrefs_superblock_t;
 
-struct libfsrefs_level0_metadata
+struct libfsrefs_superblock
 {
-	/* The primary level 1 metadata block number
+	/* The volume identifier
 	 */
-	uint64_t primary_level1_metadata_block_number;
+	uint8_t volume_identifier[ 16 ];
 
-	/* The secondary level 1 metadata block number
+	/* The primary checkpoint block number
 	 */
-	uint64_t secondary_level1_metadata_block_number;
+	uint64_t primary_checkpoint_block_number;
+
+	/* The secondary checkpoint block number
+	 */
+	uint64_t secondary_checkpoint_block_number;
 };
 
-int libfsrefs_level0_metadata_initialize(
-     libfsrefs_level0_metadata_t **level0_metadata,
+int libfsrefs_superblock_initialize(
+     libfsrefs_superblock_t **superblock,
      libcerror_error_t **error );
 
-int libfsrefs_level0_metadata_free(
-     libfsrefs_level0_metadata_t **level0_metadata,
+int libfsrefs_superblock_free(
+     libfsrefs_superblock_t **superblock,
      libcerror_error_t **error );
 
-int libfsrefs_level0_metadata_read(
-     libfsrefs_level0_metadata_t *level0_metadata,
+int libfsrefs_superblock_read_data(
+     libfsrefs_superblock_t *superblock,
+     libfsrefs_io_handle_t *io_handle,
+     const uint8_t *data,
+     size_t data_size,
+     libcerror_error_t **error );
+
+int libfsrefs_superblock_read_file_io_handle(
+     libfsrefs_superblock_t *superblock,
      libfsrefs_io_handle_t *io_handle,
      libbfio_handle_t *file_io_handle,
      off64_t file_offset,
@@ -65,5 +76,5 @@ int libfsrefs_level0_metadata_read(
 }
 #endif
 
-#endif /* !defined( _LIBFSREFS_LEVEL0_METADATA_H ) */
+#endif /* !defined( _LIBFSREFS_SUPERBLOCK_H ) */
 

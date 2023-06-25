@@ -19,8 +19,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if !defined( _FSREFS_METADATA_BLOCK_H )
-#define _FSREFS_METADATA_BLOCK_H
+#if !defined( _FSREFS_SUPERBLOCK_H )
+#define _FSREFS_SUPERBLOCK_H
 
 #include <common.h>
 #include <types.h>
@@ -29,24 +29,14 @@
 extern "C" {
 #endif
 
-typedef struct fsrefs_metadata_block_header_v1 fsrefs_metadata_block_header_v1_t;
+typedef struct fsrefs_superblock_v1 fsrefs_superblock_v1_t;
 
-struct fsrefs_metadata_block_header_v1
+struct fsrefs_superblock_v1
 {
-	/* The metadata block number
-	 * Consists of 8 bytes
-	 */
-	uint8_t block_number[ 8 ];
-
-	/* The sequence number
-	 * Consists of 8 bytes
-	 */
-	uint8_t sequence_number[ 8 ];
-
-	/* The object identifier
+	/* The volume identifier
 	 * Consists of 16 bytes
 	 */
-	uint8_t object_identifier[ 16 ];
+	uint8_t volume_identifier[ 16 ];
 
 	/* Unknown
 	 * Consists of 8 bytes
@@ -57,38 +47,43 @@ struct fsrefs_metadata_block_header_v1
 	 * Consists of 8 bytes
 	 */
 	uint8_t unknown2[ 8 ];
-};
-
-typedef struct fsrefs_metadata_block_header_v3 fsrefs_metadata_block_header_v3_t;
-
-struct fsrefs_metadata_block_header_v3
-{
-	/* The signature
-	 * Consists of 4 bytes
-	 */
-	uint8_t signature[ 4 ];
 
 	/* Unknown
 	 * Consists of 4 bytes
 	 */
-	uint8_t unknown1[ 4 ];
+	uint8_t unknown3[ 4 ];
 
 	/* Unknown
 	 * Consists of 4 bytes
 	 */
-	uint8_t unknown2[ 4 ];
+	uint8_t unknown4[ 4 ];
 
 	/* Unknown
-	 * Consists of 68 bytes
+	 * Consists of 4 bytes
 	 */
-	uint8_t unknown3[ 68 ];
-};
+	uint8_t unknown5[ 4 ];
 
-typedef struct fsrefs_metadata_block_reference_v1 fsrefs_metadata_block_reference_v1_t;
+	/* Unknown
+	 * Consists of 4 bytes
+	 */
+	uint8_t unknown6[ 4 ];
 
-struct fsrefs_metadata_block_reference_v1
-{
-	/* The metadata block number
+	/* Unknown
+	 * Consists of 64 bytes
+	 */
+	uint8_t unknown7[ 64 ];
+
+	/* Primary checkpoint block number
+	 * Consists of 8 bytes
+	 */
+	uint8_t primary_checkpoint_block_number[ 8 ];
+
+	/* Secondary checkpoint block number
+	 * Consists of 8 bytes
+	 */
+	uint8_t secondary_checkpoint_block_number[ 8 ];
+
+	/* Block number
 	 * Consists of 8 bytes
 	 */
 	uint8_t block_number[ 8 ];
@@ -96,37 +91,32 @@ struct fsrefs_metadata_block_reference_v1
 	/* Unknown
 	 * Consists of 8 bytes
 	 */
-	uint8_t unknown1[ 8 ];
+	uint8_t unknown8[ 8 ];
 
 	/* Unknown
 	 * Consists of 8 bytes
 	 */
-	uint8_t unknown2[ 8 ];
+	uint8_t unknown9[ 8 ];
 };
 
-typedef struct fsrefs_metadata_block_reference_v3 fsrefs_metadata_block_reference_v3_t;
+typedef struct fsrefs_superblock_v3 fsrefs_superblock_v3_t;
 
-struct fsrefs_metadata_block_reference_v3
+struct fsrefs_superblock_v3
 {
-	/* The metadata block number
-	 * Consists of 8 bytes
+	/* The volume identifier
+	 * Consists of 16 bytes
 	 */
-	uint8_t block_number[ 8 ];
+	uint8_t volume_identifier[ 16 ];
 
 	/* Unknown
-	 * Consists of 8 bytes
+	 * Consists of 136 bytes
 	 */
-	uint8_t unknown1[ 8 ];
-
-	/* Unknown
-	 * Consists of 8 bytes
-	 */
-	uint8_t unknown2[ 8 ];
+	uint8_t unknown1[ 136 ];
 };
 
 #if defined( __cplusplus )
 }
 #endif
 
-#endif /* !defined( _FSREFS_METADATA_BLOCK_H ) */
+#endif /* !defined( _FSREFS_SUPERBLOCK_H ) */
 

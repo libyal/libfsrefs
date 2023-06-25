@@ -58,7 +58,7 @@ struct libfsrefs_volume_header
 
 	/* The block size
 	 */
-	size_t block_size;
+	size32_t block_size;
 
 	/* The metadata block size
 	 */

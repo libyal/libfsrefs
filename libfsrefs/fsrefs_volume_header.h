@@ -1,5 +1,5 @@
 /*
- * The REFS volume header definition
+ * The ReFS volume header definition
  *
  * Copyright (C) 2012-2023, Joachim Metz <joachim.metz@gmail.com>
  *

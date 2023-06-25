@@ -1,5 +1,5 @@
 /*
- * Library level1_metadata type test program
+ * Library checkpoint type test program
  *
  * Copyright (C) 2012-2023, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -20,6 +20,7 @@
  */
 
 #include <common.h>
+#include <byte_stream.h>
 #include <file_stream.h>
 #include <types.h>
 
@@ -27,36 +28,38 @@
 #include <stdlib.h>
 #endif
 
+#include "fsrefs_test_functions.h"
+#include "fsrefs_test_libbfio.h"
 #include "fsrefs_test_libcerror.h"
 #include "fsrefs_test_libfsrefs.h"
 #include "fsrefs_test_macros.h"
 #include "fsrefs_test_memory.h"
 #include "fsrefs_test_unused.h"
 
-#include "../libfsrefs/libfsrefs_level1_metadata.h"
+#include "../libfsrefs/libfsrefs_checkpoint.h"
 
 #if defined( __GNUC__ ) && !defined( LIBFSREFS_DLL_IMPORT )
 
-/* Tests the libfsrefs_level1_metadata_initialize function
+/* Tests the libfsrefs_checkpoint_initialize function
  * Returns 1 if successful or 0 if not
  */
-int fsrefs_test_level1_metadata_initialize(
+int fsrefs_test_checkpoint_initialize(
      void )
 {
-	libcerror_error_t *error                     = NULL;
-	libfsrefs_level1_metadata_t *level1_metadata = NULL;
-	int result                                   = 0;
+	libcerror_error_t *error           = NULL;
+	libfsrefs_checkpoint_t *checkpoint = NULL;
+	int result                         = 0;
 
 #if defined( HAVE_FSREFS_TEST_MEMORY )
-	int number_of_malloc_fail_tests              = 1;
-	int number_of_memset_fail_tests              = 1;
-	int test_number                              = 0;
+	int number_of_malloc_fail_tests    = 1;
+	int number_of_memset_fail_tests    = 1;
+	int test_number                    = 0;
 #endif
 
 	/* Test regular cases
 	 */
-	result = libfsrefs_level1_metadata_initialize(
-	          &level1_metadata,
+	result = libfsrefs_checkpoint_initialize(
+	          &checkpoint,
 	          &error );
 
 	FSREFS_TEST_ASSERT_EQUAL_INT(
@@ -65,15 +68,15 @@ int fsrefs_test_level1_metadata_initialize(
 	 1 );
 
 	FSREFS_TEST_ASSERT_IS_NOT_NULL(
-	 "level1_metadata",
-	 level1_metadata );
+	 "checkpoint",
+	 checkpoint );
 
 	FSREFS_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
-	result = libfsrefs_level1_metadata_free(
-	          &level1_metadata,
+	result = libfsrefs_checkpoint_free(
+	          &checkpoint,
 	          &error );
 
 	FSREFS_TEST_ASSERT_EQUAL_INT(
@@ -82,8 +85,8 @@ int fsrefs_test_level1_metadata_initialize(
 	 1 );
 
 	FSREFS_TEST_ASSERT_IS_NULL(
-	 "level1_metadata",
-	 level1_metadata );
+	 "checkpoint",
+	 checkpoint );
 
 	FSREFS_TEST_ASSERT_IS_NULL(
 	 "error",
@@ -91,7 +94,7 @@ int fsrefs_test_level1_metadata_initialize(
 
 	/* Test error cases
 	 */
-	result = libfsrefs_level1_metadata_initialize(
+	result = libfsrefs_checkpoint_initialize(
 	          NULL,
 	          &error );
 
@@ -107,10 +110,10 @@ int fsrefs_test_level1_metadata_initialize(
 	libcerror_error_free(
 	 &error );
 
-	level1_metadata = (libfsrefs_level1_metadata_t *) 0x12345678UL;
+	checkpoint = (libfsrefs_checkpoint_t *) 0x12345678UL;
 
-	result = libfsrefs_level1_metadata_initialize(
-	          &level1_metadata,
+	result = libfsrefs_checkpoint_initialize(
+	          &checkpoint,
 	          &error );
 
 	FSREFS_TEST_ASSERT_EQUAL_INT(
@@ -125,7 +128,7 @@ int fsrefs_test_level1_metadata_initialize(
 	libcerror_error_free(
 	 &error );
 
-	level1_metadata = NULL;
+	checkpoint = NULL;
 
 #if defined( HAVE_FSREFS_TEST_MEMORY )
 
@@ -133,22 +136,22 @@ int fsrefs_test_level1_metadata_initialize(
 	     test_number < number_of_malloc_fail_tests;
 	     test_number++ )
 	{
-		/* Test libfsrefs_level1_metadata_initialize with malloc failing
+		/* Test libfsrefs_checkpoint_initialize with malloc failing
 		 */
 		fsrefs_test_malloc_attempts_before_fail = test_number;
 
-		result = libfsrefs_level1_metadata_initialize(
-		          &level1_metadata,
+		result = libfsrefs_checkpoint_initialize(
+		          &checkpoint,
 		          &error );
 
 		if( fsrefs_test_malloc_attempts_before_fail != -1 )
 		{
 			fsrefs_test_malloc_attempts_before_fail = -1;
 
-			if( level1_metadata != NULL )
+			if( checkpoint != NULL )
 			{
-				libfsrefs_level1_metadata_free(
-				 &level1_metadata,
+				libfsrefs_checkpoint_free(
+				 &checkpoint,
 				 NULL );
 			}
 		}
@@ -160,8 +163,8 @@ int fsrefs_test_level1_metadata_initialize(
 			 -1 );
 
 			FSREFS_TEST_ASSERT_IS_NULL(
-			 "level1_metadata",
-			 level1_metadata );
+			 "checkpoint",
+			 checkpoint );
 
 			FSREFS_TEST_ASSERT_IS_NOT_NULL(
 			 "error",
@@ -175,22 +178,22 @@ int fsrefs_test_level1_metadata_initialize(
 	     test_number < number_of_memset_fail_tests;
 	     test_number++ )
 	{
-		/* Test libfsrefs_level1_metadata_initialize with memset failing
+		/* Test libfsrefs_checkpoint_initialize with memset failing
 		 */
 		fsrefs_test_memset_attempts_before_fail = test_number;
 
-		result = libfsrefs_level1_metadata_initialize(
-		          &level1_metadata,
+		result = libfsrefs_checkpoint_initialize(
+		          &checkpoint,
 		          &error );
 
 		if( fsrefs_test_memset_attempts_before_fail != -1 )
 		{
 			fsrefs_test_memset_attempts_before_fail = -1;
 
-			if( level1_metadata != NULL )
+			if( checkpoint != NULL )
 			{
-				libfsrefs_level1_metadata_free(
-				 &level1_metadata,
+				libfsrefs_checkpoint_free(
+				 &checkpoint,
 				 NULL );
 			}
 		}
@@ -202,8 +205,8 @@ int fsrefs_test_level1_metadata_initialize(
 			 -1 );
 
 			FSREFS_TEST_ASSERT_IS_NULL(
-			 "level1_metadata",
-			 level1_metadata );
+			 "checkpoint",
+			 checkpoint );
 
 			FSREFS_TEST_ASSERT_IS_NOT_NULL(
 			 "error",
@@ -223,19 +226,19 @@ on_error:
 		libcerror_error_free(
 		 &error );
 	}
-	if( level1_metadata != NULL )
+	if( checkpoint != NULL )
 	{
-		libfsrefs_level1_metadata_free(
-		 &level1_metadata,
+		libfsrefs_checkpoint_free(
+		 &checkpoint,
 		 NULL );
 	}
 	return( 0 );
 }
 
-/* Tests the libfsrefs_level1_metadata_free function
+/* Tests the libfsrefs_checkpoint_free function
  * Returns 1 if successful or 0 if not
  */
-int fsrefs_test_level1_metadata_free(
+int fsrefs_test_checkpoint_free(
      void )
 {
 	libcerror_error_t *error = NULL;
@@ -243,7 +246,7 @@ int fsrefs_test_level1_metadata_free(
 
 	/* Test error cases
 	 */
-	result = libfsrefs_level1_metadata_free(
+	result = libfsrefs_checkpoint_free(
 	          NULL,
 	          &error );
 
@@ -270,22 +273,22 @@ on_error:
 	return( 0 );
 }
 
-/* Tests the libfsrefs_level1_metadata_get_number_of_level2_metadata_block_descriptors function
+/* Tests the libfsrefs_checkpoint_get_number_of_level2_metadata_block_descriptors function
  * Returns 1 if successful or 0 if not
  */
-int fsrefs_test_level1_metadata_get_number_of_level2_metadata_block_descriptors(
+int fsrefs_test_checkpoint_get_number_of_level2_metadata_block_descriptors(
      void )
 {
 	libcerror_error_t *error                               = NULL;
-	libfsrefs_level1_metadata_t *level1_metadata           = NULL;
+	libfsrefs_checkpoint_t *checkpoint                     = NULL;
 	int number_of_level2_metadata_block_descriptors        = 0;
 	int number_of_level2_metadata_block_descriptors_is_set = 0;
 	int result                                             = 0;
 
 	/* Initialize test
 	 */
-	result = libfsrefs_level1_metadata_initialize(
-	          &level1_metadata,
+	result = libfsrefs_checkpoint_initialize(
+	          &checkpoint,
 	          &error );
 
 	FSREFS_TEST_ASSERT_EQUAL_INT(
@@ -294,8 +297,8 @@ int fsrefs_test_level1_metadata_get_number_of_level2_metadata_block_descriptors(
 	 1 );
 
 	FSREFS_TEST_ASSERT_IS_NOT_NULL(
-	 "level1_metadata",
-	 level1_metadata );
+	 "checkpoint",
+	 checkpoint );
 
 	FSREFS_TEST_ASSERT_IS_NULL(
 	 "error",
@@ -303,8 +306,8 @@ int fsrefs_test_level1_metadata_get_number_of_level2_metadata_block_descriptors(
 
 	/* Test regular cases
 	 */
-	result = libfsrefs_level1_metadata_get_number_of_level2_metadata_block_descriptors(
-	          level1_metadata,
+	result = libfsrefs_checkpoint_get_number_of_level2_metadata_block_descriptors(
+	          checkpoint,
 	          &number_of_level2_metadata_block_descriptors,
 	          &error );
 
@@ -321,7 +324,7 @@ int fsrefs_test_level1_metadata_get_number_of_level2_metadata_block_descriptors(
 
 	/* Test error cases
 	 */
-	result = libfsrefs_level1_metadata_get_number_of_level2_metadata_block_descriptors(
+	result = libfsrefs_checkpoint_get_number_of_level2_metadata_block_descriptors(
 	          NULL,
 	          &number_of_level2_metadata_block_descriptors,
 	          &error );
@@ -340,8 +343,8 @@ int fsrefs_test_level1_metadata_get_number_of_level2_metadata_block_descriptors(
 
 	if( number_of_level2_metadata_block_descriptors_is_set != 0 )
 	{
-		result = libfsrefs_level1_metadata_get_number_of_level2_metadata_block_descriptors(
-		          level1_metadata,
+		result = libfsrefs_checkpoint_get_number_of_level2_metadata_block_descriptors(
+		          checkpoint,
 		          NULL,
 		          &error );
 
@@ -359,8 +362,8 @@ int fsrefs_test_level1_metadata_get_number_of_level2_metadata_block_descriptors(
 	}
 	/* Clean up
 	 */
-	result = libfsrefs_level1_metadata_free(
-	          &level1_metadata,
+	result = libfsrefs_checkpoint_free(
+	          &checkpoint,
 	          &error );
 
 	FSREFS_TEST_ASSERT_EQUAL_INT(
@@ -369,8 +372,8 @@ int fsrefs_test_level1_metadata_get_number_of_level2_metadata_block_descriptors(
 	 1 );
 
 	FSREFS_TEST_ASSERT_IS_NULL(
-	 "level1_metadata",
-	 level1_metadata );
+	 "checkpoint",
+	 checkpoint );
 
 	FSREFS_TEST_ASSERT_IS_NULL(
 	 "error",
@@ -384,10 +387,10 @@ on_error:
 		libcerror_error_free(
 		 &error );
 	}
-	if( level1_metadata != NULL )
+	if( checkpoint != NULL )
 	{
-		libfsrefs_level1_metadata_free(
-		 &level1_metadata,
+		libfsrefs_checkpoint_free(
+		 &checkpoint,
 		 NULL );
 	}
 	return( 0 );
@@ -413,26 +416,30 @@ int main(
 #if defined( __GNUC__ ) && !defined( LIBFSREFS_DLL_IMPORT )
 
 	FSREFS_TEST_RUN(
-	 "libfsrefs_level1_metadata_initialize",
-	 fsrefs_test_level1_metadata_initialize );
+	 "libfsrefs_checkpoint_initialize",
+	 fsrefs_test_checkpoint_initialize );
 
 	FSREFS_TEST_RUN(
-	 "libfsrefs_level1_metadata_free",
-	 fsrefs_test_level1_metadata_free );
+	 "libfsrefs_checkpoint_free",
+	 fsrefs_test_checkpoint_free );
 
-	/* TODO: add tests for libfsrefs_level1_metadata_read */
+	/* TODO: add tests for libfsrefs_checkpoint_read */
 
 	FSREFS_TEST_RUN(
-	 "libfsrefs_level1_metadata_get_number_of_level2_metadata_block_descriptors",
-	 fsrefs_test_level1_metadata_get_number_of_level2_metadata_block_descriptors );
+	 "libfsrefs_checkpoint_get_number_of_level2_metadata_block_descriptors",
+	 fsrefs_test_checkpoint_get_number_of_level2_metadata_block_descriptors );
 
-	/* TODO: add tests for libfsrefs_level1_metadata_get_level2_metadata_block_descriptor_by_index */
+	/* TODO: add tests for libfsrefs_checkpoint_get_level2_metadata_block_descriptor_by_index */
 
 #endif /* defined( __GNUC__ ) && !defined( LIBFSREFS_DLL_IMPORT ) */
 
 	return( EXIT_SUCCESS );
 
+#if defined( __GNUC__ ) && !defined( LIBFSREFS_DLL_IMPORT )
+
 on_error:
 	return( EXIT_FAILURE );
+
+#endif /* defined( __GNUC__ ) && !defined( LIBFSREFS_DLL_IMPORT ) */
 }
 

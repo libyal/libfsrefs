@@ -1,5 +1,5 @@
 /*
- * Library metadata_block type test program
+ * Library superblock type test program
  *
  * Copyright (C) 2012-2023, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -20,6 +20,7 @@
  */
 
 #include <common.h>
+#include <byte_stream.h>
 #include <file_stream.h>
 #include <types.h>
 
@@ -35,10 +36,9 @@
 #include "fsrefs_test_memory.h"
 #include "fsrefs_test_unused.h"
 
-#include "../libfsrefs/libfsrefs_io_handle.h"
-#include "../libfsrefs/libfsrefs_metadata_block.h"
+#include "../libfsrefs/libfsrefs_superblock.h"
 
-uint8_t fsrefs_test_metadata_block_data1[ 16384 ] = {
+uint8_t fsrefs_test_superblock_data1[ 16384 ] = {
 	0x1e, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 	0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -1064,7 +1064,7 @@ uint8_t fsrefs_test_metadata_block_data1[ 16384 ] = {
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 
-uint8_t fsrefs_test_metadata_block_data2[ 4096 ] = {
+uint8_t fsrefs_test_superblock_data2[ 4096 ] = {
 	0x53, 0x55, 0x50, 0x42, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xbb, 0xa7, 0xe0, 0x68,
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 	0x1e, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -1324,26 +1324,26 @@ uint8_t fsrefs_test_metadata_block_data2[ 4096 ] = {
 
 #if defined( __GNUC__ ) && !defined( LIBFSREFS_DLL_IMPORT )
 
-/* Tests the libfsrefs_metadata_block_initialize function
+/* Tests the libfsrefs_superblock_initialize function
  * Returns 1 if successful or 0 if not
  */
-int fsrefs_test_metadata_block_initialize(
+int fsrefs_test_superblock_initialize(
      void )
 {
-	libcerror_error_t *error                   = NULL;
-	libfsrefs_metadata_block_t *metadata_block = NULL;
-	int result                                 = 0;
+	libcerror_error_t *error           = NULL;
+	libfsrefs_superblock_t *superblock = NULL;
+	int result                         = 0;
 
 #if defined( HAVE_FSREFS_TEST_MEMORY )
-	int number_of_malloc_fail_tests            = 1;
-	int number_of_memset_fail_tests            = 1;
-	int test_number                            = 0;
+	int number_of_malloc_fail_tests    = 1;
+	int number_of_memset_fail_tests    = 1;
+	int test_number                    = 0;
 #endif
 
 	/* Test regular cases
 	 */
-	result = libfsrefs_metadata_block_initialize(
-	          &metadata_block,
+	result = libfsrefs_superblock_initialize(
+	          &superblock,
 	          &error );
 
 	FSREFS_TEST_ASSERT_EQUAL_INT(
@@ -1352,15 +1352,15 @@ int fsrefs_test_metadata_block_initialize(
 	 1 );
 
 	FSREFS_TEST_ASSERT_IS_NOT_NULL(
-	 "metadata_block",
-	 metadata_block );
+	 "superblock",
+	 superblock );
 
 	FSREFS_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
-	result = libfsrefs_metadata_block_free(
-	          &metadata_block,
+	result = libfsrefs_superblock_free(
+	          &superblock,
 	          &error );
 
 	FSREFS_TEST_ASSERT_EQUAL_INT(
@@ -1369,8 +1369,8 @@ int fsrefs_test_metadata_block_initialize(
 	 1 );
 
 	FSREFS_TEST_ASSERT_IS_NULL(
-	 "metadata_block",
-	 metadata_block );
+	 "superblock",
+	 superblock );
 
 	FSREFS_TEST_ASSERT_IS_NULL(
 	 "error",
@@ -1378,7 +1378,7 @@ int fsrefs_test_metadata_block_initialize(
 
 	/* Test error cases
 	 */
-	result = libfsrefs_metadata_block_initialize(
+	result = libfsrefs_superblock_initialize(
 	          NULL,
 	          &error );
 
@@ -1394,10 +1394,10 @@ int fsrefs_test_metadata_block_initialize(
 	libcerror_error_free(
 	 &error );
 
-	metadata_block = (libfsrefs_metadata_block_t *) 0x12345678UL;
+	superblock = (libfsrefs_superblock_t *) 0x12345678UL;
 
-	result = libfsrefs_metadata_block_initialize(
-	          &metadata_block,
+	result = libfsrefs_superblock_initialize(
+	          &superblock,
 	          &error );
 
 	FSREFS_TEST_ASSERT_EQUAL_INT(
@@ -1412,7 +1412,7 @@ int fsrefs_test_metadata_block_initialize(
 	libcerror_error_free(
 	 &error );
 
-	metadata_block = NULL;
+	superblock = NULL;
 
 #if defined( HAVE_FSREFS_TEST_MEMORY )
 
@@ -1420,22 +1420,22 @@ int fsrefs_test_metadata_block_initialize(
 	     test_number < number_of_malloc_fail_tests;
 	     test_number++ )
 	{
-		/* Test libfsrefs_metadata_block_initialize with malloc failing
+		/* Test libfsrefs_superblock_initialize with malloc failing
 		 */
 		fsrefs_test_malloc_attempts_before_fail = test_number;
 
-		result = libfsrefs_metadata_block_initialize(
-		          &metadata_block,
+		result = libfsrefs_superblock_initialize(
+		          &superblock,
 		          &error );
 
 		if( fsrefs_test_malloc_attempts_before_fail != -1 )
 		{
 			fsrefs_test_malloc_attempts_before_fail = -1;
 
-			if( metadata_block != NULL )
+			if( superblock != NULL )
 			{
-				libfsrefs_metadata_block_free(
-				 &metadata_block,
+				libfsrefs_superblock_free(
+				 &superblock,
 				 NULL );
 			}
 		}
@@ -1447,8 +1447,8 @@ int fsrefs_test_metadata_block_initialize(
 			 -1 );
 
 			FSREFS_TEST_ASSERT_IS_NULL(
-			 "metadata_block",
-			 metadata_block );
+			 "superblock",
+			 superblock );
 
 			FSREFS_TEST_ASSERT_IS_NOT_NULL(
 			 "error",
@@ -1462,22 +1462,22 @@ int fsrefs_test_metadata_block_initialize(
 	     test_number < number_of_memset_fail_tests;
 	     test_number++ )
 	{
-		/* Test libfsrefs_metadata_block_initialize with memset failing
+		/* Test libfsrefs_superblock_initialize with memset failing
 		 */
 		fsrefs_test_memset_attempts_before_fail = test_number;
 
-		result = libfsrefs_metadata_block_initialize(
-		          &metadata_block,
+		result = libfsrefs_superblock_initialize(
+		          &superblock,
 		          &error );
 
 		if( fsrefs_test_memset_attempts_before_fail != -1 )
 		{
 			fsrefs_test_memset_attempts_before_fail = -1;
 
-			if( metadata_block != NULL )
+			if( superblock != NULL )
 			{
-				libfsrefs_metadata_block_free(
-				 &metadata_block,
+				libfsrefs_superblock_free(
+				 &superblock,
 				 NULL );
 			}
 		}
@@ -1489,8 +1489,8 @@ int fsrefs_test_metadata_block_initialize(
 			 -1 );
 
 			FSREFS_TEST_ASSERT_IS_NULL(
-			 "metadata_block",
-			 metadata_block );
+			 "superblock",
+			 superblock );
 
 			FSREFS_TEST_ASSERT_IS_NOT_NULL(
 			 "error",
@@ -1510,19 +1510,19 @@ on_error:
 		libcerror_error_free(
 		 &error );
 	}
-	if( metadata_block != NULL )
+	if( superblock != NULL )
 	{
-		libfsrefs_metadata_block_free(
-		 &metadata_block,
+		libfsrefs_superblock_free(
+		 &superblock,
 		 NULL );
 	}
 	return( 0 );
 }
 
-/* Tests the libfsrefs_metadata_block_free function
+/* Tests the libfsrefs_superblock_free function
  * Returns 1 if successful or 0 if not
  */
-int fsrefs_test_metadata_block_free(
+int fsrefs_test_superblock_free(
      void )
 {
 	libcerror_error_t *error = NULL;
@@ -1530,7 +1530,7 @@ int fsrefs_test_metadata_block_free(
 
 	/* Test error cases
 	 */
-	result = libfsrefs_metadata_block_free(
+	result = libfsrefs_superblock_free(
 	          NULL,
 	          &error );
 
@@ -1553,377 +1553,6 @@ on_error:
 	{
 		libcerror_error_free(
 		 &error );
-	}
-	return( 0 );
-}
-
-/* Tests the libfsrefs_metadata_block_read_file_io_handle function
- * Returns 1 if successful or 0 if not
- */
-int fsrefs_test_metadata_block_read_file_io_handle(
-     void )
-{
-	libbfio_handle_t *file_io_handle           = NULL;
-	libcerror_error_t *error                   = NULL;
-	libfsrefs_io_handle_t *io_handle           = NULL;
-	libfsrefs_metadata_block_t *metadata_block = NULL;
-	int result                                 = 0;
-
-	/* Initialize test
-	 */
-	result = libfsrefs_io_handle_initialize(
-	          &io_handle,
-	          &error );
-
-	FSREFS_TEST_ASSERT_EQUAL_INT(
-	 "result",
-	 result,
-	 1 );
-
-	FSREFS_TEST_ASSERT_IS_NOT_NULL(
-	 "io_handle",
-	 io_handle );
-
-	io_handle->metadata_block_size  = 16384;
-	io_handle->major_format_version = 1;
-
-	FSREFS_TEST_ASSERT_IS_NULL(
-	 "error",
-	 error );
-
-	result = libfsrefs_metadata_block_initialize(
-	          &metadata_block,
-	          &error );
-
-	FSREFS_TEST_ASSERT_EQUAL_INT(
-	 "result",
-	 result,
-	 1 );
-
-	FSREFS_TEST_ASSERT_IS_NOT_NULL(
-	 "metadata_block",
-	 metadata_block );
-
-	FSREFS_TEST_ASSERT_IS_NULL(
-	 "error",
-	 error );
-
-	/* Initialize file IO handle
-	 */
-	result = fsrefs_test_open_file_io_handle(
-	          &file_io_handle,
-	          fsrefs_test_metadata_block_data1,
-	          16384,
-	          &error );
-
-	FSREFS_TEST_ASSERT_EQUAL_INT(
-	 "result",
-	 result,
-	 1 );
-
-	FSREFS_TEST_ASSERT_IS_NOT_NULL(
-	 "file_io_handle",
-	 file_io_handle );
-
-	FSREFS_TEST_ASSERT_IS_NULL(
-	 "error",
-	 error );
-
-	/* Test regular cases
-	 */
-	result = libfsrefs_metadata_block_read_file_io_handle(
-	          metadata_block,
-	          io_handle,
-	          file_io_handle,
-	          0,
-	          0,
-	          &error );
-
-	FSREFS_TEST_ASSERT_EQUAL_INT(
-	 "result",
-	 result,
-	 1 );
-
-	FSREFS_TEST_ASSERT_IS_NULL(
-	 "error",
-	 error );
-
-	/* Test error cases
-	 */
-	result = libfsrefs_metadata_block_read_file_io_handle(
-	          NULL,
-	          io_handle,
-	          file_io_handle,
-	          0,
-	          0,
-	          &error );
-
-	FSREFS_TEST_ASSERT_EQUAL_INT(
-	 "result",
-	 result,
-	 -1 );
-
-	FSREFS_TEST_ASSERT_IS_NOT_NULL(
-	 "error",
-	 error );
-
-	libcerror_error_free(
-	 &error );
-
-	result = libfsrefs_metadata_block_read_file_io_handle(
-	          metadata_block,
-	          NULL,
-	          file_io_handle,
-	          0,
-	          0,
-	          &error );
-
-	FSREFS_TEST_ASSERT_EQUAL_INT(
-	 "result",
-	 result,
-	 -1 );
-
-	FSREFS_TEST_ASSERT_IS_NOT_NULL(
-	 "error",
-	 error );
-
-	libcerror_error_free(
-	 &error );
-
-	result = libfsrefs_metadata_block_read_file_io_handle(
-	          metadata_block,
-	          io_handle,
-	          NULL,
-	          0,
-	          0,
-	          &error );
-
-	FSREFS_TEST_ASSERT_EQUAL_INT(
-	 "result",
-	 result,
-	 -1 );
-
-	FSREFS_TEST_ASSERT_IS_NOT_NULL(
-	 "error",
-	 error );
-
-	libcerror_error_free(
-	 &error );
-
-	result = libfsrefs_metadata_block_read_file_io_handle(
-	          metadata_block,
-	          io_handle,
-	          file_io_handle,
-	          -1,
-	          0,
-	          &error );
-
-	FSREFS_TEST_ASSERT_EQUAL_INT(
-	 "result",
-	 result,
-	 -1 );
-
-	FSREFS_TEST_ASSERT_IS_NOT_NULL(
-	 "error",
-	 error );
-
-	libcerror_error_free(
-	 &error );
-
-	/* Clean up file IO handle
-	 */
-	result = fsrefs_test_close_file_io_handle(
-	          &file_io_handle,
-	          &error );
-
-	FSREFS_TEST_ASSERT_EQUAL_INT(
-	 "result",
-	 result,
-	 0 );
-
-	FSREFS_TEST_ASSERT_IS_NULL(
-	 "error",
-	 error );
-
-	/* Test data too small
-	 */
-	result = fsrefs_test_open_file_io_handle(
-	          &file_io_handle,
-	          fsrefs_test_metadata_block_data1,
-	          8,
-	          &error );
-
-	FSREFS_TEST_ASSERT_EQUAL_INT(
-	 "result",
-	 result,
-	 1 );
-
-	FSREFS_TEST_ASSERT_IS_NOT_NULL(
-	 "file_io_handle",
-	 file_io_handle );
-
-	FSREFS_TEST_ASSERT_IS_NULL(
-	 "error",
-	 error );
-
-	result = libfsrefs_metadata_block_read_file_io_handle(
-	          metadata_block,
-	          io_handle,
-	          file_io_handle,
-	          0,
-	          0,
-	          &error );
-
-	FSREFS_TEST_ASSERT_EQUAL_INT(
-	 "result",
-	 result,
-	 -1 );
-
-	FSREFS_TEST_ASSERT_IS_NOT_NULL(
-	 "error",
-	 error );
-
-	libcerror_error_free(
-	 &error );
-
-	result = fsrefs_test_close_file_io_handle(
-	          &file_io_handle,
-	          &error );
-
-	FSREFS_TEST_ASSERT_EQUAL_INT(
-	 "result",
-	 result,
-	 0 );
-
-	FSREFS_TEST_ASSERT_IS_NULL(
-	 "error",
-	 error );
-
-	/* Test data invalid
-	 */
-/* TODO
-	result = fsrefs_test_open_file_io_handle(
-	          &file_io_handle,
-	          fsrefs_test_metadata_block_data1,
-	          16384,
-	          &error );
-
-	FSREFS_TEST_ASSERT_EQUAL_INT(
-	 "result",
-	 result,
-	 1 );
-
-	FSREFS_TEST_ASSERT_IS_NOT_NULL(
-	 "file_io_handle",
-	 file_io_handle );
-
-	FSREFS_TEST_ASSERT_IS_NULL(
-	 "error",
-	 error );
-
-	byte_stream_copy_from_uint64_little_endian(
-	 &( fsrefs_test_metadata_block_data1[ 3 ] ),
-	 0xffffffffffffffffUL );
-
-	result = libfsrefs_metadata_block_read_file_io_handle(
-	          metadata_block,
-	          io_handle,
-	          file_io_handle,
-	          0,
-	          0,
-	          &error );
-
-	byte_stream_copy_from_uint64_little_endian(
-	 &( fsrefs_test_metadata_block_data1[ 3 ] ),
-	 0x0000000053466552UL );
-
-	FSREFS_TEST_ASSERT_EQUAL_INT(
-	 "result",
-	 result,
-	 -1 );
-
-	FSREFS_TEST_ASSERT_IS_NOT_NULL(
-	 "error",
-	 error );
-
-	libcerror_error_free(
-	 &error );
-
-	result = fsrefs_test_close_file_io_handle(
-	          &file_io_handle,
-	          &error );
-
-	FSREFS_TEST_ASSERT_EQUAL_INT(
-	 "result",
-	 result,
-	 0 );
-
-	FSREFS_TEST_ASSERT_IS_NULL(
-	 "error",
-	 error );
-*/
-
-	/* Clean up
-	 */
-	result = libfsrefs_metadata_block_free(
-	          &metadata_block,
-	          &error );
-
-	FSREFS_TEST_ASSERT_EQUAL_INT(
-	 "result",
-	 result,
-	 1 );
-
-	FSREFS_TEST_ASSERT_IS_NULL(
-	 "metadata_block",
-	 metadata_block );
-
-	FSREFS_TEST_ASSERT_IS_NULL(
-	 "error",
-	 error );
-
-	result = libfsrefs_io_handle_free(
-	          &io_handle,
-	          &error );
-
-	FSREFS_TEST_ASSERT_EQUAL_INT(
-	 "result",
-	 result,
-	 1 );
-
-	FSREFS_TEST_ASSERT_IS_NULL(
-	 "io_handle",
-	 io_handle );
-
-	FSREFS_TEST_ASSERT_IS_NULL(
-	 "error",
-	 error );
-
-	return( 1 );
-
-on_error:
-	if( error != NULL )
-	{
-		libcerror_error_free(
-		 &error );
-	}
-	if( file_io_handle != NULL )
-	{
-		libbfio_handle_free(
-		 &file_io_handle,
-		 NULL );
-	}
-	if( metadata_block != NULL )
-	{
-		libfsrefs_metadata_block_free(
-		 &metadata_block,
-		 NULL );
-	}
-	if( io_handle != NULL )
-	{
-		libfsrefs_io_handle_free(
-		 &io_handle,
-		 NULL );
 	}
 	return( 0 );
 }
@@ -1948,16 +1577,14 @@ int main(
 #if defined( __GNUC__ ) && !defined( LIBFSREFS_DLL_IMPORT )
 
 	FSREFS_TEST_RUN(
-	 "libfsrefs_metadata_block_initialize",
-	 fsrefs_test_metadata_block_initialize );
+	 "libfsrefs_superblock_initialize",
+	 fsrefs_test_superblock_initialize );
 
 	FSREFS_TEST_RUN(
-	 "libfsrefs_metadata_block_free",
-	 fsrefs_test_metadata_block_free );
+	 "libfsrefs_superblock_free",
+	 fsrefs_test_superblock_free );
 
-	FSREFS_TEST_RUN(
-	 "libfsrefs_metadata_block_read_file_io_handle",
-	 fsrefs_test_metadata_block_read_file_io_handle );
+	/* TODO: add tests for libfsrefs_superblock_read_file_io_handle */
 
 #endif /* defined( __GNUC__ ) && !defined( LIBFSREFS_DLL_IMPORT ) */
 

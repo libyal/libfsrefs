@@ -36,17 +36,18 @@ EXTRA_DIST = \
 check_PROGRAMS = \
 	fsrefs_test_block_descriptor \
 	fsrefs_test_block_descriptors \
+	fsrefs_test_checkpoint \
 	fsrefs_test_directory \
 	fsrefs_test_error \
 	fsrefs_test_io_handle \
-	fsrefs_test_level0_metadata \
-	fsrefs_test_level1_metadata \
 	fsrefs_test_level2_metadata \
 	fsrefs_test_level3_metadata \
 	fsrefs_test_metadata_block \
+	fsrefs_test_metadata_block_header \
 	fsrefs_test_metadata_table \
 	fsrefs_test_metadata_value \
 	fsrefs_test_notify \
+	fsrefs_test_superblock \
 	fsrefs_test_support \
 	fsrefs_test_tools_info_handle \
 	fsrefs_test_tools_output \
@@ -77,6 +78,28 @@ fsrefs_test_block_descriptors_SOURCES = \
 	fsrefs_test_unused.h
 
 fsrefs_test_block_descriptors_LDADD = \
+	../libfsrefs/libfsrefs.la \
+	@LIBCERROR_LIBADD@
+
+fsrefs_test_checkpoint_SOURCES = \
+	fsrefs_test_checkpoint.c \
+	fsrefs_test_functions.c fsrefs_test_functions.h \
+	fsrefs_test_libbfio.h \
+	fsrefs_test_libcerror.h \
+	fsrefs_test_libfsrefs.h \
+	fsrefs_test_macros.h \
+	fsrefs_test_memory.c fsrefs_test_memory.h \
+	fsrefs_test_unused.h
+
+fsrefs_test_checkpoint_LDADD = \
+	@LIBBFIO_LIBADD@ \
+	@LIBCPATH_LIBADD@ \
+	@LIBCFILE_LIBADD@ \
+	@LIBUNA_LIBADD@ \
+	@LIBCSPLIT_LIBADD@ \
+	@LIBCNOTIFY_LIBADD@ \
+	@LIBCLOCALE_LIBADD@ \
+	@LIBCDATA_LIBADD@ \
 	../libfsrefs/libfsrefs.la \
 	@LIBCERROR_LIBADD@
 
@@ -113,30 +136,6 @@ fsrefs_test_io_handle_LDADD = \
 	../libfsrefs/libfsrefs.la \
 	@LIBCERROR_LIBADD@
 
-fsrefs_test_level0_metadata_SOURCES = \
-	fsrefs_test_level0_metadata.c \
-	fsrefs_test_libcerror.h \
-	fsrefs_test_libfsrefs.h \
-	fsrefs_test_macros.h \
-	fsrefs_test_memory.c fsrefs_test_memory.h \
-	fsrefs_test_unused.h
-
-fsrefs_test_level0_metadata_LDADD = \
-	../libfsrefs/libfsrefs.la \
-	@LIBCERROR_LIBADD@
-
-fsrefs_test_level1_metadata_SOURCES = \
-	fsrefs_test_level1_metadata.c \
-	fsrefs_test_libcerror.h \
-	fsrefs_test_libfsrefs.h \
-	fsrefs_test_macros.h \
-	fsrefs_test_memory.c fsrefs_test_memory.h \
-	fsrefs_test_unused.h
-
-fsrefs_test_level1_metadata_LDADD = \
-	../libfsrefs/libfsrefs.la \
-	@LIBCERROR_LIBADD@
-
 fsrefs_test_level2_metadata_SOURCES = \
 	fsrefs_test_level2_metadata.c \
 	fsrefs_test_libcerror.h \
@@ -162,6 +161,8 @@ fsrefs_test_level3_metadata_LDADD = \
 	@LIBCERROR_LIBADD@
 
 fsrefs_test_metadata_block_SOURCES = \
+	fsrefs_test_functions.c fsrefs_test_functions.h \
+	fsrefs_test_libbfio.h \
 	fsrefs_test_libcerror.h \
 	fsrefs_test_libfsrefs.h \
 	fsrefs_test_macros.h \
@@ -170,6 +171,36 @@ fsrefs_test_metadata_block_SOURCES = \
 	fsrefs_test_unused.h
 
 fsrefs_test_metadata_block_LDADD = \
+	@LIBBFIO_LIBADD@ \
+	@LIBCPATH_LIBADD@ \
+	@LIBCFILE_LIBADD@ \
+	@LIBUNA_LIBADD@ \
+	@LIBCSPLIT_LIBADD@ \
+	@LIBCNOTIFY_LIBADD@ \
+	@LIBCLOCALE_LIBADD@ \
+	@LIBCDATA_LIBADD@ \
+	../libfsrefs/libfsrefs.la \
+	@LIBCERROR_LIBADD@
+
+fsrefs_test_metadata_block_header_SOURCES = \
+	fsrefs_test_functions.c fsrefs_test_functions.h \
+	fsrefs_test_libbfio.h \
+	fsrefs_test_libcerror.h \
+	fsrefs_test_libfsrefs.h \
+	fsrefs_test_macros.h \
+	fsrefs_test_memory.c fsrefs_test_memory.h \
+	fsrefs_test_metadata_block_header.c \
+	fsrefs_test_unused.h
+
+fsrefs_test_metadata_block_header_LDADD = \
+	@LIBBFIO_LIBADD@ \
+	@LIBCPATH_LIBADD@ \
+	@LIBCFILE_LIBADD@ \
+	@LIBUNA_LIBADD@ \
+	@LIBCSPLIT_LIBADD@ \
+	@LIBCNOTIFY_LIBADD@ \
+	@LIBCLOCALE_LIBADD@ \
+	@LIBCDATA_LIBADD@ \
 	../libfsrefs/libfsrefs.la \
 	@LIBCERROR_LIBADD@
 
@@ -205,6 +236,28 @@ fsrefs_test_notify_SOURCES = \
 	fsrefs_test_unused.h
 
 fsrefs_test_notify_LDADD = \
+	../libfsrefs/libfsrefs.la \
+	@LIBCERROR_LIBADD@
+
+fsrefs_test_superblock_SOURCES = \
+	fsrefs_test_functions.c fsrefs_test_functions.h \
+	fsrefs_test_libbfio.h \
+	fsrefs_test_libcerror.h \
+	fsrefs_test_libfsrefs.h \
+	fsrefs_test_macros.h \
+	fsrefs_test_memory.c fsrefs_test_memory.h \
+	fsrefs_test_superblock.c \
+	fsrefs_test_unused.h
+
+fsrefs_test_superblock_LDADD = \
+	@LIBBFIO_LIBADD@ \
+	@LIBCPATH_LIBADD@ \
+	@LIBCFILE_LIBADD@ \
+	@LIBUNA_LIBADD@ \
+	@LIBCSPLIT_LIBADD@ \
+	@LIBCNOTIFY_LIBADD@ \
+	@LIBCLOCALE_LIBADD@ \
+	@LIBCDATA_LIBADD@ \
 	../libfsrefs/libfsrefs.la \
 	@LIBCERROR_LIBADD@
 

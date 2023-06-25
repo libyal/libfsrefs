@@ -199,6 +199,30 @@ int libfsrefs_level2_metadata_read(
 
 		return( -1 );
 	}
+	if( io_handle == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid IO handle.",
+		 function );
+
+		return( -1 );
+	}
+	if( io_handle->major_format_version != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
+		 "%s: unsupported format version: %" PRIu8 ".%" PRIu8 ".",
+		 function,
+		 io_handle->major_format_version,
+		 io_handle->minor_format_version );
+
+		return( -1 );
+	}
 	if( libfsrefs_metadata_block_initialize(
 	     &metadata_block,
 	     error ) != 1 )
@@ -212,7 +236,7 @@ int libfsrefs_level2_metadata_read(
 
 		goto on_error;
 	}
-	if( libfsrefs_metadata_block_read(
+	if( libfsrefs_metadata_block_read_file_io_handle(
 	     metadata_block,
 	     io_handle,
 	     file_io_handle,
@@ -245,8 +269,8 @@ int libfsrefs_level2_metadata_read(
 	if( libfsrefs_metadata_table_read(
 	     metadata_table,
 	     metadata_block->data,
-	     (size_t) metadata_block->data_size - sizeof( fsrefs_metadata_block_header_t ),
-	     sizeof( fsrefs_metadata_block_header_t ),
+	     (size_t) metadata_block->data_size - sizeof( fsrefs_metadata_block_header_v1_t ),
+	     sizeof( fsrefs_metadata_block_header_v1_t ),
 	     2,
 	     error ) != 1 )
 	{

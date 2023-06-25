@@ -1,5 +1,5 @@
 /*
- * Debug functions
+ * The REFS metadata block header functions
  *
  * Copyright (C) 2012-2023, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -19,12 +19,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if !defined( _LIBFSREFS_DEBUG_H )
-#define _LIBFSREFS_DEBUG_H
+#if !defined( _LIBFSREFS_METADATA_BLOCK_HEADER_H )
+#define _LIBFSREFS_METADATA_BLOCK_HEADER_H
 
 #include <common.h>
 #include <types.h>
 
+#include "libfsrefs_io_handle.h"
 #include "libfsrefs_libbfio.h"
 #include "libfsrefs_libcerror.h"
 
@@ -32,44 +33,40 @@
 extern "C" {
 #endif
 
-#if defined( HAVE_DEBUG_OUTPUT )
+typedef struct libfsrefs_metadata_block_header libfsrefs_metadata_block_header_t;
 
-void libfsrefs_debug_print_mft_attribute_data_flags(
-      uint16_t mft_attribute_data_flags );
+struct libfsrefs_metadata_block_header
+{
+	/* The signature
+	 */
+	uint8_t signature[ 4 ];
+};
 
-void libfsrefs_debug_print_file_attribute_flags(
-      uint32_t file_attribute_flags );
-
-void libfsrefs_debug_print_index_node_flags(
-      uint32_t index_node_flags );
-
-void libfsrefs_debug_print_index_value_flags(
-      uint32_t index_value_flags );
-
-const char *libfsrefs_debug_print_attribute_type(
-             uint32_t attribute_type );
-
-const char *libfsrefs_debug_print_file_name_attribute_namespace(
-             uint8_t name_namespace );
-
-int libfsrefs_debug_print_guid_value(
-     const char *function_name,
-     const char *value_name,
-     const uint8_t *byte_stream,
-     size_t byte_stream_size,
-     int byte_order,
-     uint32_t string_format_flags,
+int libfsrefs_metadata_block_header_initialize(
+     libfsrefs_metadata_block_header_t **metadata_block_header,
      libcerror_error_t **error );
 
-int libfsrefs_debug_print_read_offsets(
+int libfsrefs_metadata_block_header_free(
+     libfsrefs_metadata_block_header_t **metadata_block_header,
+     libcerror_error_t **error );
+
+int libfsrefs_metadata_block_header_read_data(
+     libfsrefs_metadata_block_header_t *metadata_block_header,
+     libfsrefs_io_handle_t *io_handle,
+     const uint8_t *data,
+     size_t data_size,
+     libcerror_error_t **error );
+
+int libfsrefs_metadata_block_header_read_file_io_handle(
+     libfsrefs_metadata_block_header_t *metadata_block_header,
+     libfsrefs_io_handle_t *io_handle,
      libbfio_handle_t *file_io_handle,
+     off64_t file_offset,
      libcerror_error_t **error );
-
-#endif
 
 #if defined( __cplusplus )
 }
 #endif
 
-#endif /* !defined( _LIBFSREFS_DEBUG_H ) */
+#endif /* !defined( _LIBFSREFS_METADATA_BLOCK_HEADER_H ) */
 

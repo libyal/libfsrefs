@@ -378,7 +378,7 @@ int libfsrefs_volume_header_read_data(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
-		 "%s: invalid volume size value out of bounds.",
+		 "%s: invalid number of sectors value out of bounds.",
 		 function );
 
 		return( -1 );
@@ -386,7 +386,21 @@ int libfsrefs_volume_header_read_data(
 	volume_header->volume_size  = number_of_sectors * volume_header->bytes_per_sector;
 	volume_header->volume_size += volume_header->bytes_per_sector;
 
-	if( sectors_per_block != 128 )
+	if( sectors_per_block > (size32_t) ( UINT32_MAX / volume_header->bytes_per_sector ) )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: invalid sectors per block value out of bounds.",
+		 function );
+
+		return( -1 );
+	}
+	volume_header->block_size = (size32_t) sectors_per_block * volume_header->bytes_per_sector;
+
+	if( ( volume_header->block_size != 4096 )
+	 && ( volume_header->block_size != 65536 ) )
 	{
 		libcerror_error_set(
 		 error,
@@ -394,13 +408,32 @@ int libfsrefs_volume_header_read_data(
 		 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
 		 "%s: unsupported block size: %" PRIu32 ".",
 		 function,
-		 sectors_per_block );
+		 volume_header->block_size );
 
 		return( -1 );
 	}
-	volume_header->block_size          = (size_t) sectors_per_block * (size_t) volume_header->bytes_per_sector;
-	volume_header->metadata_block_size = 16 * 1024;
+	if( ( volume_header->major_format_version != 1 )
+	 && ( volume_header->major_format_version != 3 ) )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
+		 "%s: unsupported format version: %" PRIu8 ".%" PRIu8 ".",
+		 function,
+		 volume_header->major_format_version,
+		 volume_header->minor_format_version );
 
+		return( -1 );
+	}
+	if( volume_header->major_format_version == 1 )
+	{
+		volume_header->metadata_block_size = 16 * 1024;
+	}
+	else
+	{
+		volume_header->metadata_block_size = volume_header->block_size;
+	}
 	return( 1 );
 }
 
@@ -441,7 +474,7 @@ int libfsrefs_volume_header_read_file_io_handle(
 #endif
 	read_count = libbfio_handle_read_buffer_at_offset(
 	              file_io_handle,
-	              (uint8_t *) &volume_header_data,
+	              volume_header_data,
 	              sizeof( fsrefs_volume_header_t ),
 	              file_offset,
 	              error );
@@ -461,7 +494,7 @@ int libfsrefs_volume_header_read_file_io_handle(
 	}
 	if( libfsrefs_volume_header_read_data(
 	     volume_header,
-	     (uint8_t *) &volume_header_data,
+	     volume_header_data,
 	     sizeof( fsrefs_volume_header_t ),
 	     error ) != 1 )
 	{

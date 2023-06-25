@@ -1,5 +1,5 @@
 /*
- * Level 1 metadata functions
+ * Checkpoint (or level 1 metadata) functions
  *
  * Copyright (C) 2012-2023, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -19,8 +19,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if !defined( _LIBFSREFS_LEVEL1_METADATA_H )
-#define _LIBFSREFS_LEVEL1_METADATA_H
+#if !defined( _LIBFSREFS_CHECKPOINT_H )
+#define _LIBFSREFS_CHECKPOINT_H
 
 #include <common.h>
 #include <types.h>
@@ -35,9 +35,9 @@
 extern "C" {
 #endif
 
-typedef struct libfsrefs_level1_metadata libfsrefs_level1_metadata_t;
+typedef struct libfsrefs_checkpoint libfsrefs_checkpoint_t;
 
-struct libfsrefs_level1_metadata
+struct libfsrefs_checkpoint
 {
 	/* The sequence number
 	 */
@@ -48,28 +48,35 @@ struct libfsrefs_level1_metadata
 	libcdata_array_t *level2_metadata_block_descriptors_array;
 };
 
-int libfsrefs_level1_metadata_initialize(
-     libfsrefs_level1_metadata_t **level1_metadata,
+int libfsrefs_checkpoint_initialize(
+     libfsrefs_checkpoint_t **checkpoint,
      libcerror_error_t **error );
 
-int libfsrefs_level1_metadata_free(
-     libfsrefs_level1_metadata_t **level1_metadata,
+int libfsrefs_checkpoint_free(
+     libfsrefs_checkpoint_t **checkpoint,
      libcerror_error_t **error );
 
-int libfsrefs_level1_metadata_read(
-     libfsrefs_level1_metadata_t *level1_metadata,
+int libfsrefs_checkpoint_read_data(
+     libfsrefs_checkpoint_t *checkpoint,
+     libfsrefs_io_handle_t *io_handle,
+     const uint8_t *data,
+     size_t data_size,
+     libcerror_error_t **error );
+
+int libfsrefs_checkpoint_read_file_io_handle(
+     libfsrefs_checkpoint_t *checkpoint,
      libfsrefs_io_handle_t *io_handle,
      libbfio_handle_t *file_io_handle,
      off64_t file_offset,
      libcerror_error_t **error );
 
-int libfsrefs_level1_metadata_get_number_of_level2_metadata_block_descriptors(
-     libfsrefs_level1_metadata_t *level1_metadata,
+int libfsrefs_checkpoint_get_number_of_level2_metadata_block_descriptors(
+     libfsrefs_checkpoint_t *checkpoint,
      int *number_of_block_descriptors,
      libcerror_error_t **error );
 
-int libfsrefs_level1_metadata_get_level2_metadata_block_descriptor_by_index(
-     libfsrefs_level1_metadata_t *level1_metadata,
+int libfsrefs_checkpoint_get_level2_metadata_block_descriptor_by_index(
+     libfsrefs_checkpoint_t *checkpoint,
      int block_descriptor_index,
      libfsrefs_block_descriptor_t **block_descriptor,
      libcerror_error_t **error );
@@ -78,5 +85,5 @@ int libfsrefs_level1_metadata_get_level2_metadata_block_descriptor_by_index(
 }
 #endif
 
-#endif /* !defined( _LIBFSREFS_LEVEL1_METADATA_H ) */
+#endif /* !defined( _LIBFSREFS_CHECKPOINT_H ) */
 

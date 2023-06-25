@@ -29,6 +29,7 @@
 #include "libfsrefs_libcerror.h"
 #include "libfsrefs_libcnotify.h"
 #include "libfsrefs_metadata_block.h"
+#include "libfsrefs_metadata_block_header.h"
 
 #include "fsrefs_metadata_block.h"
 
@@ -143,7 +144,7 @@ int libfsrefs_metadata_block_free(
 /* Reads the metadata block
  * Returns 1 if successful or -1 on error
  */
-int libfsrefs_metadata_block_read(
+int libfsrefs_metadata_block_read_file_io_handle(
      libfsrefs_metadata_block_t *metadata_block,
      libfsrefs_io_handle_t *io_handle,
      libbfio_handle_t *file_io_handle,
@@ -152,7 +153,7 @@ int libfsrefs_metadata_block_read(
      libcerror_error_t **error )
 {
 	uint8_t *metadata_block_data              = NULL;
-	static char *function                     = "libfsrefs_metadata_block_read";
+	static char *function                     = "libfsrefs_metadata_block_read_file_io_handle";
 	size_t metadata_block_data_size           = 0;
 	ssize_t read_count                        = 0;
 	uint64_t calculated_metadata_block_number = 0;
@@ -191,6 +192,32 @@ int libfsrefs_metadata_block_read(
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid IO handle.",
+		 function );
+
+		return( -1 );
+	}
+	if( ( io_handle->major_format_version != 1 )
+	 && ( io_handle->major_format_version != 3 ) )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
+		 "%s: unsupported format version: %" PRIu8 ".%" PRIu8 ".",
+		 function,
+		 io_handle->major_format_version,
+		 io_handle->minor_format_version );
+
+		return( -1 );
+	}
+	if( ( io_handle->metadata_block_size == 0 )
+	 || ( io_handle->metadata_block_size > MEMORY_MAXIMUM_ALLOCATION_SIZE ) )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: invalid IO handle - metadata block size value out of bounds.",
 		 function );
 
 		return( -1 );
@@ -259,16 +286,16 @@ int libfsrefs_metadata_block_read(
 		 level );
 		libcnotify_print_data(
 		 metadata_block_data,
-		 sizeof( fsrefs_metadata_block_header_t ),
+		 sizeof( fsrefs_metadata_block_header_v1_t ),
 		 LIBCNOTIFY_PRINT_DATA_FLAG_GROUP_DATA );
 	}
 #endif
 	byte_stream_copy_to_uint64_little_endian(
-	 ( (fsrefs_metadata_block_header_t *) metadata_block_data )->block_number,
+	 ( (fsrefs_metadata_block_header_v1_t *) metadata_block_data )->block_number,
 	 metadata_block_number );
 
 	byte_stream_copy_to_uint64_little_endian(
-	 ( (fsrefs_metadata_block_header_t *) metadata_block_data )->sequence_number,
+	 ( (fsrefs_metadata_block_header_v1_t *) metadata_block_data )->sequence_number,
 	 metadata_block->sequence_number );
 
 #if defined( HAVE_DEBUG_OUTPUT )
@@ -291,12 +318,12 @@ int libfsrefs_metadata_block_read(
 		 function,
 		 level );
 		libcnotify_print_data(
-		 ( (fsrefs_metadata_block_header_t *) metadata_block_data )->object_identifier,
+		 ( (fsrefs_metadata_block_header_v1_t *) metadata_block_data )->object_identifier,
 		 16,
 		 0 );
 
 		byte_stream_copy_to_uint64_little_endian(
-		 ( (fsrefs_metadata_block_header_t *) metadata_block_data )->unknown1,
+		 ( (fsrefs_metadata_block_header_v1_t *) metadata_block_data )->unknown1,
 		 value_64bit );
 		libcnotify_printf(
 		 "%s: level: %d unknown1\t\t\t: 0x%08" PRIx64 "\n",
@@ -305,7 +332,7 @@ int libfsrefs_metadata_block_read(
 		 value_64bit );
 
 		byte_stream_copy_to_uint64_little_endian(
-		 ( (fsrefs_metadata_block_header_t *) metadata_block_data )->unknown2,
+		 ( (fsrefs_metadata_block_header_v1_t *) metadata_block_data )->unknown2,
 		 value_64bit );
 		libcnotify_printf(
 		 "%s: level: %d unknown2\t\t\t: 0x%08" PRIx64 "\n",
@@ -316,7 +343,8 @@ int libfsrefs_metadata_block_read(
 		libcnotify_printf(
 		 "\n" );
 	}
-#endif
+#endif /* defined( HAVE_DEBUG_OUTPUT ) */
+
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )
 	{
@@ -325,11 +353,12 @@ int libfsrefs_metadata_block_read(
 		 function,
 		 level );
 		libcnotify_print_data(
-		 &( metadata_block_data[ sizeof( fsrefs_metadata_block_header_t ) ] ),
-		 metadata_block_data_size - sizeof( fsrefs_metadata_block_header_t ),
+		 &( metadata_block_data[ sizeof( fsrefs_metadata_block_header_v1_t ) ] ),
+		 metadata_block_data_size - sizeof( fsrefs_metadata_block_header_v1_t ),
 		 LIBCNOTIFY_PRINT_DATA_FLAG_GROUP_DATA );
 	}
-#endif
+#endif /* defined( HAVE_DEBUG_OUTPUT ) */
+
 	return( 1 );
 
 on_error:

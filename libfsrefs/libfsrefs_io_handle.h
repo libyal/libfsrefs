@@ -37,14 +37,6 @@ typedef struct libfsrefs_io_handle libfsrefs_io_handle_t;
 
 struct libfsrefs_io_handle
 {
-	/* The block size
-	 */
-	size_t block_size;
-
-	/* The metadata block size
-	 */
-	size_t metadata_block_size;
-
 	/* The number of bytes per sector
 	 */
 	uint32_t bytes_per_sector;
@@ -52,6 +44,22 @@ struct libfsrefs_io_handle
 	/* The volume size
 	 */
 	size64_t volume_size;
+
+	/* The major format version
+	 */
+	uint8_t major_format_version;
+
+	/* The minor format version
+	 */
+	uint8_t minor_format_version;
+
+	/* The block size
+	 */
+	size_t block_size;
+
+	/* The metadata block size
+	 */
+	size_t metadata_block_size;
 
 	/* Value to indicate if abort was signalled
 	 */

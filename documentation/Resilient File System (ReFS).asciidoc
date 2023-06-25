@@ -48,7 +48,7 @@ in the section entitled "GNU Free Documentation License".
 | 0.0.1 | J.B. Metz | May 2012 | Initial version.
 | 0.0.2 | J.B. Metz | September 2012 | Additional information.
 | 0.0.3 | J.B. Metz | November 2013 | Additional information.
-| 0.0.4 | J.B. Metz | June 2023 | Switched to asciidoc format.
+| 0.0.4 | J.B. Metz | June 2023 | Switched to asciidoc format and additional information.
 |===
 
 :numbered:
@@ -62,6 +62,7 @@ A volume consists of:
 
 * a volume header
 * metadata blocks
+** superblock
 * file and directory data
 * a copy of the volume header
 
@@ -81,7 +82,7 @@ There are multiple version of ReFS.
 
 [cols="1,5",options="header"]
 |===
-| NTFS version | Remarks
+| ReFS version | Remarks
 | 1.1 | Used by Windows 8 (preview) and Windows Server 2012 
 | 1.2 | Used by Windows 8.1, Windows 10 (1507 to 1607) and Windows Server 2012 R2
 | |
@@ -105,7 +106,9 @@ The following version of programs were used to test the information within this
 document:
 
 * Windows 8
-* Windows 2012 Server
+* Windows 2012 Server R2
+* Windows 2016 Server
+* Windows 2019 Server
 
 == The volume header
 
@@ -125,13 +128,12 @@ The volume header is 512 bytes of size and consists of:
 | 3 | 8 | "ReFS\x00\x00\x00\x00" | File system signature
 | 11 | 5 | 0x00 | [yellow-background]*Unknown (empty values)*
 | 16 | 4 | "FSRS" | [yellow-background]*Unknown*
-| 20 | 2 | 0x200 | [yellow-background]*Unknown (volume header size?)*
+| 20 | 2 | 0x200 | [yellow-background]*Unknown (volume header size of physical sector size?)*
 | 22 | 2 | | [yellow-background]*Unknown (checksum?)* +
 This value will change over time
 | 24 | 8 | | Number of sectors
 | 32 | 4 | | Sector size
-| 36 | 4 | | Sectors per block (allocation unit) +
-Default is 64k
+| 36 | 4 | | Sectors per block (allocation unit)
 | 40 | 1 | | Major format version
 | 41 | 1 | | Minor format version
 | 42 | 2 | 0x00 | [yellow-background]*Unknown (flags?)*
@@ -142,32 +144,216 @@ Default is 64k
 | 72 | 440 | 0x00 | [yellow-background]*Unknown (empty values)*
 |===
 
-== Metadata block
+Seen 4096 and 65536 as supported allocation unit byte sizes.
 
-The volume metadata is stored in 16k blocks.
+== Metadata
+
+Metadata is stored in one or more blocks (or pages).
+
+There are multiple levels of metadata:
+
+[cols="1,1,5",options="header"]
+|===
+| Value | Signature | Description
+| 0 | "SUPB" | Superblock
+| 1 | "CHKP" | Checkpoint
+| 2 | "MSB+" | Ministore B-tree
+| 3 | | 
+|===
 
 [yellow-background]*TODO: is the metadata block referred to as synchronous ministore (SMS) by Microsoft?*
 
 === Metadata block header
 
-The metadata block header is 48 bytes of size and consists of:
+==== Metadata block header - format version 1
+
+The format version 1 metadata block header is 48 bytes of size and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
 | Offset | Size | Value | Description
 | 0 | 8 | | Block number +
 Relative from the start of the volume
-| 8 | 8 | | [yellow-background]*Unknown (sequence nubmer or previous block number?)*
+| 8 | 8 | | [yellow-background]*Unknown (sequence number?)*
 | 16 | 8 | 0x00 | [yellow-background]*Unknown (empty values)*
 | 24 | 8 | | Object identifier +
-See section: <<object_identifier,Object identifier>>
+See section: <<object_identifiers,Object identifiers>>
 | 32 | 8 | 0x01 | [yellow-background]*Unknown (flags or level?)*
 | 40 | 8 | 0x00 | [yellow-background]*Unknown (empty values)*
 |===
 
 [yellow-background]*TODO: It seems that the data in bytes 8 – 23 is used as an identifier. Level 3 table contains an identifier that matches the data in the corresponding level 4 block.*
 
-=== [[object_identifier]]Object identifier
+==== Metadata block header - format version 3
+
+The format version 3 metadata block header is 80 bytes of size and consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 4 | | Signature
+| 4 | 4 | 2 | [yellow-background]*Unknown*
+| 8 | 4 | 0x00 | [yellow-background]*Unknown (empty values)*
+| 12 | 4 | | [yellow-background]*Unknown (volume signature?)*
+| 16 | 8 | | [yellow-background]*Unknown (virtual allocator clock?)*
+| 24 | 8 | | [yellow-background]*Unknown (tree update clock?)*
+| 32 | 8 | | First block number of the metadata
+| 40 | 8 | | Second block number of the metadata
+| 48 | 8 | | Third block number of the metadata
+| 56 | 8 | | Fourth block number of the metadata
+| 64 | 8 | | [yellow-background]*Unknown (table identifier upper 64-bit?)*
+| 72 | 8 | | [yellow-background]*Unknown (table identifier lower 64-bit?)*
+|===
+
+[NOTE]
+In format version 3 the metadata can span multiple metadata blocks.
+
+=== [[object_identifiers]]Object identifiers
+
+==== Level 0 and 1
+
+[cols="1,1,5",options="header"]
+|===
+| Value | Identifier | Description
+| 0x00000000 | | Level 0 and level 1 metadata
+|===
+
+==== Level 2
+
+[cols="1,1,5",options="header"]
+|===
+| Value | Identifier | Description
+| 0x00000001 | | Level 2 metadata
+| 0x00000002 | | Level 2 metadata
+| 0x00000003 | | Level 2 metadata
+| | |
+| 0x0000000c | | Level 2 metadata
+| 0x0000000d | | Level 2 metadata
+| 0x0000000e | | Level 2 metadata
+|===
+
+==== Level 3
+
+[cols="1,1,5",options="header"]
+|===
+| Value | Identifier | Description
+| 0x00000500 | REFS_OBJECT_UNKNOWN_1 | Volume
+| 0x00000520 | REFS_OBJECT_UNKNOWN_2 |
+| 0x00000530 | |
+| | |
+| 0x00000600 | REFS_ROOT_DIRECTORY_ID |
+| | |
+| 0x00000700 | REFS_OBJECT_UNKNOWN_3 |
+| 0x00000701 | | Used for first sub directory
+|===
+
+Values 0x00000701 and above are used for sub directories
+
+=== Metadata block descriptor
+
+==== [[metadata_block_descriptor_v1]]Metadata block descriptor - format version 1
+
+The format version 1 metadata block descriptor is 24 bytes of size and
+consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 8 | | Block number
+4+| _Checkum descriptor_
+| 8 | 2 | 0x00 | [yellow-background]*Unknown (empty values)*
+| 10 | 1 | | Checksum type
+| 11 | 1 | | Checksum data offset +
+The offset is relative to the start of the checksum descriptor
+| 12 | 2 | | Checksum data size
+| 14 | 2 | 0x00 | [yellow-background]*Unknown (empty values)*
+| 16 | 8 | | Checksum data
+|===
+
+==== Metadata block descriptor - format version 3
+
+The format version 3 metadata block descriptor is 48 bytes of size and
+consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 8 | | First block number
+| 8 | 8 | | Second block number
+| 16 | 8 | | Third block number
+| 24 | 8 | | Fourth block number
+4+| _Checkum descriptor_
+| 32 | 2 | 0x00 | [yellow-background]*Unknown (empty values)*
+| 34 | 1 | | Checksum type
+| 35 | 1 | | Checksum data offset +
+The offset is relative to the start of the checksum descriptor
+| 36 | 2 | | Checksum data size
+| 38 | 2 | 0x00 | [yellow-background]*Unknown (empty values)*
+| 40 | 8 | | Checksum data
+|===
+
+==== Checksum type
+
+[cols="1,1,5",options="header"]
+|===
+| Value | Identifier | Description
+| 1 | | CRC32-C
+| 2 | | CRC64-ECMA-182 +
+Checksum data size is 8 bytes
+|===
+
+=== Superblock (level 0 metadata)
+
+==== Superblock metadata - format version 1
+
+The format version 1 superblock metadata is 48 bytes of size and consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 16 | | Volume identifier
+| 16 | 8 | 0x00 | [yellow-background]*Unknown (empty values)*
+| 24 | 8 | | [yellow-background]*Unknown (sequence number?)*
+| 32 | 4 | | Checkpoint references data offset +
+The offset is relative to the start of the metadata block
+| 36 | 4 | 2 | [yellow-background]*Unknown (number of checkpoint references?)*
+| 40 | 4 | | Self descriptor data offset +
+The offset is relative to the start of the metadata block
+| 44 | 4 | | Self descriptor data size
+| 48 | 64 | 0x00 | [yellow-background]*Unknown (empty values)*
+| 112 | 8 | | Primary checkpoint (level 1 metadata) block number
+| 120 | 8 | | Secondary checkpoint (level 1 metadata) block number
+| 128 | 24 | | Self metadata block descriptor +
+Contains a <<metadata_block_descriptor_v1,Metadata block descriptor - format version 1>>
+|===
+
+==== Superblock metadata - format version 3
+
+The format version 3 superblock metadata is 152 bytes of size and consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 16 | | Volume identifier
+| 16 | 8 | | [yellow-background]*Unknown*
+| 24 | 8 | | [yellow-background]*Unknown*
+| 32 | 4 | | [yellow-background]*Unknown*
+| 36 | 4 | | [yellow-background]*Unknown*
+| 40 | 4 | | Self descriptor data offset +
+The offset is relative to the start of the metadata block
+| 44 | 4 | | Self descriptor data size
+| 48 | 64 | | [yellow-background]*Unknown*
+| 112 | 8 | | [yellow-background]*Unknown (Primary level 1 metadata block number)*
+| 120 | 8 | | [yellow-background]*Unknown (Secondary level 1 metadata block number)*
+| 128 | 24 | | Self metadata block descriptor +
+Contains a <<metadata_block_descriptor_v3,Metadata block descriptor - format version 3>>
+|===
+
+=== Checkpoint (level 1 metadata)
+
+==== Checkpoint metadata - format version 1
+
+The format version 1 checkpoint metadata is 48 bytes of size and consists of:
 
 :numbered!:
 [appendix]

@@ -224,7 +224,7 @@ int libfsrefs_block_descriptors_read(
 
 		goto on_error;
 	}
-	if( libfsrefs_metadata_block_read(
+	if( libfsrefs_metadata_block_read_file_io_handle(
 	     metadata_block,
 	     io_handle,
 	     file_io_handle,
@@ -257,8 +257,8 @@ int libfsrefs_block_descriptors_read(
 	if( libfsrefs_metadata_table_read(
 	     metadata_table,
 	     metadata_block->data,
-	     (size_t) metadata_block->data_size - sizeof( fsrefs_metadata_block_header_t ),
-	     sizeof( fsrefs_metadata_block_header_t ),
+	     (size_t) metadata_block->data_size - sizeof( fsrefs_metadata_block_header_v1_t ),
+	     sizeof( fsrefs_metadata_block_header_v1_t ),
 	     level,
 	     error ) != 1 )
 	{

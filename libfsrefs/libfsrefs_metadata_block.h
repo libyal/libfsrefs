@@ -58,7 +58,14 @@ int libfsrefs_metadata_block_free(
      libfsrefs_metadata_block_t **metadata_block,
      libcerror_error_t **error );
 
-int libfsrefs_metadata_block_read(
+int libfsrefs_metadata_block_read_data(
+     libfsrefs_metadata_block_t *metadata_block,
+     libfsrefs_io_handle_t *io_handle,
+     const uint8_t *data,
+     size_t data_size,
+     libcerror_error_t **error );
+
+int libfsrefs_metadata_block_read_file_io_handle(
      libfsrefs_metadata_block_t *metadata_block,
      libfsrefs_io_handle_t *io_handle,
      libbfio_handle_t *file_io_handle,

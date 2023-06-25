@@ -134,6 +134,13 @@ int libfsrefs_volume_get_utf16_name(
      size_t utf16_string_size,
      libcerror_error_t **error );
 
+LIBFSREFS_EXTERN \
+int libfsrefs_volume_get_version(
+     libfsrefs_volume_t *volume,
+     uint8_t *major_version,
+     uint8_t *minor_version,
+     libcerror_error_t **error );
+
 #if defined( __cplusplus )
 }
 #endif

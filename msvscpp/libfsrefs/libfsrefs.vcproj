@@ -182,6 +182,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\libfsrefs\libfsrefs_checkpoint.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\libfsrefs\libfsrefs_debug.c"
 				>
 			</File>
@@ -198,14 +202,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\libfsrefs\libfsrefs_level0_metadata.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libfsrefs\libfsrefs_level1_metadata.c"
-				>
-			</File>
-			<File
 				RelativePath="..\..\libfsrefs\libfsrefs_level2_metadata.c"
 				>
 			</File>
@@ -218,6 +214,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\libfsrefs\libfsrefs_metadata_block_header.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\libfsrefs\libfsrefs_metadata_table.c"
 				>
 			</File>
@@ -227,6 +227,10 @@
 			</File>
 			<File
 				RelativePath="..\..\libfsrefs\libfsrefs_notify.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfsrefs\libfsrefs_superblock.c"
 				>
 			</File>
 			<File
@@ -256,11 +260,19 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
+				RelativePath="..\..\libfsrefs\fsrefs_checkpoint.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\libfsrefs\fsrefs_index.h"
 				>
 			</File>
 			<File
 				RelativePath="..\..\libfsrefs\fsrefs_metadata_block.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfsrefs\fsrefs_superblock.h"
 				>
 			</File>
 			<File
@@ -277,6 +289,10 @@
 			</File>
 			<File
 				RelativePath="..\..\libfsrefs\libfsrefs_block_descriptors.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfsrefs\libfsrefs_checkpoint.h"
 				>
 			</File>
 			<File
@@ -301,14 +317,6 @@
 			</File>
 			<File
 				RelativePath="..\..\libfsrefs\libfsrefs_io_handle.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libfsrefs\libfsrefs_level0_metadata.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libfsrefs\libfsrefs_level1_metadata.h"
 				>
 			</File>
 			<File
@@ -368,6 +376,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\libfsrefs\libfsrefs_metadata_block_header.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\libfsrefs\libfsrefs_metadata_table.h"
 				>
 			</File>
@@ -377,6 +389,10 @@
 			</File>
 			<File
 				RelativePath="..\..\libfsrefs\libfsrefs_notify.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfsrefs\libfsrefs_superblock.h"
 				>
 			</File>
 			<File

@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9,00"
-	Name="fsrefs_test_level1_metadata"
-	ProjectGUID="{B6612907-00C8-4388-86FF-F596543F386D}"
-	RootNamespace="fsrefs_test_level1_metadata"
+	Name="fsrefs_test_checkpoint"
+	ProjectGUID="{AF13DDD6-36B7-4589-98EF-113557719D40}"
+	RootNamespace="fsrefs_test_checkpoint"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="131072"
 	>
@@ -176,7 +176,11 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\..\tests\fsrefs_test_level1_metadata.c"
+				RelativePath="..\..\tests\fsrefs_test_checkpoint.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\tests\fsrefs_test_functions.c"
 				>
 			</File>
 			<File
@@ -189,6 +193,14 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
+			<File
+				RelativePath="..\..\tests\fsrefs_test_functions.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\tests\fsrefs_test_libbfio.h"
+				>
+			</File>
 			<File
 				RelativePath="..\..\tests\fsrefs_test_libcerror.h"
 				>

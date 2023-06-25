@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9,00"
-	Name="fsrefs_test_metadata_block"
-	ProjectGUID="{6D2302FA-8B35-4308-8790-032B3B6AB3FF}"
-	RootNamespace="fsrefs_test_metadata_block"
+	Name="fsrefs_test_metadata_block_header"
+	ProjectGUID="{0B7CF568-8154-41C0-85E0-182D0172DF69}"
+	RootNamespace="fsrefs_test_metadata_block_header"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="131072"
 	>
@@ -184,7 +184,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\tests\fsrefs_test_metadata_block.c"
+				RelativePath="..\..\tests\fsrefs_test_metadata_block_header.c"
 				>
 			</File>
 		</Filter>

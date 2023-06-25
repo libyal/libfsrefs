@@ -21,10 +21,13 @@ lib_LTLIBRARIES = libfsrefs.la
 
 libfsrefs_la_SOURCES = \
 	fsrefs_index.h \
+	fsrefs_checkpoint.h \
 	fsrefs_metadata_block.h \
+	fsrefs_superblock.h \
 	fsrefs_volume_header.h \
 	fsrefs_volume_information.h \
 	libfsrefs.c \
+	libfsrefs_checkpoint.c libfsrefs_checkpoint.h \
 	libfsrefs_debug.c libfsrefs_debug.h \
 	libfsrefs_definitions.h \
 	libfsrefs_directory.c libfsrefs_directory.h \
@@ -33,8 +36,6 @@ libfsrefs_la_SOURCES = \
 	libfsrefs_error.c libfsrefs_error.h \
 	libfsrefs_extern.h \
 	libfsrefs_io_handle.c libfsrefs_io_handle.h \
-	libfsrefs_level0_metadata.c libfsrefs_level0_metadata.h \
-	libfsrefs_level1_metadata.c libfsrefs_level1_metadata.h \
 	libfsrefs_level2_metadata.c libfsrefs_level2_metadata.h \
 	libfsrefs_level3_metadata.c libfsrefs_level3_metadata.h \
 	libfsrefs_libbfio.h \
@@ -49,9 +50,11 @@ libfsrefs_la_SOURCES = \
 	libfsrefs_libfwnt.h \
 	libfsrefs_libuna.h \
 	libfsrefs_metadata_block.c libfsrefs_metadata_block.h \
+	libfsrefs_metadata_block_header.c libfsrefs_metadata_block_header.h \
 	libfsrefs_metadata_table.c libfsrefs_metadata_table.h \
 	libfsrefs_metadata_value.c libfsrefs_metadata_value.h \
 	libfsrefs_notify.c libfsrefs_notify.h \
+	libfsrefs_superblock.c libfsrefs_superblock.h \
 	libfsrefs_support.c libfsrefs_support.h \
 	libfsrefs_types.h \
 	libfsrefs_unused.h \
