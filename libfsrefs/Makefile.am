@@ -56,6 +56,7 @@ libfsrefs_la_SOURCES = \
 	libfsrefs_types.h \
 	libfsrefs_unused.h \
 	libfsrefs_volume.c libfsrefs_volume.h \
+	libfsrefs_volume_header.c libfsrefs_volume_header.h \
 	libfsrefs_volume_information.c libfsrefs_volume_information.h \
 	libfsrefs_volume_name.c libfsrefs_volume_name.h
 

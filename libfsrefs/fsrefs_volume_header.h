@@ -60,10 +60,10 @@ struct fsrefs_volume_header
 	 */
 	uint8_t unknown4[ 2 ];
 
-	/* Unknown
+	/* Checksum
 	 * Consists of 2 bytes
 	 */
-	uint8_t unknown5[ 2 ];
+	uint8_t checksum[ 2 ];
 
 	/* The number of sectors
 	 * Consists of 8 bytes
@@ -80,10 +80,20 @@ struct fsrefs_volume_header
 	 */
 	uint8_t sectors_per_block[ 4 ];
 
-	/* Unknown
-	 * Consists of 4 bytes
+	/* Major format version
+	 * Consists of 1 byte
 	 */
-	uint8_t unknown7[ 4 ];
+	uint8_t major_format_version;
+
+	/* Minor format version
+	 * Consists of 1 byte
+	 */
+	uint8_t minor_format_version;
+
+	/* Unknown
+	 * Consists of 2 bytes
+	 */
+	uint8_t unknown7[ 2 ];
 
 	/* Unknown
 	 * Consists of 4 bytes
@@ -95,15 +105,20 @@ struct fsrefs_volume_header
 	 */
 	uint8_t unknown9[ 8 ];
 
+	/* Volume serial number
+	 * Consists of 8 bytes
+	 */
+	uint8_t volume_serial_number[ 8 ];
+
 	/* Unknown
 	 * Consists of 8 bytes
 	 */
 	uint8_t unknown10[ 8 ];
 
 	/* Unknown
-	 * Consists of 15872 bytes
+	 * Consists of 440 bytes
 	 */
-	uint8_t unknown11[ 15872 ];
+	uint8_t unknown11[ 440 ];
 };
 
 #if defined( __cplusplus )

@@ -7,7 +7,7 @@ EXIT_SUCCESS=0;
 EXIT_FAILURE=1;
 EXIT_IGNORE=77;
 
-LIBRARY_TESTS="block_descriptor block_descriptors directory error io_handle level0_metadata level1_metadata level2_metadata level3_metadata metadata_block metadata_table metadata_value notify volume_information volume_name";
+LIBRARY_TESTS="block_descriptor block_descriptors directory error io_handle level0_metadata level1_metadata level2_metadata level3_metadata metadata_block metadata_table metadata_value notify volume_header volume_information volume_name";
 LIBRARY_TESTS_WITH_INPUT="support volume";
 OPTION_SETS="offset";
 

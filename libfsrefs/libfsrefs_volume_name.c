@@ -213,17 +213,6 @@ int libfsrefs_volume_name_read(
 
 		return( -1 );
 	}
-	if( metadata_value->data_size > (size_t) SSIZE_MAX )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_VALUE_EXCEEDS_MAXIMUM,
-		 "%s: invalid metadata value - invalid data size value exceeds maximum.",
-		 function );
-
-		return( -1 );
-	}
 	byte_stream_copy_to_uint64_little_endian(
 	 metadata_value->identifier_data,
 	 value_identifier );
@@ -255,6 +244,17 @@ int libfsrefs_volume_name_read(
 
 	if( volume_name->name_size > 0 )
 	{
+		if( volume_name->name_size > (size_t) MEMORY_MAXIMUM_ALLOCATION_SIZE )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_EXCEEDS_MAXIMUM,
+			 "%s: invalid volume name - invalid name size value exceeds maximum.",
+			 function );
+
+			goto on_error;
+		}
 		volume_name->name = (uint8_t *) memory_allocate(
 		                                 sizeof( uint8_t ) * volume_name->name_size );
 

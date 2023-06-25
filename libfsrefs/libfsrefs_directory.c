@@ -159,7 +159,6 @@ int libfsrefs_directory_read(
 	libfsrefs_metadata_value_t *metadata_value     = NULL;
 	static char *function                          = "libfsrefs_directory_read";
 	uint64_t value_identifier                      = 0;
-	uint32_t value_data_size                       = 0;
 	int metadata_table_value_index                 = 0;
 	int number_of_metadata_table_values            = 0;
 

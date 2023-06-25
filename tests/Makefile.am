@@ -52,6 +52,7 @@ check_PROGRAMS = \
 	fsrefs_test_tools_output \
 	fsrefs_test_tools_signal \
 	fsrefs_test_volume \
+	fsrefs_test_volume_header \
 	fsrefs_test_volume_information \
 	fsrefs_test_volume_name
 
@@ -302,6 +303,28 @@ fsrefs_test_volume_LDADD = \
 	@LIBCTHREADS_LIBADD@ \
 	@LIBCERROR_LIBADD@ \
 	@PTHREAD_LIBADD@
+
+fsrefs_test_volume_header_SOURCES = \
+	fsrefs_test_functions.c fsrefs_test_functions.h \
+	fsrefs_test_libbfio.h \
+	fsrefs_test_libcerror.h \
+	fsrefs_test_libfsrefs.h \
+	fsrefs_test_macros.h \
+	fsrefs_test_memory.c fsrefs_test_memory.h \
+	fsrefs_test_unused.h \
+	fsrefs_test_volume_header.c
+
+fsrefs_test_volume_header_LDADD = \
+	@LIBBFIO_LIBADD@ \
+	@LIBCPATH_LIBADD@ \
+	@LIBCFILE_LIBADD@ \
+	@LIBUNA_LIBADD@ \
+	@LIBCSPLIT_LIBADD@ \
+	@LIBCNOTIFY_LIBADD@ \
+	@LIBCLOCALE_LIBADD@ \
+	@LIBCDATA_LIBADD@ \
+	../libfsrefs/libfsrefs.la \
+	@LIBCERROR_LIBADD@
 
 fsrefs_test_volume_information_SOURCES = \
 	fsrefs_test_libcerror.h \

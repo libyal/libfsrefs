@@ -25,16 +25,13 @@
 #include <common.h>
 #include <types.h>
 
-#include "libfsrefs_libbfio.h"
 #include "libfsrefs_libcerror.h"
-#include "libfsrefs_libfcache.h"
-#include "libfsrefs_libfdata.h"
 
 #if defined( __cplusplus )
 extern "C" {
 #endif
 
-extern const char fsrefs_volume_file_system_signature[ 4 ];
+extern const char fsrefs_volume_file_system_signature[ 8 ];
 
 typedef struct libfsrefs_io_handle libfsrefs_io_handle_t;
 
@@ -52,9 +49,9 @@ struct libfsrefs_io_handle
 	 */
 	uint32_t bytes_per_sector;
 
-	/* The number of sectors
+	/* The volume size
 	 */
-	uint64_t number_of_sectors;
+	size64_t volume_size;
 
 	/* Value to indicate if abort was signalled
 	 */
@@ -71,11 +68,6 @@ int libfsrefs_io_handle_free(
 
 int libfsrefs_io_handle_clear(
      libfsrefs_io_handle_t *io_handle,
-     libcerror_error_t **error );
-
-int libfsrefs_io_handle_read_volume_header(
-     libfsrefs_io_handle_t *io_handle,
-     libbfio_handle_t *file_io_handle,
      libcerror_error_t **error );
 
 #if defined( __cplusplus )

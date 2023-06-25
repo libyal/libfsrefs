@@ -6,7 +6,7 @@ $ExitSuccess = 0
 $ExitFailure = 1
 $ExitIgnore = 77
 
-$LibraryTests = "block_descriptor block_descriptors directory error io_handle level0_metadata level1_metadata level2_metadata level3_metadata metadata_block metadata_table metadata_value notify volume_information volume_name"
+$LibraryTests = "block_descriptor block_descriptors directory error io_handle level0_metadata level1_metadata level2_metadata level3_metadata metadata_block metadata_table metadata_value notify volume_header volume_information volume_name"
 $LibraryTestsWithInput = "support volume"
 $OptionSets = "offset"
 

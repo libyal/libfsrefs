@@ -238,6 +238,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\libfsrefs\libfsrefs_volume_header.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\libfsrefs\libfsrefs_volume_information.c"
 				>
 			</File>
@@ -389,6 +393,10 @@
 			</File>
 			<File
 				RelativePath="..\..\libfsrefs\libfsrefs_volume.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfsrefs\libfsrefs_volume_header.h"
 				>
 			</File>
 			<File

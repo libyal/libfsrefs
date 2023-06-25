@@ -188,10 +188,6 @@ int libfsrefs_level2_metadata_read(
 	int metadata_table_value_index                 = 0;
 	int number_of_metadata_table_values            = 0;
 
-#if defined( HAVE_DEBUG_OUTPUT )
-	uint64_t value_64bit                           = 0;
-#endif
-
 	if( level2_metadata == NULL )
 	{
 		libcerror_error_set(

@@ -42,6 +42,7 @@
 #include "libfsrefs_libfdata.h"
 #include "libfsrefs_metadata_block.h"
 #include "libfsrefs_volume.h"
+#include "libfsrefs_volume_header.h"
 #include "libfsrefs_volume_name.h"
 
 /* Creates a volume
@@ -773,6 +774,7 @@ int libfsrefs_volume_open_read(
 	libfsrefs_level1_metadata_t *level1_secondary_metadata         = NULL;
 	libfsrefs_level2_metadata_t *level2_metadata                   = NULL;
 	libfsrefs_level3_metadata_t *level3_metadata                   = NULL;
+	libfsrefs_volume_header_t *volume_header                       = NULL;
 	static char *function                                          = "libfsrefs_volume_open_read";
 	uint64_t value_identifier                                      = 0;
 	int level2_metadata_block_descriptor_index                     = 0;
@@ -811,20 +813,39 @@ int libfsrefs_volume_open_read(
 		 "Reading volume header:\n" );
 	}
 #endif
-	if( libfsrefs_io_handle_read_volume_header(
-	     internal_volume->io_handle,
+	if( libfsrefs_volume_header_initialize(
+	     &volume_header,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to create volume header.",
+		 function );
+
+		goto on_error;
+	}
+	if( libfsrefs_volume_header_read_file_io_handle(
+	     volume_header,
 	     file_io_handle,
+	     0,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_IO,
 		 LIBCERROR_IO_ERROR_READ_FAILED,
-		 "%s: unable to read volume header.",
+		 "%s: unable to read volume header at offset: 0 (0x00000000).",
 		 function );
 
 		goto on_error;
 	}
+	internal_volume->io_handle->block_size          = volume_header->block_size;
+	internal_volume->io_handle->metadata_block_size = volume_header->metadata_block_size;
+	internal_volume->io_handle->bytes_per_sector    = volume_header->bytes_per_sector;
+	internal_volume->io_handle->volume_size         = volume_header->volume_size;
+
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )
 	{
@@ -1494,6 +1515,12 @@ on_error:
 	{
 		libfsrefs_level0_metadata_free(
 		 &level0_metadata,
+		 NULL );
+	}
+	if( volume_header != NULL )
+	{
+		libfsrefs_volume_header_free(
+		 &volume_header,
 		 NULL );
 	}
 	return( -1 );
