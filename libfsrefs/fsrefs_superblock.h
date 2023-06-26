@@ -1,5 +1,5 @@
 /*
- * The ReFS metadata block definition
+ * The ReFS superblock metadata definition
  *
  * Copyright (C) 2012-2023, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -29,9 +29,9 @@
 extern "C" {
 #endif
 
-typedef struct fsrefs_superblock_v1 fsrefs_superblock_v1_t;
+typedef struct fsrefs_superblock fsrefs_superblock_t;
 
-struct fsrefs_superblock_v1
+struct fsrefs_superblock
 {
 	/* The volume identifier
 	 * Consists of 16 bytes
@@ -48,70 +48,25 @@ struct fsrefs_superblock_v1
 	 */
 	uint8_t unknown2[ 8 ];
 
-	/* Unknown
+	/* Checkpoints data offset
 	 * Consists of 4 bytes
 	 */
-	uint8_t unknown3[ 4 ];
+	uint8_t checkpoints_data_offset[ 4 ];
 
-	/* Unknown
+	/* Number of checkpoints
 	 * Consists of 4 bytes
 	 */
-	uint8_t unknown4[ 4 ];
+	uint8_t number_of_checkpoints[ 4 ];
 
-	/* Unknown
+	/* Self reference data offset
 	 * Consists of 4 bytes
 	 */
-	uint8_t unknown5[ 4 ];
+	uint8_t self_reference_data_offset[ 4 ];
 
-	/* Unknown
+	/* Self reference data size
 	 * Consists of 4 bytes
 	 */
-	uint8_t unknown6[ 4 ];
-
-	/* Unknown
-	 * Consists of 64 bytes
-	 */
-	uint8_t unknown7[ 64 ];
-
-	/* Primary checkpoint block number
-	 * Consists of 8 bytes
-	 */
-	uint8_t primary_checkpoint_block_number[ 8 ];
-
-	/* Secondary checkpoint block number
-	 * Consists of 8 bytes
-	 */
-	uint8_t secondary_checkpoint_block_number[ 8 ];
-
-	/* Block number
-	 * Consists of 8 bytes
-	 */
-	uint8_t block_number[ 8 ];
-
-	/* Unknown
-	 * Consists of 8 bytes
-	 */
-	uint8_t unknown8[ 8 ];
-
-	/* Unknown
-	 * Consists of 8 bytes
-	 */
-	uint8_t unknown9[ 8 ];
-};
-
-typedef struct fsrefs_superblock_v3 fsrefs_superblock_v3_t;
-
-struct fsrefs_superblock_v3
-{
-	/* The volume identifier
-	 * Consists of 16 bytes
-	 */
-	uint8_t volume_identifier[ 16 ];
-
-	/* Unknown
-	 * Consists of 136 bytes
-	 */
-	uint8_t unknown1[ 136 ];
+	uint8_t self_reference_data_size[ 4 ];
 };
 
 #if defined( __cplusplus )

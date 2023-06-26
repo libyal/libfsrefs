@@ -24,6 +24,7 @@
 #include <memory.h>
 #include <types.h>
 
+#include "libfsrefs_block_descriptor.h"
 #include "libfsrefs_debug.h"
 #include "libfsrefs_io_handle.h"
 #include "libfsrefs_libbfio.h"
@@ -149,17 +150,17 @@ int libfsrefs_superblock_read_data(
      size_t data_size,
      libcerror_error_t **error )
 {
-	static char *function                      = "libfsrefs_superblock_read_data";
-	size_t block_reference_size                = 0;
-	size_t header_size                         = 0;
-	size_t superblock_size                     = 0;
-	uint32_t checkpoint_references_data_offset = 0;
-	uint32_t self_reference_data_offset        = 0;
-	uint32_t self_reference_data_size          = 0;
+	static char *function                          = "libfsrefs_superblock_read_data";
+	size_t data_offset                             = 0;
+	size_t header_size                             = 0;
+	uint32_t checkpoints_data_offset               = 0;
+	uint32_t number_of_checkpoints                 = 0;
+	uint32_t self_reference_data_offset            = 0;
+	uint32_t self_reference_data_size              = 0;
 
 #if defined( HAVE_DEBUG_OUTPUT )
-	uint64_t value_64bit                       = 0;
-	uint32_t value_32bit                       = 0;
+	libfsrefs_block_descriptor_t *block_descriptor = NULL;
+	uint64_t value_64bit                           = 0;
 #endif
 
 	if( superblock == NULL )
@@ -186,15 +187,11 @@ int libfsrefs_superblock_read_data(
 	}
 	if( io_handle->major_format_version == 1 )
 	{
-		block_reference_size = sizeof( fsrefs_metadata_block_reference_v1_t );
-		header_size          = sizeof( fsrefs_metadata_block_header_v1_t );
-		superblock_size      = sizeof( fsrefs_superblock_v1_t );
+		header_size = sizeof( fsrefs_metadata_block_header_v1_t );
 	}
 	else if( io_handle->major_format_version == 3 )
 	{
-		block_reference_size = sizeof( fsrefs_metadata_block_reference_v3_t );
-		header_size          = sizeof( fsrefs_metadata_block_header_v3_t );
-		superblock_size      = sizeof( fsrefs_superblock_v3_t );
+		header_size = sizeof( fsrefs_metadata_block_header_v3_t );
 	}
 	else
 	{
@@ -220,7 +217,7 @@ int libfsrefs_superblock_read_data(
 
 		return( -1 );
 	}
-	if( ( data_size < superblock_size )
+	if( ( data_size < sizeof( fsrefs_superblock_t ) )
 	 || ( data_size > (size_t) SSIZE_MAX ) )
 	{
 		libcerror_error_set(
@@ -240,13 +237,13 @@ int libfsrefs_superblock_read_data(
 		 function );
 		libcnotify_print_data(
 		 data,
-		 superblock_size,
+		 sizeof( fsrefs_superblock_t ),
 		 0 );
 	}
 #endif
 	if( memory_copy(
 	     superblock->volume_identifier,
-	     ( (fsrefs_superblock_v1_t *) data )->volume_identifier,
+	     ( (fsrefs_superblock_t *) data )->volume_identifier,
 	     16 ) == NULL )
 	{
 		libcerror_error_set(
@@ -256,29 +253,31 @@ int libfsrefs_superblock_read_data(
 		 "%s: unable to copy volume identifier.",
 		 function );
 
-		return( -1 );
+		goto on_error;
 	}
-	if( io_handle->major_format_version == 1 )
-	{
-		byte_stream_copy_to_uint32_little_endian(
-		 ( (fsrefs_superblock_v1_t *) data )->unknown3,
-		 checkpoint_references_data_offset );
+	byte_stream_copy_to_uint32_little_endian(
+	 ( (fsrefs_superblock_t *) data )->checkpoints_data_offset,
+	 checkpoints_data_offset );
 
-		byte_stream_copy_to_uint32_little_endian(
-		 ( (fsrefs_superblock_v1_t *) data )->unknown5,
-		 self_reference_data_offset );
+	byte_stream_copy_to_uint32_little_endian(
+	 ( (fsrefs_superblock_t *) data )->number_of_checkpoints,
+	 number_of_checkpoints );
 
-		byte_stream_copy_to_uint32_little_endian(
-		 ( (fsrefs_superblock_v1_t *) data )->unknown6,
-		 self_reference_data_size );
-	}
+	byte_stream_copy_to_uint32_little_endian(
+	 ( (fsrefs_superblock_t *) data )->self_reference_data_offset,
+	 self_reference_data_offset );
+
+	byte_stream_copy_to_uint32_little_endian(
+	 ( (fsrefs_superblock_t *) data )->self_reference_data_size,
+	 self_reference_data_size );
+
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )
 	{
 		if( libfsrefs_debug_print_guid_value(
 		     function,
 		     "volume identifier\t\t\t",
-		     ( (fsrefs_superblock_v1_t *) data )->volume_identifier,
+		     ( (fsrefs_superblock_t *) data )->volume_identifier,
 		     16,
 		     LIBFGUID_ENDIAN_LITTLE,
 		     LIBFGUID_STRING_FORMAT_FLAG_USE_LOWER_CASE,
@@ -291,123 +290,130 @@ int libfsrefs_superblock_read_data(
 			 "%s: unable to print GUID value.",
 			 function );
 
-			return( -1 );
+			goto on_error;
 		}
-		if( io_handle->major_format_version == 1 )
-		{
-			byte_stream_copy_to_uint64_little_endian(
-			 ( (fsrefs_superblock_v1_t *) data )->unknown1,
-			 value_64bit );
-			libcnotify_printf(
-			 "%s: unknown1\t\t\t\t: 0x%08" PRIx64 "\n",
-			 function,
-			 value_64bit );
+		byte_stream_copy_to_uint64_little_endian(
+		 ( (fsrefs_superblock_t *) data )->unknown1,
+		 value_64bit );
+		libcnotify_printf(
+		 "%s: unknown1\t\t\t\t: 0x%08" PRIx64 "\n",
+		 function,
+		 value_64bit );
 
-			byte_stream_copy_to_uint64_little_endian(
-			 ( (fsrefs_superblock_v1_t *) data )->unknown2,
-			 value_64bit );
-			libcnotify_printf(
-			 "%s: unknown2\t\t\t\t: 0x%08" PRIx64 "\n",
-			 function,
-			 value_64bit );
+		byte_stream_copy_to_uint64_little_endian(
+		 ( (fsrefs_superblock_t *) data )->unknown2,
+		 value_64bit );
+		libcnotify_printf(
+		 "%s: unknown2\t\t\t\t: 0x%08" PRIx64 "\n",
+		 function,
+		 value_64bit );
 
-			libcnotify_printf(
-			 "%s: checkpoint references data offset\t: 0x%08" PRIx32 "\n",
-			 function,
-			 checkpoint_references_data_offset );
+		libcnotify_printf(
+		 "%s: checkpoints data offset\t\t\t: 0x%08" PRIx32 "\n",
+		 function,
+		 checkpoints_data_offset );
 
-			byte_stream_copy_to_uint32_little_endian(
-			 ( (fsrefs_superblock_v1_t *) data )->unknown4,
-			 value_32bit );
-			libcnotify_printf(
-			 "%s: unknown4\t\t\t\t: %" PRIu32 "\n",
-			 function,
-			 value_32bit );
+		libcnotify_printf(
+		 "%s: number of checkpoints\t\t\t: %" PRIu32 "\n",
+		 function,
+		 number_of_checkpoints );
 
-			libcnotify_printf(
-			 "%s: self reference data offset\t\t: 0x%08" PRIx32 "\n",
-			 function,
-			 self_reference_data_offset );
+		libcnotify_printf(
+		 "%s: self reference data offset\t\t: 0x%08" PRIx32 "\n",
+		 function,
+		 self_reference_data_offset );
 
-			libcnotify_printf(
-			 "%s: self reference data size\t\t: %" PRIu32 "\n",
-			 function,
-			 self_reference_data_size );
-		}
-		else if( io_handle->major_format_version == 3 )
-		{
-			libcnotify_printf(
-			 "%s: unknown1\n",
-			 function );
-			libcnotify_print_data(
-			 ( (fsrefs_superblock_v3_t *) data )->unknown1,
-			 136,
-			 LIBCNOTIFY_PRINT_DATA_FLAG_GROUP_DATA );
-		}
+		libcnotify_printf(
+		 "%s: self reference data size\t\t: %" PRIu32 "\n",
+		 function,
+		 self_reference_data_size );
 	}
 #endif /* defined( HAVE_DEBUG_OUTPUT ) */
 
-	if( ( checkpoint_references_data_offset < header_size )
-	 || ( checkpoint_references_data_offset >= io_handle->metadata_block_size ) )
+	data_offset = sizeof( fsrefs_superblock_t );
+
+	if( ( checkpoints_data_offset < ( data_offset + header_size ) )
+	 || ( checkpoints_data_offset >= io_handle->metadata_block_size ) )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
-		 "%s: invalid checkpoint references data offset value out of bounds.",
+		 "%s: invalid checkpoints data offset value out of bounds.",
 		 function );
 
-		return( -1 );
+		goto on_error;
 	}
-	checkpoint_references_data_offset -= header_size;
+	if( number_of_checkpoints != 2 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
+		 "%s: unsupported number of checkpoints.",
+		 function );
+
+		goto on_error;
+	}
+	checkpoints_data_offset -= header_size;
 
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )
 	{
-		if( checkpoint_references_data_offset > superblock_size )
+		if( checkpoints_data_offset > data_offset )
 		{
 			libcnotify_printf(
-			 "%s: unknown7\n",
+			 "%s: unknown3\n",
 			 function );
 			libcnotify_print_data(
-			 &( data[ superblock_size ] ),
-			 (size_t) checkpoint_references_data_offset - superblock_size,
+			 &( data[ data_offset ] ),
+			 (size_t) checkpoints_data_offset - data_offset,
 			 LIBCNOTIFY_PRINT_DATA_FLAG_GROUP_DATA );
 		}
 	}
 #endif /* defined( HAVE_DEBUG_OUTPUT ) */
 
-/* TODO use checkpoint_references_data_offset */
+	data_offset = checkpoints_data_offset;
 
-	if( io_handle->major_format_version == 1 )
+	if( ( data_size - data_offset ) < 16 )
 	{
-		byte_stream_copy_to_uint64_little_endian(
-		 ( (fsrefs_superblock_v1_t *) data )->primary_checkpoint_block_number,
-		 superblock->primary_checkpoint_block_number );
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: invalid checkpoints data size value out of bounds.",
+		 function );
 
-		byte_stream_copy_to_uint64_little_endian(
-		 ( (fsrefs_superblock_v1_t *) data )->secondary_checkpoint_block_number,
-		 superblock->secondary_checkpoint_block_number );
+		goto on_error;
 	}
+	byte_stream_copy_to_uint64_little_endian(
+	 &( data[ data_offset ] ),
+	 superblock->primary_checkpoint_block_number );
+
+	data_offset += 8;
+
+	byte_stream_copy_to_uint64_little_endian(
+	 &( data[ data_offset ] ),
+	 superblock->secondary_checkpoint_block_number );
+
+	data_offset += 8;
+
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )
 	{
-		if( io_handle->major_format_version == 1 )
-		{
-			libcnotify_printf(
-			 "%s: primary checkpoint block number\t\t: %" PRIu64 "\n",
-			 function,
-			 superblock->primary_checkpoint_block_number );
+		libcnotify_printf(
+		 "%s: primary checkpoint block number\t\t: %" PRIu64 "\n",
+		 function,
+		 superblock->primary_checkpoint_block_number );
 
-			libcnotify_printf(
-			 "%s: secondary checkpoint block number\t: %" PRIu64 "\n",
-			 function,
-			 superblock->secondary_checkpoint_block_number );
-		}
+		libcnotify_printf(
+		 "%s: secondary checkpoint block number\t: %" PRIu64 "\n",
+		 function,
+		 superblock->secondary_checkpoint_block_number );
 	}
 #endif /* defined( HAVE_DEBUG_OUTPUT ) */
 
-	if( ( self_reference_data_offset < header_size )
+	if( ( self_reference_data_offset < ( data_offset + header_size ) )
 	 || ( self_reference_data_offset >= io_handle->metadata_block_size ) )
 	{
 		libcerror_error_set(
@@ -417,11 +423,29 @@ int libfsrefs_superblock_read_data(
 		 "%s: invalid self reference data offset value out of bounds.",
 		 function );
 
-		return( -1 );
+		goto on_error;
 	}
-	if( ( self_reference_data_size != block_reference_size )
-	 || ( self_reference_data_size > io_handle->metadata_block_size )
-	 || ( self_reference_data_offset > ( io_handle->metadata_block_size - self_reference_data_size ) ) )
+	self_reference_data_offset -= header_size;
+
+#if defined( HAVE_DEBUG_OUTPUT )
+	if( libcnotify_verbose != 0 )
+	{
+		if( self_reference_data_offset > data_offset )
+		{
+			libcnotify_printf(
+			 "%s: unknown4\n",
+			 function );
+			libcnotify_print_data(
+			 &( data[ data_offset ] ),
+			 (size_t) self_reference_data_offset - data_offset,
+			 LIBCNOTIFY_PRINT_DATA_FLAG_GROUP_DATA );
+		}
+	}
+#endif /* defined( HAVE_DEBUG_OUTPUT ) */
+
+	data_offset = self_reference_data_offset;
+
+	if( ( data_size - data_offset ) < self_reference_data_size )
 	{
 		libcerror_error_set(
 		 error,
@@ -430,48 +454,76 @@ int libfsrefs_superblock_read_data(
 		 "%s: invalid self reference data size value out of bounds.",
 		 function );
 
-		return( -1 );
+		goto on_error;
 	}
-	self_reference_data_offset -= header_size;
-
-/* TODO use self_reference_data_offset */
-
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )
 	{
-		if( io_handle->major_format_version == 1 )
+		libcnotify_printf(
+		 "%s: self reference data\n",
+		 function );
+		libcnotify_print_data(
+		 &( data[ data_offset ] ),
+		 self_reference_data_size,
+		 LIBCNOTIFY_PRINT_DATA_FLAG_GROUP_DATA );
+
+		if( libfsrefs_block_descriptor_initialize(
+		     &block_descriptor,
+		     error ) != 1 )
 		{
-			byte_stream_copy_to_uint64_little_endian(
-			 ( (fsrefs_superblock_v1_t *) data )->block_number,
-			 value_64bit );
-			libcnotify_printf(
-			 "%s: block number\t\t\t\t: %" PRIu64 "\n",
-			 function,
-			 value_64bit );
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+			 "%s: unable to create block descriptor.",
+			 function );
 
-			byte_stream_copy_to_uint64_little_endian(
-			 ( (fsrefs_superblock_v1_t *) data )->unknown8,
-			 value_64bit );
-			libcnotify_printf(
-			 "%s: unknown9\t\t\t\t: 0x%08" PRIx64 "\n",
-			 function,
-			 value_64bit );
+			goto on_error;
+		}
+		if( libfsrefs_block_descriptor_read_data(
+		     block_descriptor,
+		     io_handle,
+		     &( data[ data_offset ] ),
+		     self_reference_data_size,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_IO,
+			 LIBCERROR_IO_ERROR_READ_FAILED,
+			 "%s: unable to read block descriptor.",
+			 function );
 
-			byte_stream_copy_to_uint64_little_endian(
-			 ( (fsrefs_superblock_v1_t *) data )->unknown9,
-			 value_64bit );
-			libcnotify_printf(
-			 "%s: unknown10\t\t\t\t: 0x%08" PRIx64 "\n",
-			 function,
-			 value_64bit );
+			goto on_error;
+		}
+		if( libfsrefs_block_descriptor_free(
+		     &block_descriptor,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable to free block descriptor.",
+			 function );
 
-			libcnotify_printf(
-			 "\n" );
+			goto on_error;
 		}
 	}
 #endif /* defined( HAVE_DEBUG_OUTPUT ) */
 
 	return( 1 );
+
+on_error:
+#if defined( HAVE_DEBUG_OUTPUT )
+	if( block_descriptor != NULL )
+	{
+		libfsrefs_block_descriptor_free(
+		 &block_descriptor,
+		 NULL );
+	}
+#endif
+	return( -1 );
 }
 
 /* Reads a superblock
@@ -612,8 +664,23 @@ int libfsrefs_superblock_read_file_io_handle(
 	}
 	file_offset += header_size;
 
-/* TODO check header */
+	if( io_handle->major_format_version == 3 )
+	{
+		if( memory_compare(
+		     metadata_block_header->signature,
+		     "SUPB",
+		     4 ) != 0 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
+			 "%s: invalid metadata block signature.",
+			 function );
 
+			goto on_error;
+		}
+	}
 	if( libfsrefs_metadata_block_header_free(
 	     &metadata_block_header,
 	     error ) != 1 )

@@ -1,5 +1,5 @@
 /*
- * The ReFS metadata block definition
+ * The ReFS checkpoint metadata definition
  *
  * Copyright (C) 2012-2023, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -29,39 +29,84 @@
 extern "C" {
 #endif
 
-typedef struct fsrefs_checkpoint_v1 fsrefs_checkpoint_v1_t;
+typedef struct fsrefs_checkpoint_header fsrefs_checkpoint_header_t;
 
-struct fsrefs_checkpoint_v1
+struct fsrefs_checkpoint_header
 {
 	/* Unknown
 	 * Consists of 4 bytes
 	 */
 	uint8_t unknown1[ 4 ];
 
-	/* Unknown
+	/* Major format version
 	 * Consists of 2 bytes
 	 */
-	uint8_t unknown2[ 2 ];
+	uint8_t major_format_version[ 2 ];
+
+	/* Minor format version
+	 * Consists of 2 bytes
+	 */
+	uint8_t minor_format_version[ 2 ];
+
+	/* Self reference data offset
+	 * Consists of 4 bytes
+	 */
+	uint8_t self_reference_data_offset[ 4 ];
+
+	/* Self reference data size
+	 * Consists of 4 bytes
+	 */
+	uint8_t self_reference_data_size[ 4 ];
+};
+
+typedef struct fsrefs_checkpoint_trailer_v1 fsrefs_checkpoint_trailer_v1_t;
+
+struct fsrefs_checkpoint_trailer_v1
+{
+	/* Unknown
+	 * Consists of 8 bytes
+	 */
+	uint8_t unknown2[ 8 ];
 
 	/* Unknown
-	 * Consists of 2 bytes
+	 * Consists of 4 bytes
 	 */
-	uint8_t unknown3[ 2 ];
+	uint8_t unknown3[ 4 ];
 
 	/* Unknown
 	 * Consists of 4 bytes
 	 */
 	uint8_t unknown4[ 4 ];
 
-	/* Table entry size
-	 * Consists of 4 bytes
-	 */
-	uint8_t table_entry_size[ 4 ];
-
-	/* Sequence number
+	/* Unknown
 	 * Consists of 8 bytes
 	 */
-	uint8_t sequence_number[ 8 ];
+	uint8_t unknown5[ 8 ];
+
+	/* Number of offsets
+	 * Consists of 4 bytes
+	 */
+	uint8_t number_of_offsets[ 4 ];
+};
+
+typedef struct fsrefs_checkpoint_trailer_v3 fsrefs_checkpoint_trailer_v3_t;
+
+struct fsrefs_checkpoint_trailer_v3
+{
+	/* Unknown
+	 * Consists of 8 bytes
+	 */
+	uint8_t unknown2[ 8 ];
+
+	/* Unknown
+	 * Consists of 8 bytes
+	 */
+	uint8_t unknown3[ 8 ];
+
+	/* Unknown
+	 * Consists of 4 bytes
+	 */
+	uint8_t unknown4[ 4 ];
 
 	/* Unknown
 	 * Consists of 4 bytes
@@ -69,34 +114,29 @@ struct fsrefs_checkpoint_v1
 	uint8_t unknown5[ 4 ];
 
 	/* Unknown
-	 * Consists of 4 bytes
+	 * Consists of 8 bytes
 	 */
-	uint8_t unknown6[ 4 ];
+	uint8_t unknown6[ 8 ];
 
 	/* Unknown
 	 * Consists of 8 bytes
 	 */
 	uint8_t unknown7[ 8 ];
 
-	/* Number of entries
+	/* Unknown
 	 * Consists of 4 bytes
 	 */
-	uint8_t number_of_entries[ 4 ];
-};
-
-typedef struct fsrefs_checkpoint_v3 fsrefs_checkpoint_v3_t;
-
-struct fsrefs_checkpoint_v3
-{
-	/* The volume identifier
-	 * Consists of 16 bytes
-	 */
-	uint8_t volume_identifier[ 16 ];
+	uint8_t unknown8[ 4 ];
 
 	/* Unknown
-	 * Consists of 136 bytes
+	 * Consists of 4 bytes
 	 */
-	uint8_t unknown1[ 136 ];
+	uint8_t unknown9[ 4 ];
+
+	/* Number of offsets
+	 * Consists of 4 bytes
+	 */
+	uint8_t number_of_offsets[ 4 ];
 };
 
 #if defined( __cplusplus )

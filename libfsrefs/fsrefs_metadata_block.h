@@ -84,9 +84,9 @@ struct fsrefs_metadata_block_header_v3
 	uint8_t unknown3[ 68 ];
 };
 
-typedef struct fsrefs_metadata_block_reference_v1 fsrefs_metadata_block_reference_v1_t;
+typedef struct fsrefs_metadata_block_descriptor_v1 fsrefs_metadata_block_descriptor_v1_t;
 
-struct fsrefs_metadata_block_reference_v1
+struct fsrefs_metadata_block_descriptor_v1
 {
 	/* The metadata block number
 	 * Consists of 8 bytes
@@ -94,34 +94,79 @@ struct fsrefs_metadata_block_reference_v1
 	uint8_t block_number[ 8 ];
 
 	/* Unknown
-	 * Consists of 8 bytes
+	 * Consists of 2 bytes
 	 */
-	uint8_t unknown1[ 8 ];
+	uint8_t unknown1[ 2 ];
+
+	/* Checksum type
+	 * Consists of 1 byte
+	 */
+	uint8_t checksum_type;
+
+	/* Checksum data offset
+	 * Consists of 1 byte
+	 */
+	uint8_t checksum_data_offset;
+
+	/* Checksum data size
+	 * Consists of 2 bytes
+	 */
+	uint8_t checksum_data_size[ 2 ];
 
 	/* Unknown
-	 * Consists of 8 bytes
+	 * Consists of 2 bytes
 	 */
-	uint8_t unknown2[ 8 ];
+	uint8_t unknown2[ 2 ];
 };
 
-typedef struct fsrefs_metadata_block_reference_v3 fsrefs_metadata_block_reference_v3_t;
+typedef struct fsrefs_metadata_block_descriptor_v3 fsrefs_metadata_block_descriptor_v3_t;
 
-struct fsrefs_metadata_block_reference_v3
+struct fsrefs_metadata_block_descriptor_v3
 {
-	/* The metadata block number
+	/* The first metadata block number
 	 * Consists of 8 bytes
 	 */
-	uint8_t block_number[ 8 ];
+	uint8_t block_number1[ 8 ];
+
+	/* The second metadata block number
+	 * Consists of 8 bytes
+	 */
+	uint8_t block_number2[ 8 ];
+
+	/* The third metadata block number
+	 * Consists of 8 bytes
+	 */
+	uint8_t block_number3[ 8 ];
+
+	/* The fourth metadata block number
+	 * Consists of 8 bytes
+	 */
+	uint8_t block_number4[ 8 ];
 
 	/* Unknown
-	 * Consists of 8 bytes
+	 * Consists of 2 bytes
 	 */
-	uint8_t unknown1[ 8 ];
+	uint8_t unknown1[ 2 ];
+
+	/* Checksum type
+	 * Consists of 1 byte
+	 */
+	uint8_t checksum_type;
+
+	/* Checksum data offset
+	 * Consists of 1 byte
+	 */
+	uint8_t checksum_data_offset;
+
+	/* Checksum data size
+	 * Consists of 2 bytes
+	 */
+	uint8_t checksum_data_size[ 2 ];
 
 	/* Unknown
-	 * Consists of 8 bytes
+	 * Consists of 2 bytes
 	 */
-	uint8_t unknown2[ 8 ];
+	uint8_t unknown2[ 2 ];
 };
 
 #if defined( __cplusplus )

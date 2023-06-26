@@ -124,13 +124,14 @@ The volume header is 512 bytes of size and consists of:
 [cols="1,1,1,5",options="header"]
 |===
 | Offset | Size | Value | Description
-| 0 | 3 | | Boot entry point
-| 3 | 8 | "ReFS\x00\x00\x00\x00" | File system signature
+4+| _File system recognition structure (FILE_SYSTEM_RECOGNITION_STRUCTURE)_
+| 0 | 3 | 0x00 | Boot entry point (or JMP instruction)
+| 3 | 8 | "ReFS\x00\x00\x00\x00" | File system signature (or file system name)
 | 11 | 5 | 0x00 | [yellow-background]*Unknown (empty values)*
-| 16 | 4 | "FSRS" | [yellow-background]*Unknown*
-| 20 | 2 | 0x200 | [yellow-background]*Unknown (volume header size of physical sector size?)*
-| 22 | 2 | | [yellow-background]*Unknown (checksum?)* +
-This value will change over time
+| 16 | 4 | "FSRS" | File system recognition structure identifier
+| 20 | 2 | 0x200 | [yellow-background]*Unknown (size of file system recognition structure?)*
+| 22 | 2 | | [yellow-background]*Unknown (checksum of file system recognition structure?)*
+4+|
 | 24 | 8 | | Number of sectors
 | 32 | 4 | | Sector size
 | 36 | 4 | | Sectors per block (allocation unit)
@@ -163,7 +164,7 @@ There are multiple levels of metadata:
 
 [yellow-background]*TODO: is the metadata block referred to as synchronous ministore (SMS) by Microsoft?*
 
-=== Metadata block header
+=== [[metadata_block_header]]Metadata block header
 
 ==== Metadata block header - format version 1
 
@@ -249,9 +250,9 @@ In format version 3 the metadata can span multiple metadata blocks.
 
 Values 0x00000701 and above are used for sub directories
 
-=== Metadata block descriptor
+=== [[metadata_block_descriptor]]Metadata block descriptor
 
-==== [[metadata_block_descriptor_v1]]Metadata block descriptor - format version 1
+==== Metadata block descriptor - format version 1
 
 The format version 1 metadata block descriptor is 24 bytes of size and
 consists of:
@@ -302,11 +303,18 @@ The offset is relative to the start of the checksum descriptor
 Checksum data size is 8 bytes
 |===
 
-=== Superblock (level 0 metadata)
+=== Superblock (level 0) metadata
 
-==== Superblock metadata - format version 1
+The superblock metadata consists of:
 
-The format version 1 superblock metadata is 48 bytes of size and consists of:
+* <<metadata_block_header,Metadata block header>>
+* Superblock
+* Checkpoint references data
+* Self <<metadata_block_descriptor,metadata block descriptor>>
+
+==== Superblock
+
+The superblock is 48 bytes of size and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
@@ -316,50 +324,97 @@ The format version 1 superblock metadata is 48 bytes of size and consists of:
 | 24 | 8 | | [yellow-background]*Unknown (sequence number?)*
 | 32 | 4 | | Checkpoint references data offset +
 The offset is relative to the start of the metadata block
-| 36 | 4 | 2 | [yellow-background]*Unknown (number of checkpoint references?)*
+| 36 | 4 | 2 | [yellow-background]*Unknown (number of checkpoint metadata block numbers?)*
 | 40 | 4 | | Self descriptor data offset +
 The offset is relative to the start of the metadata block
 | 44 | 4 | | Self descriptor data size
-| 48 | 64 | 0x00 | [yellow-background]*Unknown (empty values)*
-| 112 | 8 | | Primary checkpoint (level 1 metadata) block number
-| 120 | 8 | | Secondary checkpoint (level 1 metadata) block number
-| 128 | 24 | | Self metadata block descriptor +
-Contains a <<metadata_block_descriptor_v1,Metadata block descriptor - format version 1>>
 |===
 
-==== Superblock metadata - format version 3
+==== Checkpoint references data
 
-The format version 3 superblock metadata is 152 bytes of size and consists of:
+The checkpoint references data is variable of size and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
 | Offset | Size | Value | Description
-| 0 | 16 | | Volume identifier
-| 16 | 8 | | [yellow-background]*Unknown*
-| 24 | 8 | | [yellow-background]*Unknown*
-| 32 | 4 | | [yellow-background]*Unknown*
-| 36 | 4 | | [yellow-background]*Unknown*
-| 40 | 4 | | Self descriptor data offset +
-The offset is relative to the start of the metadata block
-| 44 | 4 | | Self descriptor data size
-| 48 | 64 | | [yellow-background]*Unknown*
-| 112 | 8 | | [yellow-background]*Unknown (Primary level 1 metadata block number)*
-| 120 | 8 | | [yellow-background]*Unknown (Secondary level 1 metadata block number)*
-| 128 | 24 | | Self metadata block descriptor +
-Contains a <<metadata_block_descriptor_v3,Metadata block descriptor - format version 3>>
+| 0 | number of entries x 8 | | Checkpoint metadata block number
 |===
 
-=== Checkpoint (level 1 metadata)
+=== Checkpoint (level 1) metadata
 
-==== Checkpoint metadata - format version 1
+The checkpoint metadata consists of:
 
-The format version 1 checkpoint metadata is 48 bytes of size and consists of:
+* <<metadata_block_header,Metadata block header>>
+* Superblock
+* Checkpoint header
+* Checkpoint trailer
+* Self <<metadata_block_descriptor,metadata block descriptor>
+* Level 2 metadata <<metadata_block_descriptor,metadata block descriptors>>
+
+==== Checkpoint header
+
+The checkpoint header is 16 bytes of size and consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 4 | 0x00 | [yellow-background]*Unknown (empty values)*
+| 4 | 2 | | Major format version
+| 6 | 2 | | Minor format version
+| 8 | 4 | | Self descriptor data offset +
+The offset is relative to the start of the metadata block
+| 12 | 4 | | Self descriptor data size
+|===
+
+==== Checkpoint trailer
+
+===== Checkpoint trailer - format version 1
+
+The format version 1 checkpoint trailer is variable of size and consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 8 | | [yellow-background]*Unknown (sequence number?)*
+| 8 | 4 | | [yellow-background]*Unknown (checkpoint data size?)*
+| 12 | 4 | | [yellow-background]*Unknown (seen: 32)*
+| 16 | 8 | | [yellow-background]*Unknown*
+| 24 | 4 | | Number of offsets
+| 28 | number of offset x 4 | | Array of offsets +
+The offset is relative to the start of the metadata block
+| ... | ... | 0x00 | [yellow-background]*Unknown (empty values)*
+|===
+
+===== Checkpoint trailer - format version 3
+
+The format version 3 checkpoint trailer is variable of size and consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 8 | | [yellow-background]*Unknown (sequence number or checkpoint clock?)*
+| 8 | 8 | | [yellow-background]*Unknown (virtual allocator clock?)*
+| 16 | 4 | | [yellow-background]*Unknown (oldest log record?)*
+| 20 | 4 | | [yellow-background]*Unknown*
+| 24 | 8 | | [yellow-background]*Unknown*
+| 32 | 8 | | [yellow-background]*Unknown*
+| 40 | 4 | | [yellow-background]*Unknown (checkpoint data size?)*
+| 44 | 4 | | [yellow-background]*Unknown (seen: 32)*
+| 48 | 4 | | Number of offsets
+| 52 | number of offset x 4 | | Array of offsets +
+The offset is relative to the start of the metadata block
+| ... | ... | 0x00 | [yellow-background]*Unknown (empty values)*
+|===
 
 :numbered!:
 [appendix]
 == References
 
-`[REFERENCE]`
+[cols="1,5",options="header"]
+|===
+| Title: | FILE_SYSTEM_RECOGNITION_STRUCTURE structure
+| URL: | https://learn.microsoft.com/en-us/windows/win32/fileio/file-system-recognition-structure
+|===
 
 [cols="1,5",options="header"]
 |===

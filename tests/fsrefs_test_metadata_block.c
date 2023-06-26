@@ -1801,67 +1801,7 @@ int fsrefs_test_metadata_block_read_file_io_handle(
 
 	/* Test data invalid
 	 */
-/* TODO
-	result = fsrefs_test_open_file_io_handle(
-	          &file_io_handle,
-	          fsrefs_test_metadata_block_data1,
-	          16384,
-	          &error );
-
-	FSREFS_TEST_ASSERT_EQUAL_INT(
-	 "result",
-	 result,
-	 1 );
-
-	FSREFS_TEST_ASSERT_IS_NOT_NULL(
-	 "file_io_handle",
-	 file_io_handle );
-
-	FSREFS_TEST_ASSERT_IS_NULL(
-	 "error",
-	 error );
-
-	byte_stream_copy_from_uint64_little_endian(
-	 &( fsrefs_test_metadata_block_data1[ 3 ] ),
-	 0xffffffffffffffffUL );
-
-	result = libfsrefs_metadata_block_read_file_io_handle(
-	          metadata_block,
-	          io_handle,
-	          file_io_handle,
-	          0,
-	          0,
-	          &error );
-
-	byte_stream_copy_from_uint64_little_endian(
-	 &( fsrefs_test_metadata_block_data1[ 3 ] ),
-	 0x0000000053466552UL );
-
-	FSREFS_TEST_ASSERT_EQUAL_INT(
-	 "result",
-	 result,
-	 -1 );
-
-	FSREFS_TEST_ASSERT_IS_NOT_NULL(
-	 "error",
-	 error );
-
-	libcerror_error_free(
-	 &error );
-
-	result = fsrefs_test_close_file_io_handle(
-	          &file_io_handle,
-	          &error );
-
-	FSREFS_TEST_ASSERT_EQUAL_INT(
-	 "result",
-	 result,
-	 0 );
-
-	FSREFS_TEST_ASSERT_IS_NULL(
-	 "error",
-	 error );
-*/
+/* TODO */
 
 	/* Clean up
 	 */

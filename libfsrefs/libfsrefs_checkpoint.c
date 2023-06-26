@@ -178,17 +178,23 @@ int libfsrefs_checkpoint_read_data(
      size_t data_size,
      libcerror_error_t **error )
 {
-	static char *function       = "libfsrefs_checkpoint_read_data";
-	size_t block_reference_size = 0;
-	size_t checkpoint_size      = 0;
-	size_t header_size          = 0;
-	uint32_t entry_offset       = 0;
-	uint32_t number_of_entries  = 0;
+	libfsrefs_block_descriptor_t *block_descriptor = NULL;
+	static char *function                          = "libfsrefs_checkpoint_read_data";
+	size_t data_offset                             = 0;
+	size_t header_size                             = 0;
+	size_t trailer_size                            = 0;
+	uint32_t descriptor_offset                     = 0;
+	uint32_t number_of_offsets                     = 0;
+	uint32_t offset_index                          = 0;
+	uint32_t offsets_data_offset                   = 0;
+	uint32_t self_reference_data_offset            = 0;
+	uint32_t self_reference_data_size              = 0;
+	int entry_index                                = 0;
 
 #if defined( HAVE_DEBUG_OUTPUT )
-	uint64_t value_64bit        = 0;
-	uint32_t value_32bit        = 0;
-	uint16_t value_16bit        = 0;
+	uint64_t value_64bit                           = 0;
+	uint32_t value_32bit                           = 0;
+	uint16_t value_16bit                           = 0;
 #endif
 
 	if( checkpoint == NULL )
@@ -215,15 +221,13 @@ int libfsrefs_checkpoint_read_data(
 	}
 	if( io_handle->major_format_version == 1 )
 	{
-		block_reference_size = sizeof( fsrefs_metadata_block_reference_v1_t );
-		checkpoint_size      = sizeof( fsrefs_checkpoint_v1_t );
-		header_size          = sizeof( fsrefs_metadata_block_header_v1_t );
+		header_size  = sizeof( fsrefs_metadata_block_header_v1_t );
+		trailer_size = sizeof( fsrefs_checkpoint_trailer_v1_t );
 	}
 	else if( io_handle->major_format_version == 3 )
 	{
-		block_reference_size = sizeof( fsrefs_metadata_block_reference_v3_t );
-		checkpoint_size      = sizeof( fsrefs_checkpoint_v3_t );
-		header_size          = sizeof( fsrefs_metadata_block_header_v3_t );
+		header_size  = sizeof( fsrefs_metadata_block_header_v3_t );
+		trailer_size = sizeof( fsrefs_checkpoint_trailer_v3_t );
 	}
 	else
 	{
@@ -249,7 +253,7 @@ int libfsrefs_checkpoint_read_data(
 
 		return( -1 );
 	}
-	if( ( data_size < checkpoint_size )
+	if( ( data_size < sizeof( fsrefs_checkpoint_header_t ) )
 	 || ( data_size > (size_t) SSIZE_MAX ) )
 	{
 		libcerror_error_set(
@@ -265,172 +269,291 @@ int libfsrefs_checkpoint_read_data(
 	if( libcnotify_verbose != 0 )
 	{
 		libcnotify_printf(
-		 "%s: checkpoint data:\n",
+		 "%s: checkpoint header data:\n",
 		 function );
 		libcnotify_print_data(
 		 data,
-		 checkpoint_size,
+		 sizeof( fsrefs_checkpoint_header_t ),
+		 0 );
+	}
+#endif
+	byte_stream_copy_to_uint32_little_endian(
+	 ( (fsrefs_checkpoint_header_t *) data )->self_reference_data_offset,
+	 self_reference_data_offset );
+
+	byte_stream_copy_to_uint32_little_endian(
+	 ( (fsrefs_checkpoint_header_t *) data )->self_reference_data_size,
+	 self_reference_data_size );
+
+#if defined( HAVE_DEBUG_OUTPUT )
+	if( libcnotify_verbose != 0 )
+	{
+		byte_stream_copy_to_uint32_little_endian(
+		 ( (fsrefs_checkpoint_header_t *) data )->unknown1,
+		 value_32bit );
+		libcnotify_printf(
+		 "%s: unknown1\t\t\t\t: 0x%08" PRIx32 "\n",
+		 function,
+		 value_32bit );
+
+		byte_stream_copy_to_uint16_little_endian(
+		 ( (fsrefs_checkpoint_header_t *) data )->major_format_version,
+		 value_16bit );
+		libcnotify_printf(
+		 "%s: major format version\t\t\t: %" PRIu16 "\n",
+		 function,
+		 value_16bit );
+
+		byte_stream_copy_to_uint16_little_endian(
+		 ( (fsrefs_checkpoint_header_t *) data )->minor_format_version,
+		 value_16bit );
+		libcnotify_printf(
+		 "%s: minor format version\t\t\t: %" PRIu16 "\n",
+		 function,
+		 value_16bit );
+
+		libcnotify_printf(
+		 "%s: self reference data offset\t\t: 0x%08" PRIx32 "\n",
+		 function,
+		 self_reference_data_offset );
+
+		libcnotify_printf(
+		 "%s: self reference data size\t\t: %" PRIu32 "\n",
+		 function,
+		 self_reference_data_size );
+	}
+#endif /* defined( HAVE_DEBUG_OUTPUT ) */
+
+	data_offset = sizeof( fsrefs_checkpoint_header_t );
+
+	if( ( self_reference_data_offset < ( data_offset + header_size ) )
+	 || ( self_reference_data_offset >= io_handle->metadata_block_size ) )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: invalid self reference data offset value out of bounds.",
+		 function );
+
+		goto on_error;
+	}
+	self_reference_data_offset -= header_size;
+
+	if( ( data_size - data_offset ) < trailer_size )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: invalid data size value out of bounds.",
+		 function );
+
+		goto on_error;
+	}
+#if defined( HAVE_DEBUG_OUTPUT )
+	if( libcnotify_verbose != 0 )
+	{
+		libcnotify_printf(
+		 "%s: checkpoint trailer data:\n",
+		 function );
+		libcnotify_print_data(
+		 &( data[ data_offset ] ),
+		 trailer_size,
 		 0 );
 	}
 #endif
 	if( io_handle->major_format_version == 1 )
 	{
 		byte_stream_copy_to_uint32_little_endian(
-		 ( (fsrefs_checkpoint_v1_t *) data )->unknown4,
-		 entry_offset );
-
+		 ( (fsrefs_checkpoint_trailer_v1_t *) &( data[ data_offset ] ) )->number_of_offsets,
+		 number_of_offsets );
+	}
+	else if( io_handle->major_format_version == 3 )
+	{
 		byte_stream_copy_to_uint32_little_endian(
-		 ( (fsrefs_checkpoint_v1_t *) data )->number_of_entries,
-		 number_of_entries );
+		 ( (fsrefs_checkpoint_trailer_v3_t *) &( data[ data_offset ] ) )->number_of_offsets,
+		 number_of_offsets );
 	}
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )
 	{
 		if( io_handle->major_format_version == 1 )
 		{
-			byte_stream_copy_to_uint32_little_endian(
-			 ( (fsrefs_checkpoint_v1_t *) data )->unknown1,
-			 value_32bit );
+			byte_stream_copy_to_uint64_little_endian(
+			 ( (fsrefs_checkpoint_trailer_v1_t *) &( data[ data_offset ] ) )->unknown2,
+			 value_64bit );
 			libcnotify_printf(
-			 "%s: unknown1\t\t\t\t: 0x%08" PRIx32 "\n",
+			 "%s: unknown2\t\t\t\t: 0x%08" PRIx64 "\n",
 			 function,
-			 value_32bit );
-
-			byte_stream_copy_to_uint16_little_endian(
-			 ( (fsrefs_checkpoint_v1_t *) data )->unknown2,
-			 value_16bit );
-			libcnotify_printf(
-			 "%s: unknown2\t\t\t\t: 0x%04" PRIx16 "\n",
-			 function,
-			 value_16bit );
-
-			byte_stream_copy_to_uint16_little_endian(
-			 ( (fsrefs_checkpoint_v1_t *) data )->unknown3,
-			 value_16bit );
-			libcnotify_printf(
-			 "%s: unknown3\t\t\t\t: 0x%04" PRIx16 "\n",
-			 function,
-			 value_16bit );
-
-			libcnotify_printf(
-			 "%s: unknown4 offset\t\t\t\t: 0x%08" PRIx32 "\n",
-			 function,
-			 entry_offset );
+			 value_64bit );
 
 			byte_stream_copy_to_uint32_little_endian(
-			 ( (fsrefs_checkpoint_v1_t *) data )->table_entry_size,
+			 ( (fsrefs_checkpoint_trailer_v1_t *) &( data[ data_offset ] ) )->unknown3,
 			 value_32bit );
 			libcnotify_printf(
-			 "%s: table entry size\t\t\t: %" PRIu32 "\n",
+			 "%s: unknown3\t\t\t\t: 0x%08" PRIx32 "\n",
+			 function,
+			 value_32bit );
+
+			byte_stream_copy_to_uint32_little_endian(
+			 ( (fsrefs_checkpoint_trailer_v1_t *) &( data[ data_offset ] ) )->unknown4,
+			 value_32bit );
+			libcnotify_printf(
+			 "%s: unknown4\t\t\t\t: 0x%08" PRIx32 "\n",
 			 function,
 			 value_32bit );
 
 			byte_stream_copy_to_uint64_little_endian(
-			 ( (fsrefs_checkpoint_v1_t *) data )->sequence_number,
+			 ( (fsrefs_checkpoint_trailer_v1_t *) &( data[ data_offset ] ) )->unknown5,
 			 value_64bit );
 			libcnotify_printf(
-			 "%s: sequence number\t\t\t\t: %" PRIu64 "\n",
+			 "%s: unknown5\t\t\t\t: 0x%08" PRIx64 "\n",
+			 function,
+			 value_64bit );
+		}
+		else if( io_handle->major_format_version == 3 )
+		{
+			byte_stream_copy_to_uint64_little_endian(
+			 ( (fsrefs_checkpoint_trailer_v3_t *) &( data[ data_offset ] ) )->unknown2,
+			 value_64bit );
+			libcnotify_printf(
+			 "%s: unknown2\t\t\t\t: 0x%08" PRIx64 "\n",
+			 function,
+			 value_64bit );
+
+			byte_stream_copy_to_uint64_little_endian(
+			 ( (fsrefs_checkpoint_trailer_v3_t *) &( data[ data_offset ] ) )->unknown3,
+			 value_64bit );
+			libcnotify_printf(
+			 "%s: unknown3\t\t\t\t: 0x%08" PRIx64 "\n",
 			 function,
 			 value_64bit );
 
 			byte_stream_copy_to_uint32_little_endian(
-			 ( (fsrefs_checkpoint_v1_t *) data )->unknown5,
+			 ( (fsrefs_checkpoint_trailer_v3_t *) &( data[ data_offset ] ) )->unknown4,
+			 value_32bit );
+			libcnotify_printf(
+			 "%s: unknown4\t\t\t\t: 0x%08" PRIx32 "\n",
+			 function,
+			 value_32bit );
+
+			byte_stream_copy_to_uint32_little_endian(
+			 ( (fsrefs_checkpoint_trailer_v3_t *) &( data[ data_offset ] ) )->unknown5,
 			 value_32bit );
 			libcnotify_printf(
 			 "%s: unknown5\t\t\t\t: 0x%08" PRIx32 "\n",
 			 function,
 			 value_32bit );
 
+			byte_stream_copy_to_uint64_little_endian(
+			 ( (fsrefs_checkpoint_trailer_v3_t *) &( data[ data_offset ] ) )->unknown6,
+			 value_64bit );
+			libcnotify_printf(
+			 "%s: unknown6\t\t\t\t: 0x%08" PRIx64 "\n",
+			 function,
+			 value_64bit );
+
+			byte_stream_copy_to_uint64_little_endian(
+			 ( (fsrefs_checkpoint_trailer_v3_t *) &( data[ data_offset ] ) )->unknown7,
+			 value_64bit );
+			libcnotify_printf(
+			 "%s: unknown7\t\t\t\t: 0x%08" PRIx64 "\n",
+			 function,
+			 value_64bit );
+
 			byte_stream_copy_to_uint32_little_endian(
-			 ( (fsrefs_checkpoint_v1_t *) data )->unknown6,
+			 ( (fsrefs_checkpoint_trailer_v3_t *) &( data[ data_offset ] ) )->unknown8,
 			 value_32bit );
 			libcnotify_printf(
-			 "%s: unknown6\t\t\t\t: 0x%08" PRIx32 "\n",
+			 "%s: unknown8\t\t\t\t: 0x%08" PRIx32 "\n",
 			 function,
 			 value_32bit );
 
+			byte_stream_copy_to_uint32_little_endian(
+			 ( (fsrefs_checkpoint_trailer_v3_t *) &( data[ data_offset ] ) )->unknown9,
+			 value_32bit );
 			libcnotify_printf(
-			 "%s: unknown7:\n",
-			 function );
-			libcnotify_print_data(
-			 ( (fsrefs_checkpoint_v1_t *) data )->unknown7,
-			 8,
-			 LIBCNOTIFY_PRINT_DATA_FLAG_GROUP_DATA );
-
-			libcnotify_printf(
-			 "%s: number of table entries\t\t\t: %" PRIu32 "\n",
+			 "%s: unknown9\t\t\t\t: 0x%08" PRIx32 "\n",
 			 function,
-			 number_of_entries );
-
-			libcnotify_printf(
-			 "%s: table entry offsets data:\n",
-			 function );
-			libcnotify_print_data(
-			 &( data[ sizeof( fsrefs_checkpoint_v1_t ) ] ),
-			 4 * number_of_entries,
-			 LIBCNOTIFY_PRINT_DATA_FLAG_GROUP_DATA );
-
+			 value_32bit );
 		}
+		libcnotify_printf(
+		 "%s: number of offsets\t\t\t: %" PRIu32 "\n",
+		 function,
+		 number_of_offsets );
 	}
 #endif /* defined( HAVE_DEBUG_OUTPUT ) */
 
-/* TODO check if entry offset is in bounds */
+	data_offset += trailer_size;
 
-#ifdef TODO
+	if( ( ( data_size - data_offset ) / 4 ) < number_of_offsets )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: invalid number of offsets value out of bounds.",
+		 function );
+
+		goto on_error;
+	}
+	offsets_data_offset = data_offset;
 
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )
 	{
-		byte_stream_copy_to_uint64_little_endian(
-		 &( metadata_block->data[ entry_offset ] ),
-		 value_64bit );
 		libcnotify_printf(
-		 "%s: self entry: block number\t\t: %" PRIu64 "\n",
-		 function,
-		 value_64bit );
-
-		byte_stream_copy_to_uint64_little_endian(
-		 &( metadata_block->data[ entry_offset + 8 ] ),
-		 value_64bit );
-		libcnotify_printf(
-		 "%s: self entry: unknown1\t\t\t: 0x%08" PRIx64 "\n",
-		 function,
-		 value_64bit );
-
-		byte_stream_copy_to_uint64_little_endian(
-		 &( metadata_block->data[ entry_offset + 16 ] ),
-		 value_64bit );
-		libcnotify_printf(
-		 "%s: self entry: checksum\t\t\t: 0x%08" PRIx64 "\n",
-		 function,
-		 value_64bit );
-
-		libcnotify_printf(
-		 "\n" );
+		 "%s: offsets data:\n",
+		 function );
+		libcnotify_print_data(
+		 &( data[ data_offset ] ),
+		 number_of_offsets * 4,
+		 0 );
 	}
 #endif
-	metadata_block_data_offset = 92;
-
-	for( entry_index = 0;
-	     entry_index < number_of_entries;
-	     entry_index++ )
-	{
-		byte_stream_copy_to_uint32_little_endian(
-		 &( metadata_block->data[ metadata_block_data_offset ] ),
-		 entry_offset );
-
-		metadata_block_data_offset += 4;
+	data_offset += number_of_offsets * 4;
 
 #if defined( HAVE_DEBUG_OUTPUT )
-		if( libcnotify_verbose != 0 )
+	if( libcnotify_verbose != 0 )
+	{
+		if( self_reference_data_offset > data_offset )
 		{
 			libcnotify_printf(
-			 "%s: entry: %02" PRIu32 " offset\t\t\t: 0x%08" PRIx32 "\n",
-			 function,
-			 entry_index,
-			 entry_offset );
+			 "%s: unknown4\n",
+			 function );
+			libcnotify_print_data(
+			 &( data[ data_offset ] ),
+			 (size_t) self_reference_data_offset - data_offset,
+			 LIBCNOTIFY_PRINT_DATA_FLAG_GROUP_DATA );
 		}
-#endif
+	}
+#endif /* defined( HAVE_DEBUG_OUTPUT ) */
+
+	data_offset = self_reference_data_offset;
+
+	if( ( data_size - data_offset ) < self_reference_data_size )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: invalid self reference data size value out of bounds.",
+		 function );
+
+		goto on_error;
+	}
+#if defined( HAVE_DEBUG_OUTPUT )
+	if( libcnotify_verbose != 0 )
+	{
+		libcnotify_printf(
+		 "%s: self reference data\n",
+		 function );
+		libcnotify_print_data(
+		 &( data[ data_offset ] ),
+		 self_reference_data_size,
+		 LIBCNOTIFY_PRINT_DATA_FLAG_GROUP_DATA );
+
 		if( libfsrefs_block_descriptor_initialize(
 		     &block_descriptor,
 		     error ) != 1 )
@@ -444,48 +567,104 @@ int libfsrefs_checkpoint_read_data(
 
 			goto on_error;
 		}
-/* TODO check if entry offset is in bounds */
+		if( libfsrefs_block_descriptor_read_data(
+		     block_descriptor,
+		     io_handle,
+		     &( data[ data_offset ] ),
+		     self_reference_data_size,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_IO,
+			 LIBCERROR_IO_ERROR_READ_FAILED,
+			 "%s: unable to read block descriptor.",
+			 function );
 
-		byte_stream_copy_to_uint64_little_endian(
-		 &( metadata_block->data[ entry_offset ] ),
-		 block_descriptor->block_number );
+			goto on_error;
+		}
+		if( libfsrefs_block_descriptor_free(
+		     &block_descriptor,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable to free block descriptor.",
+			 function );
 
-		byte_stream_copy_to_uint64_little_endian(
-		 &( metadata_block->data[ entry_offset + 8 ] ),
-		 block_descriptor->unknown );
+			goto on_error;
+		}
+	}
+#endif /* defined( HAVE_DEBUG_OUTPUT ) */
 
-		byte_stream_copy_to_uint64_little_endian(
-		 &( metadata_block->data[ entry_offset + 16 ] ),
-		 block_descriptor->checksum );
+	for( offset_index = 0;
+	     offset_index < number_of_offsets;
+	     offset_index++ )
+	{
+		byte_stream_copy_to_uint32_little_endian(
+		 &( data[ offsets_data_offset ] ),
+		 descriptor_offset );
+
+		offsets_data_offset += 4;
 
 #if defined( HAVE_DEBUG_OUTPUT )
 		if( libcnotify_verbose != 0 )
 		{
 			libcnotify_printf(
-			 "%s: entry: %02" PRIu32 " block number\t\t\t: %" PRIu64 "\n",
+			 "%s: descriptor: %02" PRIu32 " offset\t\t\t: 0x%08" PRIx32 "\n",
 			 function,
-			 entry_index,
-			 block_descriptor->block_number );
-
-			libcnotify_printf(
-			 "%s: entry: %02" PRIu32 " unknown1\t\t\t: 0x%08" PRIx64 "\n",
-			 function,
-			 entry_index,
-			 block_descriptor->unknown );
-
-			libcnotify_printf(
-			 "%s: entry: %02" PRIu32 " checksum\t\t\t: 0x%08" PRIx64 "\n",
-			 function,
-			 entry_index,
-			 block_descriptor->checksum );
-
-			libcnotify_printf(
-			 "\n" );
+			 offset_index,
+			 descriptor_offset );
 		}
 #endif
+		if( ( descriptor_offset < ( data_offset + header_size ) )
+		 || ( descriptor_offset >= io_handle->metadata_block_size ) )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+			 "%s: invalid descriptor offset value out of bounds.",
+			 function );
+
+			goto on_error;
+		}
+		descriptor_offset -= header_size;
+
+		if( libfsrefs_block_descriptor_initialize(
+		     &block_descriptor,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+			 "%s: unable to create block descriptor.",
+			 function );
+
+			goto on_error;
+		}
+		if( libfsrefs_block_descriptor_read_data(
+		     block_descriptor,
+		     io_handle,
+		     &( data[ descriptor_offset ] ),
+		     data_size - descriptor_offset,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_IO,
+			 LIBCERROR_IO_ERROR_READ_FAILED,
+			 "%s: unable to read block descriptor.",
+			 function );
+
+			goto on_error;
+		}
 		if( libcdata_array_append_entry(
 		     checkpoint->level2_metadata_block_descriptors_array,
-		     &array_entry_index,
+		     &entry_index,
 		     (intptr_t *) block_descriptor,
 		     error ) != 1 )
 		{
@@ -500,19 +679,15 @@ int libfsrefs_checkpoint_read_data(
 		}
 		block_descriptor = NULL;
 	}
-#endif /* TODO */
-
 	return( 1 );
 
 on_error:
-#ifdef TODO
 	if( block_descriptor != NULL )
 	{
 		libfsrefs_block_descriptor_free(
 		 &block_descriptor,
 		 NULL );
 	}
-#endif /* TODO */
 	return( -1 );
 }
 
@@ -654,8 +829,23 @@ int libfsrefs_checkpoint_read_file_io_handle(
 	}
 	file_offset += header_size;
 
-/* TODO check header */
+	if( io_handle->major_format_version == 3 )
+	{
+		if( memory_compare(
+		     metadata_block_header->signature,
+		     "CHKP",
+		     4 ) != 0 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
+			 "%s: invalid metadata block signature.",
+			 function );
 
+			goto on_error;
+		}
+	}
 	if( libfsrefs_metadata_block_header_free(
 	     &metadata_block_header,
 	     error ) != 1 )

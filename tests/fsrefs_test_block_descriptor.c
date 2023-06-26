@@ -297,13 +297,19 @@ int main(
 	 "libfsrefs_block_descriptor_free",
 	 fsrefs_test_block_descriptor_free );
 
+	/* TODO: add tests for libfsrefs_block_descriptor_read_data */
+
 	/* TODO: add tests for libfsrefs_block_descriptor_set_identifier */
 
 #endif /* defined( __GNUC__ ) && !defined( LIBFSREFS_DLL_IMPORT ) */
 
 	return( EXIT_SUCCESS );
 
+#if defined( __GNUC__ ) && !defined( LIBFSREFS_DLL_IMPORT )
+
 on_error:
 	return( EXIT_FAILURE );
+
+#endif /* defined( __GNUC__ ) && !defined( LIBFSREFS_DLL_IMPORT ) */
 }
 

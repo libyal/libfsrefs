@@ -20,10 +20,16 @@
  */
 
 #include <common.h>
+#include <byte_stream.h>
 #include <memory.h>
 #include <types.h>
 
 #include "libfsrefs_block_descriptor.h"
+#include "libfsrefs_io_handle.h"
+#include "libfsrefs_libcerror.h"
+#include "libfsrefs_libcnotify.h"
+
+#include "fsrefs_metadata_block.h"
 
 /* Creates a block descriptor
  * Make sure the value block_descriptor is referencing, is set to NULL
@@ -130,6 +136,264 @@ int libfsrefs_block_descriptor_free(
 
 		*block_descriptor = NULL;
 	}
+	return( 1 );
+}
+
+/* Reads a block descriptor
+ * Returns 1 if successful or -1 on error
+ */
+int libfsrefs_block_descriptor_read_data(
+     libfsrefs_block_descriptor_t *block_descriptor,
+     libfsrefs_io_handle_t *io_handle,
+     const uint8_t *data,
+     size_t data_size,
+     libcerror_error_t **error )
+{
+	static char *function        = "libfsrefs_block_descriptor_read_data";
+	size_t block_descriptor_size = 0;
+	uint16_t checksum_data_size  = 0;
+	uint8_t checksum_data_offset = 0;
+	uint8_t checksum_type        = 0;
+
+#if defined( HAVE_DEBUG_OUTPUT )
+	uint64_t value_64bit         = 0;
+	uint16_t value_16bit         = 0;
+#endif
+
+	if( block_descriptor == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid block descriptor.",
+		 function );
+
+		return( -1 );
+	}
+	if( io_handle == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid IO handle.",
+		 function );
+
+		return( -1 );
+	}
+	if( io_handle->major_format_version == 1 )
+	{
+		block_descriptor_size = sizeof( fsrefs_metadata_block_descriptor_v1_t );
+	}
+	else if( io_handle->major_format_version == 3 )
+	{
+		block_descriptor_size = sizeof( fsrefs_metadata_block_descriptor_v3_t );
+	}
+	else
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
+		 "%s: unsupported format version: %" PRIu8 ".%" PRIu8 ".",
+		 function,
+		 io_handle->major_format_version,
+		 io_handle->minor_format_version );
+
+		return( -1 );
+	}
+	if( data == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 "%s: invalid data.",
+		 function );
+
+		return( -1 );
+	}
+	if( ( data_size < block_descriptor_size )
+	 || ( data_size > (size_t) SSIZE_MAX ) )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: invalid data size value out of bounds.",
+		 function );
+
+		return( -1 );
+	}
+#if defined( HAVE_DEBUG_OUTPUT )
+	if( libcnotify_verbose != 0 )
+	{
+		libcnotify_printf(
+		 "%s: block descriptor data:\n",
+		 function );
+		libcnotify_print_data(
+		 data,
+		 block_descriptor_size,
+		 LIBCNOTIFY_PRINT_DATA_FLAG_GROUP_DATA );
+	}
+#endif
+	if( io_handle->major_format_version == 1 )
+	{
+		byte_stream_copy_to_uint64_little_endian(
+		 ( (fsrefs_metadata_block_descriptor_v1_t *) data )->block_number,
+		 block_descriptor->block_number );
+
+		checksum_type = ( (fsrefs_metadata_block_descriptor_v1_t *) data )->checksum_type;
+
+		checksum_data_offset = ( (fsrefs_metadata_block_descriptor_v1_t *) data )->checksum_data_offset;
+
+		byte_stream_copy_to_uint16_little_endian(
+		 ( (fsrefs_metadata_block_descriptor_v1_t *) data )->checksum_data_size,
+		 checksum_data_size );
+	}
+	else if( io_handle->major_format_version == 3 )
+	{
+		byte_stream_copy_to_uint64_little_endian(
+		 ( (fsrefs_metadata_block_descriptor_v3_t *) data )->block_number1,
+		 block_descriptor->block_number );
+
+		checksum_type = ( (fsrefs_metadata_block_descriptor_v3_t *) data )->checksum_type;
+
+		checksum_data_offset = ( (fsrefs_metadata_block_descriptor_v3_t *) data )->checksum_data_offset;
+
+		byte_stream_copy_to_uint16_little_endian(
+		 ( (fsrefs_metadata_block_descriptor_v3_t *) data )->checksum_data_size,
+		 checksum_data_size );
+	}
+#if defined( HAVE_DEBUG_OUTPUT )
+	if( libcnotify_verbose != 0 )
+	{
+		if( io_handle->major_format_version == 1 )
+		{
+			libcnotify_printf(
+			 "%s: block number\t\t\t: %" PRIu64 "\n",
+			 function,
+			 block_descriptor->block_number );
+		}
+		else if( io_handle->major_format_version == 3 )
+		{
+			libcnotify_printf(
+			 "%s: block number1\t\t\t: %" PRIu64 "\n",
+			 function,
+			 block_descriptor->block_number );
+
+			byte_stream_copy_to_uint64_little_endian(
+			 ( (fsrefs_metadata_block_descriptor_v3_t *) data )->block_number2,
+			 value_64bit );
+			libcnotify_printf(
+			 "%s: block number2\t\t\t: %" PRIu64 "\n",
+			 function,
+			 value_64bit );
+
+			byte_stream_copy_to_uint64_little_endian(
+			 ( (fsrefs_metadata_block_descriptor_v3_t *) data )->block_number3,
+			 value_64bit );
+			libcnotify_printf(
+			 "%s: block number3\t\t\t: %" PRIu64 "\n",
+			 function,
+			 value_64bit );
+
+			byte_stream_copy_to_uint64_little_endian(
+			 ( (fsrefs_metadata_block_descriptor_v3_t *) data )->block_number4,
+			 value_64bit );
+			libcnotify_printf(
+			 "%s: block number4\t\t\t: %" PRIu64 "\n",
+			 function,
+			 value_64bit );
+		}
+		if( io_handle->major_format_version == 1 )
+		{
+			byte_stream_copy_to_uint16_little_endian(
+			 ( (fsrefs_metadata_block_descriptor_v1_t *) data )->unknown1,
+			 value_16bit );
+		}
+		else if( io_handle->major_format_version == 3 )
+		{
+			byte_stream_copy_to_uint16_little_endian(
+			 ( (fsrefs_metadata_block_descriptor_v3_t *) data )->unknown1,
+			 value_16bit );
+		}
+		libcnotify_printf(
+		 "%s: unknown1\t\t\t\t: 0x%04" PRIx16 "\n",
+		 function,
+		 value_16bit );
+
+		libcnotify_printf(
+		 "%s: checksum type\t\t\t: %" PRIu8 "\n",
+		 function,
+		 checksum_type );
+
+		libcnotify_printf(
+		 "%s: checksum data offset\t\t: %" PRIu8 "\n",
+		 function,
+		 checksum_data_offset );
+
+		libcnotify_printf(
+		 "%s: checksum data size\t\t: %" PRIu16 "\n",
+		 function,
+		 checksum_data_size );
+
+		if( io_handle->major_format_version == 1 )
+		{
+			byte_stream_copy_to_uint16_little_endian(
+			 ( (fsrefs_metadata_block_descriptor_v1_t *) data )->unknown2,
+			 value_16bit );
+		}
+		else if( io_handle->major_format_version == 3 )
+		{
+			byte_stream_copy_to_uint16_little_endian(
+			 ( (fsrefs_metadata_block_descriptor_v3_t *) data )->unknown2,
+			 value_16bit );
+		}
+		libcnotify_printf(
+		 "%s: unknown2\t\t\t\t: 0x%04" PRIx16 "\n",
+		 function,
+		 value_16bit );
+	}
+#endif /* defined( HAVE_DEBUG_OUTPUT ) */
+
+	if( ( checksum_type != 1 )
+	 && ( checksum_type != 2 ) )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
+		 "%s: unsupported checksum type: %" PRIu8 ".",
+		 function,
+		 checksum_type );
+
+		return( -1 );
+	}
+/* TODO validate checksum data offset */
+/* TODO validate checksum data size */
+
+	if( io_handle->major_format_version == 1 )
+	{
+		checksum_data_offset += 8;
+	}
+	else if( io_handle->major_format_version == 3 )
+	{
+		checksum_data_offset += 32;
+	}
+#if defined( HAVE_DEBUG_OUTPUT )
+	if( libcnotify_verbose != 0 )
+	{
+		libcnotify_printf(
+		 "%s: checksum data:\n",
+		 function );
+		libcnotify_print_data(
+		 &( data[ checksum_data_offset ] ),
+		 checksum_data_size,
+		 LIBCNOTIFY_PRINT_DATA_FLAG_GROUP_DATA );
+	}
+#endif
 	return( 1 );
 }
 

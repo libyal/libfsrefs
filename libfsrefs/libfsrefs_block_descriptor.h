@@ -25,6 +25,7 @@
 #include <common.h>
 #include <types.h>
 
+#include "libfsrefs_io_handle.h"
 #include "libfsrefs_libcerror.h"
 
 #if defined( __cplusplus )
@@ -62,6 +63,13 @@ int libfsrefs_block_descriptor_initialize(
 
 int libfsrefs_block_descriptor_free(
      libfsrefs_block_descriptor_t **block_descriptor,
+     libcerror_error_t **error );
+
+int libfsrefs_block_descriptor_read_data(
+     libfsrefs_block_descriptor_t *block_descriptor,
+     libfsrefs_io_handle_t *io_handle,
+     const uint8_t *data,
+     size_t data_size,
      libcerror_error_t **error );
 
 int libfsrefs_block_descriptor_set_identifier(
