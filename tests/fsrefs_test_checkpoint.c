@@ -2303,42 +2303,21 @@ on_error:
 	return( 0 );
 }
 
-/* Tests the libfsrefs_checkpoint_get_number_of_level2_metadata_block_descriptors function
+/* Tests the libfsrefs_checkpoint_get_number_of_ministore_tree_block_descriptors function
  * Returns 1 if successful or 0 if not
  */
-int fsrefs_test_checkpoint_get_number_of_level2_metadata_block_descriptors(
-     void )
+int fsrefs_test_checkpoint_get_number_of_ministore_tree_block_descriptors(
+     libfsrefs_checkpoint_t *checkpoint )
 {
-	libcerror_error_t *error                               = NULL;
-	libfsrefs_checkpoint_t *checkpoint                     = NULL;
-	int number_of_level2_metadata_block_descriptors        = 0;
-	int number_of_level2_metadata_block_descriptors_is_set = 0;
-	int result                                             = 0;
-
-	/* Initialize test
-	 */
-	result = libfsrefs_checkpoint_initialize(
-	          &checkpoint,
-	          &error );
-
-	FSREFS_TEST_ASSERT_EQUAL_INT(
-	 "result",
-	 result,
-	 1 );
-
-	FSREFS_TEST_ASSERT_IS_NOT_NULL(
-	 "checkpoint",
-	 checkpoint );
-
-	FSREFS_TEST_ASSERT_IS_NULL(
-	 "error",
-	 error );
+	libcerror_error_t *error                       = NULL;
+	int number_of_ministore_tree_block_descriptors = 0;
+	int result                                     = 0;
 
 	/* Test regular cases
 	 */
-	result = libfsrefs_checkpoint_get_number_of_level2_metadata_block_descriptors(
+	result = libfsrefs_checkpoint_get_number_of_ministore_tree_block_descriptors(
 	          checkpoint,
-	          &number_of_level2_metadata_block_descriptors,
+	          &number_of_ministore_tree_block_descriptors,
 	          &error );
 
 	FSREFS_TEST_ASSERT_NOT_EQUAL_INT(
@@ -2350,13 +2329,11 @@ int fsrefs_test_checkpoint_get_number_of_level2_metadata_block_descriptors(
 	 "error",
 	 error );
 
-	number_of_level2_metadata_block_descriptors_is_set = result;
-
 	/* Test error cases
 	 */
-	result = libfsrefs_checkpoint_get_number_of_level2_metadata_block_descriptors(
+	result = libfsrefs_checkpoint_get_number_of_ministore_tree_block_descriptors(
 	          NULL,
-	          &number_of_level2_metadata_block_descriptors,
+	          &number_of_ministore_tree_block_descriptors,
 	          &error );
 
 	FSREFS_TEST_ASSERT_EQUAL_INT(
@@ -2371,43 +2348,22 @@ int fsrefs_test_checkpoint_get_number_of_level2_metadata_block_descriptors(
 	libcerror_error_free(
 	 &error );
 
-	if( number_of_level2_metadata_block_descriptors_is_set != 0 )
-	{
-		result = libfsrefs_checkpoint_get_number_of_level2_metadata_block_descriptors(
-		          checkpoint,
-		          NULL,
-		          &error );
-
-		FSREFS_TEST_ASSERT_EQUAL_INT(
-		 "result",
-		 result,
-		 -1 );
-
-		FSREFS_TEST_ASSERT_IS_NOT_NULL(
-		 "error",
-		 error );
-
-		libcerror_error_free(
-		 &error );
-	}
-	/* Clean up
-	 */
-	result = libfsrefs_checkpoint_free(
-	          &checkpoint,
+	result = libfsrefs_checkpoint_get_number_of_ministore_tree_block_descriptors(
+	          checkpoint,
+	          NULL,
 	          &error );
 
 	FSREFS_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
-	 1 );
+	 -1 );
 
-	FSREFS_TEST_ASSERT_IS_NULL(
-	 "checkpoint",
-	 checkpoint );
-
-	FSREFS_TEST_ASSERT_IS_NULL(
+	FSREFS_TEST_ASSERT_IS_NOT_NULL(
 	 "error",
 	 error );
+
+	libcerror_error_free(
+	 &error );
 
 	return( 1 );
 
@@ -2416,12 +2372,6 @@ on_error:
 	{
 		libcerror_error_free(
 		 &error );
-	}
-	if( checkpoint != NULL )
-	{
-		libfsrefs_checkpoint_free(
-		 &checkpoint,
-		 NULL );
 	}
 	return( 0 );
 }
@@ -2525,18 +2475,12 @@ int main(
 
 	/* Run tests
 	 */
-/* TODO
 	FSREFS_TEST_RUN_WITH_ARGS(
-	 "libfsrefs_checkpoint_get_volume_size",
-	 fsrefs_test_checkpoint_get_volume_size,
+	 "libfsrefs_checkpoint_get_number_of_ministore_tree_block_descriptors",
+	 fsrefs_test_checkpoint_get_number_of_ministore_tree_block_descriptors,
 	 checkpoint );
-*/
 
-	FSREFS_TEST_RUN(
-	 "libfsrefs_checkpoint_get_number_of_level2_metadata_block_descriptors",
-	 fsrefs_test_checkpoint_get_number_of_level2_metadata_block_descriptors );
-
-	/* TODO: add tests for libfsrefs_checkpoint_get_level2_metadata_block_descriptor_by_index */
+	/* TODO: add tests for libfsrefs_checkpoint_get_ministore_tree_block_descriptor_by_index */
 
 	/* Clean up
 	 */

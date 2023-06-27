@@ -1,5 +1,5 @@
 /*
- * Input/Output (IO) handle functions
+ * Ministor node record functions
  *
  * Copyright (C) 2012-2023, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -19,8 +19,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if !defined( _LIBFSREFS_IO_HANDLE_H )
-#define _LIBFSREFS_IO_HANDLE_H
+#if !defined( _LIBFSREFS_NODE_RECORD_H )
+#define _LIBFSREFS_NODE_RECORD_H
 
 #include <common.h>
 #include <types.h>
@@ -31,60 +31,52 @@
 extern "C" {
 #endif
 
-extern const char fsrefs_volume_file_system_signature[ 8 ];
+typedef struct libfsrefs_node_record libfsrefs_node_record_t;
 
-typedef struct libfsrefs_io_handle libfsrefs_io_handle_t;
-
-struct libfsrefs_io_handle
+struct libfsrefs_node_record
 {
-	/* The number of bytes per sector
+	/* The size
 	 */
-	uint32_t bytes_per_sector;
+	uint32_t size;
 
-	/* The volume size
+	/* The flags
 	 */
-	size64_t volume_size;
+	uint16_t flags;
 
-	/* The major format version
+	/* The key data offset
 	 */
-	uint8_t major_format_version;
+	uint16_t key_data_offset;
 
-	/* The minor format version
+	/* The key data size
 	 */
-	uint8_t minor_format_version;
+	uint16_t key_data_size;
 
-	/* The block size
+	/* The value data offset
 	 */
-	size_t block_size;
+	uint16_t value_data_offset;
 
-	/* The metadata block size
+	/* The value data size
 	 */
-	size_t metadata_block_size;
-
-	/* The container size
-	 */
-	uint64_t container_size;
-
-	/* Value to indicate if abort was signalled
-	 */
-	int abort;
+	uint16_t value_data_size;
 };
 
-int libfsrefs_io_handle_initialize(
-     libfsrefs_io_handle_t **io_handle,
+int libfsrefs_node_record_initialize(
+     libfsrefs_node_record_t **node_record,
      libcerror_error_t **error );
 
-int libfsrefs_io_handle_free(
-     libfsrefs_io_handle_t **io_handle,
+int libfsrefs_node_record_free(
+     libfsrefs_node_record_t **node_record,
      libcerror_error_t **error );
 
-int libfsrefs_io_handle_clear(
-     libfsrefs_io_handle_t *io_handle,
+int libfsrefs_node_record_read_data(
+     libfsrefs_node_record_t *node_record,
+     const uint8_t *data,
+     size_t data_size,
      libcerror_error_t **error );
 
 #if defined( __cplusplus )
 }
 #endif
 
-#endif /* !defined( _LIBFSREFS_IO_HANDLE_H ) */
+#endif /* !defined( _LIBFSREFS_NODE_RECORD_H ) */
 

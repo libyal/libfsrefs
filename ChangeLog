@@ -1,4 +1,7 @@
 TODO
+* Format support
+** For version 3.x map block number to container
+
 * API
   - complete volume name functions
 * metadata table
@@ -49,3 +52,4 @@ TODO
 
 20120527
 * initial version based on libfsntfs
+

@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9,00"
-	Name="fsrefs_test_level2_metadata"
-	ProjectGUID="{2DC26DAE-740E-4108-A2E7-935F98D4AE89}"
-	RootNamespace="fsrefs_test_level2_metadata"
+	Name="fsrefs_test_ministore_tree"
+	ProjectGUID="{4D8E5555-B3AA-401E-9F13-8E5E17540386}"
+	RootNamespace="fsrefs_test_ministore_tree"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="131072"
 	>
@@ -176,11 +176,15 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\..\tests\fsrefs_test_level2_metadata.c"
+				RelativePath="..\..\tests\fsrefs_test_functions.c"
 				>
 			</File>
 			<File
 				RelativePath="..\..\tests\fsrefs_test_memory.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\tests\fsrefs_test_ministore_tree.c"
 				>
 			</File>
 		</Filter>
@@ -189,6 +193,14 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
+			<File
+				RelativePath="..\..\tests\fsrefs_test_functions.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\tests\fsrefs_test_libbfio.h"
+				>
+			</File>
 			<File
 				RelativePath="..\..\tests\fsrefs_test_libcerror.h"
 				>

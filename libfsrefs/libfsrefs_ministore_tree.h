@@ -1,5 +1,5 @@
 /*
- * Level 2 metadata functions
+ * Ministore tree (or level 2 metadata) functions
  *
  * Copyright (C) 2012-2023, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -19,8 +19,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if !defined( _LIBFSREFS_LEVEL2_METADATA_H )
-#define _LIBFSREFS_LEVEL2_METADATA_H
+#if !defined( _LIBFSREFS_MINISTORE_TREE_H )
+#define _LIBFSREFS_MINISTORE_TREE_H
 
 #include <common.h>
 #include <types.h>
@@ -35,37 +35,44 @@
 extern "C" {
 #endif
 
-typedef struct libfsrefs_level2_metadata libfsrefs_level2_metadata_t;
+typedef struct libfsrefs_ministore_tree libfsrefs_ministore_tree_t;
 
-struct libfsrefs_level2_metadata
+struct libfsrefs_ministore_tree
 {
 	/* The block descriptors array
 	 */
 	libcdata_array_t *block_descriptors_array;
 };
 
-int libfsrefs_level2_metadata_initialize(
-     libfsrefs_level2_metadata_t **level2_metadata,
+int libfsrefs_ministore_tree_initialize(
+     libfsrefs_ministore_tree_t **ministore_tree,
      libcerror_error_t **error );
 
-int libfsrefs_level2_metadata_free(
-     libfsrefs_level2_metadata_t **level2_metadata,
+int libfsrefs_ministore_tree_free(
+     libfsrefs_ministore_tree_t **ministore_tree,
      libcerror_error_t **error );
 
-int libfsrefs_level2_metadata_read(
-     libfsrefs_level2_metadata_t *level2_metadata,
+int libfsrefs_ministore_tree_read_data(
+     libfsrefs_ministore_tree_t *ministore_tree,
+     libfsrefs_io_handle_t *io_handle,
+     const uint8_t *data,
+     size_t data_size,
+     libcerror_error_t **error );
+
+int libfsrefs_ministore_tree_read_file_io_handle(
+     libfsrefs_ministore_tree_t *ministore_tree,
      libfsrefs_io_handle_t *io_handle,
      libbfio_handle_t *file_io_handle,
      off64_t file_offset,
      libcerror_error_t **error );
 
-int libfsrefs_level2_metadata_get_number_of_block_descriptors(
-     libfsrefs_level2_metadata_t *level2_metadata,
+int libfsrefs_ministore_tree_get_number_of_block_descriptors(
+     libfsrefs_ministore_tree_t *ministore_tree,
      int *number_of_block_descriptors,
      libcerror_error_t **error );
 
-int libfsrefs_level2_metadata_get_block_descriptor_by_index(
-     libfsrefs_level2_metadata_t *level2_metadata,
+int libfsrefs_ministore_tree_get_block_descriptor_by_index(
+     libfsrefs_ministore_tree_t *ministore_tree,
      int block_descriptor_index,
      libfsrefs_block_descriptor_t **block_descriptor,
      libcerror_error_t **error );
@@ -74,5 +81,5 @@ int libfsrefs_level2_metadata_get_block_descriptor_by_index(
 }
 #endif
 
-#endif /* !defined( _LIBFSREFS_LEVEL2_METADATA_H ) */
+#endif /* !defined( _LIBFSREFS_MINISTORE_TREE_H ) */
 

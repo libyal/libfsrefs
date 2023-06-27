@@ -141,7 +141,7 @@ The volume header is 512 bytes of size and consists of:
 | 44 | 4 | | [yellow-background]*Unknown*
 | 48 | 8 | 0x00 | [yellow-background]*Unknown (empty values)*
 | 56 | 8 | | Volume serial number
-| 64 | 8 | | [yellow-background]*Unknown (Container size?)*
+| 64 | 8 | | [yellow-background]*Unknown (container (or band) size?)*
 | 72 | 440 | 0x00 | [yellow-background]*Unknown (empty values)*
 |===
 
@@ -155,11 +155,10 @@ There are multiple levels of metadata:
 
 [cols="1,1,5",options="header"]
 |===
-| Value | Signature | Description
+| Level | Block signature | Description
 | 0 | "SUPB" | Superblock
 | 1 | "CHKP" | Checkpoint
-| 2 | "MSB+" | Ministore B-tree
-| 3 | | 
+| 2+ | "MSB+" | Ministore tree (B+-tree)
 |===
 
 [yellow-background]*TODO: is the metadata block referred to as synchronous ministore (SMS) by Microsoft?*
@@ -174,7 +173,7 @@ The format version 1 metadata block header is 48 bytes of size and consists of:
 |===
 | Offset | Size | Value | Description
 | 0 | 8 | | Block number +
-Relative from the start of the volume
+The block number is relative from the start of the volume
 | 8 | 8 | | [yellow-background]*Unknown (sequence number?)*
 | 16 | 8 | 0x00 | [yellow-background]*Unknown (empty values)*
 | 24 | 8 | | Object identifier +
@@ -198,10 +197,10 @@ The format version 3 metadata block header is 80 bytes of size and consists of:
 | 12 | 4 | | [yellow-background]*Unknown (volume signature?)*
 | 16 | 8 | | [yellow-background]*Unknown (virtual allocator clock?)*
 | 24 | 8 | | [yellow-background]*Unknown (tree update clock?)*
-| 32 | 8 | | First block number of the metadata
-| 40 | 8 | | Second block number of the metadata
-| 48 | 8 | | Third block number of the metadata
-| 56 | 8 | | Fourth block number of the metadata
+| 32 | 8 | | First block number
+| 40 | 8 | | Second block number
+| 48 | 8 | | Third block number
+| 56 | 8 | | Fourth block number
 | 64 | 8 | | [yellow-background]*Unknown (table identifier upper 64-bit?)*
 | 72 | 8 | | [yellow-background]*Unknown (table identifier lower 64-bit?)*
 |===
@@ -349,7 +348,7 @@ The checkpoint metadata consists of:
 * Checkpoint header
 * Checkpoint trailer
 * Self <<metadata_block_descriptor,metadata block descriptor>
-* Level 2 metadata <<metadata_block_descriptor,metadata block descriptors>>
+* Ministore tree <<metadata_block_descriptor,metadata block descriptors>>
 
 ==== Checkpoint header
 
@@ -406,15 +405,188 @@ The offset is relative to the start of the metadata block
 | ... | ... | 0x00 | [yellow-background]*Unknown (empty values)*
 |===
 
+==== Ministore tree block descriptors
+
+[cols="1,1,5",options="header"]
+|===
+| Index | Identifier | Description
+| 0 | | Object identifiers tree
+| 1 | | Medium allocator tree
+| 2 | | Container allocator tree
+| 3 | | Schema tree
+| 4 | | Parent-child relationship tree
+| 5 | | Copy of object identifier tree
+| 6 | | Block reference count tree
+| 7 | | Container tree
+| 8 | | Copy of container tree
+| 9 | | Copy of schema tree
+| 10 | | Container index tree
+| 11 | | Integrity state tree
+| 12 | | Small allocator tree
+|===
+
+=== Ministore tree (level 2) metadata
+
+The ministore tree metadata consists of:
+
+* <<metadata_block_header,Metadata block header>>
+* Tree header
+* Node header
+* Node records
+* Unused
+* Node record offsets
+
+==== Tree header
+
+The tree header is variable in size and consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 4 | | Node header offset +
+The offset is relative to the start of the tree header
+| 4 | 2 | 0x28 | Header data size
+| 6 | 2 | | [yellow-background]*Unknown*
+| 8 | 2 | | [yellow-background]*Unknown*
+| 10 | 2 | | [yellow-background]*Unknown*
+| 12 | 2 | | [yellow-background]*Unknown*
+|===
+
+==== Node header
+
+The node header is 32 bytes of size and consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 4 | | Data area start offset +
+The offset is relative to the start of the node header
+| 4 | 4 | | Data area end offset +
+The offset is relative to the start of the node header
+| 8 | 4 | | Unused data size
+| 12 | 1 | | Node level, where 0 is the root level
+| 13 | 1 | | Node type flags
+| 14 | 2 | | [yellow-background]*Unknown (empty values)*
+| 16 | 4 | | Record offsets start offset +
+The offset is relative to the start of the node information entry
+| 20 | 4 | | Number of record offsets
+| 24 | 4 | | Record offsets end offset +
+The offset is relative to the start of the node information entry or 0 if not set
+| 28 | 4 | | [yellow-background]*Unknown (empty values)*
+|===
+
+==== Node type flags
+
+[cols="1,1,5",options="header"]
+|===
+| Value | Identifier | Description
+| 0x01 | | Is branch (or inner) node
+| 0x02 | | Is root node
+| 0x04 | | Is stream node
+|===
+
+==== Node record
+
+The node record is variable of size and consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 4 | | Node record size +
+Includes the 4 bytes of the size value
+| 4 | 2 | | Key data offset +
+The offset is relative to the start of the node record
+| 6 | 2 | | Key data size
+| 8 | 2 | | Flags
+| 10 | 2 | | Value data offset +
+The offset is relative to the start of the node record
+| 12 | 2 | | Value data size
+|===
+
+==== Node record flags
+
+[cols="1,1,5",options="header"]
+|===
+| Value | Identifier | Description
+| 0x02 | | Rightmost extent in a subtree
+| 0x04 | | Is unallocated (free)
+| | |
+| 0x40 | | Is stream record
+|===
+
+==== Container record value
+
+The container record value is 160 bytes in size and consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 8 | | Container (or band) identifier
+| 8 | 4 | | [yellow-background]*Unknown*
+| 12 | 4 | | [yellow-background]*Unknown*
+| 16 | 4 | | [yellow-background]*Unknown (flags?)*
+| 20 | 4 | | [yellow-background]*Unknown*
+| 24 | 8 | | [yellow-background]*Unknown*
+| 32 | 8 | | [yellow-background]*Unknown (number of unused cluster blocks?)*
+| 40 | 8 | | [yellow-background]*Unknown*
+| 48 | 28 | | [yellow-background]*Unknown (empty)*
+| 76 | 4 | | [yellow-background]*Unknown*
+| 80 | 64 | | [yellow-background]*Unknown (empty)*
+| 144 | 8 | | Cluster block number
+| 152 | 8 | | Cluster size +
+Contains the number of (cluster) blocks
+|===
+
 :numbered!:
 [appendix]
 == References
+
+`[BALLENTHIN12]`
+
+[cols="1,5",options="header"]
+|===
+| Title: | The Microsoft ReFS On-Disk Layout
+| Author(s): | Willi Ballenthin
+| Date: | 2012
+| URL: | http://www.williballenthin.com/forensics/refs/index.html
+|===
+
+`[GREEN13]`
+
+[cols="1,5",options="header"]
+|===
+| Title: | Resilient File System (ReFS) - Analysis of the File System found on Windows Server 2012 and Windows 8.1
+| Author(s): | Paul K. Green
+| Version: | 0.6
+| Date: | September 2013
+| URL: | https://docs.google.com/uc?export=download&id=0B7_P1Njdyx3hdnNtYlpVZ2taaU0
+|===
+
+`[PRADE19]`
+
+[cols="1,5",options="header"]
+|===
+| Title: | Forensic Analysis of the Resilient File System (ReFS) Version 3.4
+| Author(s): | Paul Prade, Tobias Groß, Andreas Dewald
+| Date: | December 2019
+| URL: | https://www.sciencedirect.com/science/article/pii/S266628172030010X
+|===
+
+`[MSDN]`
+
+[cols="1,5",options="header"]
+|===
+| Title: | http://www.williballenthin.com/forensics/refs/index.html
+| URL: | http://blogs.msdn.com/b/b8/archive/2012/01/16/building-the-next-generation-file-system-for-windows-refs.aspx
+|===
 
 [cols="1,5",options="header"]
 |===
 | Title: | FILE_SYSTEM_RECOGNITION_STRUCTURE structure
 | URL: | https://learn.microsoft.com/en-us/windows/win32/fileio/file-system-recognition-structure
 |===
+
+`[WIKIPEDIA]`
 
 [cols="1,5",options="header"]
 |===

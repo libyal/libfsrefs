@@ -147,7 +147,6 @@ int libfsrefs_metadata_block_header_read_data(
 {
 	static char *function = "libfsrefs_metadata_block_header_read_data";
 	size_t header_size    = 0;
-	uint64_t block_number = 0;
 
 #if defined( HAVE_DEBUG_OUTPUT )
 	uint64_t value_64bit  = 0;
@@ -236,7 +235,7 @@ int libfsrefs_metadata_block_header_read_data(
 	{
 		byte_stream_copy_to_uint64_little_endian(
 		 ( (fsrefs_metadata_block_header_v1_t *) data )->block_number,
-		 block_number );
+		 metadata_block_header->block_number1 );
 	}
 	else if( io_handle->major_format_version == 3 )
 	{
@@ -254,6 +253,21 @@ int libfsrefs_metadata_block_header_read_data(
 
 			return( -1 );
 		}
+		byte_stream_copy_to_uint64_little_endian(
+		 ( (fsrefs_metadata_block_header_v3_t *) data )->block_number1,
+		 metadata_block_header->block_number1 );
+
+		byte_stream_copy_to_uint64_little_endian(
+		 ( (fsrefs_metadata_block_header_v3_t *) data )->block_number2,
+		 metadata_block_header->block_number2 );
+
+		byte_stream_copy_to_uint64_little_endian(
+		 ( (fsrefs_metadata_block_header_v3_t *) data )->block_number3,
+		 metadata_block_header->block_number3 );
+
+		byte_stream_copy_to_uint64_little_endian(
+		 ( (fsrefs_metadata_block_header_v3_t *) data )->block_number4,
+		 metadata_block_header->block_number4 );
 	}
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )
@@ -263,7 +277,7 @@ int libfsrefs_metadata_block_header_read_data(
 			libcnotify_printf(
 			 "%s: block number\t\t\t: %" PRIu64 "\n",
 			 function,
-			 block_number );
+			 metadata_block_header->block_number1 );
 
 			byte_stream_copy_to_uint64_little_endian(
 			 ( (fsrefs_metadata_block_header_v1_t *) data )->unknown1,
@@ -326,13 +340,68 @@ int libfsrefs_metadata_block_header_read_data(
 			 function,
 			 value_32bit );
 
-			libcnotify_printf(
-			 "%s: unknown3\n",
-			 function );
-			libcnotify_print_data(
+			byte_stream_copy_to_uint32_little_endian(
 			 ( (fsrefs_metadata_block_header_v3_t *) data )->unknown3,
-			 68,
-			 0 );
+			 value_32bit );
+			libcnotify_printf(
+			 "%s: unknown3\t\t\t: 0x%08" PRIx32 "\n",
+			 function,
+			 value_32bit );
+
+			byte_stream_copy_to_uint64_little_endian(
+			 ( (fsrefs_metadata_block_header_v3_t *) data )->unknown4,
+			 value_64bit );
+			libcnotify_printf(
+			 "%s: unknown4\t\t\t: 0x%08" PRIx64 "\n",
+			 function,
+			 value_64bit );
+
+			byte_stream_copy_to_uint64_little_endian(
+			 ( (fsrefs_metadata_block_header_v3_t *) data )->unknown5,
+			 value_64bit );
+			libcnotify_printf(
+			 "%s: unknown5\t\t\t: 0x%08" PRIx64 "\n",
+			 function,
+			 value_64bit );
+
+			libcnotify_printf(
+			 "%s: block number1\t\t: %" PRIu64 "\n",
+			 function,
+			 metadata_block_header->block_number1 );
+
+			libcnotify_printf(
+			 "%s: block number2\t\t: %" PRIu64 "\n",
+			 function,
+			 metadata_block_header->block_number2 );
+
+			libcnotify_printf(
+			 "%s: block number3\t\t: %" PRIu64 "\n",
+			 function,
+			 metadata_block_header->block_number3 );
+
+			libcnotify_printf(
+			 "%s: block number4\t\t: %" PRIu64 "\n",
+			 function,
+			 metadata_block_header->block_number4 );
+
+			byte_stream_copy_to_uint64_little_endian(
+			 ( (fsrefs_metadata_block_header_v3_t *) data )->unknown6,
+			 value_64bit );
+			libcnotify_printf(
+			 "%s: unknown6\t\t\t: 0x%08" PRIx64 "\n",
+			 function,
+			 value_64bit );
+
+			byte_stream_copy_to_uint64_little_endian(
+			 ( (fsrefs_metadata_block_header_v3_t *) data )->unknown7,
+			 value_64bit );
+			libcnotify_printf(
+			 "%s: unknown7\t\t\t: 0x%08" PRIx64 "\n",
+			 function,
+			 value_64bit );
+
+			libcnotify_printf(
+			 "\n" );
 		}
 	}
 #endif /* defined( HAVE_DEBUG_OUTPUT ) */

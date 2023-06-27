@@ -1,5 +1,5 @@
 /*
- * Library level2_metadata type test program
+ * Library node_header type test program
  *
  * Copyright (C) 2012-2023, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -33,30 +33,34 @@
 #include "fsrefs_test_memory.h"
 #include "fsrefs_test_unused.h"
 
-#include "../libfsrefs/libfsrefs_level2_metadata.h"
+#include "../libfsrefs/libfsrefs_node_header.h"
+
+uint8_t fsrefs_test_node_header_data1[ 32 ] = {
+	0x20, 0x00, 0x00, 0x00, 0xa0, 0x02, 0x00, 0x00, 0xb0, 0x32, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00,
+	0x50, 0x35, 0x00, 0x00, 0x08, 0x00, 0x00, 0x00, 0x70, 0x35, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 
 #if defined( __GNUC__ ) && !defined( LIBFSREFS_DLL_IMPORT )
 
-/* Tests the libfsrefs_level2_metadata_initialize function
+/* Tests the libfsrefs_node_header_initialize function
  * Returns 1 if successful or 0 if not
  */
-int fsrefs_test_level2_metadata_initialize(
+int fsrefs_test_node_header_initialize(
      void )
 {
-	libcerror_error_t *error                     = NULL;
-	libfsrefs_level2_metadata_t *level2_metadata = NULL;
-	int result                                   = 0;
+	libcerror_error_t *error             = NULL;
+	libfsrefs_node_header_t *node_header = NULL;
+	int result                           = 0;
 
 #if defined( HAVE_FSREFS_TEST_MEMORY )
-	int number_of_malloc_fail_tests              = 1;
-	int number_of_memset_fail_tests              = 1;
-	int test_number                              = 0;
+	int number_of_malloc_fail_tests      = 1;
+	int number_of_memset_fail_tests      = 1;
+	int test_number                      = 0;
 #endif
 
 	/* Test regular cases
 	 */
-	result = libfsrefs_level2_metadata_initialize(
-	          &level2_metadata,
+	result = libfsrefs_node_header_initialize(
+	          &node_header,
 	          &error );
 
 	FSREFS_TEST_ASSERT_EQUAL_INT(
@@ -65,15 +69,15 @@ int fsrefs_test_level2_metadata_initialize(
 	 1 );
 
 	FSREFS_TEST_ASSERT_IS_NOT_NULL(
-	 "level2_metadata",
-	 level2_metadata );
+	 "node_header",
+	 node_header );
 
 	FSREFS_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
-	result = libfsrefs_level2_metadata_free(
-	          &level2_metadata,
+	result = libfsrefs_node_header_free(
+	          &node_header,
 	          &error );
 
 	FSREFS_TEST_ASSERT_EQUAL_INT(
@@ -82,8 +86,8 @@ int fsrefs_test_level2_metadata_initialize(
 	 1 );
 
 	FSREFS_TEST_ASSERT_IS_NULL(
-	 "level2_metadata",
-	 level2_metadata );
+	 "node_header",
+	 node_header );
 
 	FSREFS_TEST_ASSERT_IS_NULL(
 	 "error",
@@ -91,7 +95,7 @@ int fsrefs_test_level2_metadata_initialize(
 
 	/* Test error cases
 	 */
-	result = libfsrefs_level2_metadata_initialize(
+	result = libfsrefs_node_header_initialize(
 	          NULL,
 	          &error );
 
@@ -107,10 +111,10 @@ int fsrefs_test_level2_metadata_initialize(
 	libcerror_error_free(
 	 &error );
 
-	level2_metadata = (libfsrefs_level2_metadata_t *) 0x12345678UL;
+	node_header = (libfsrefs_node_header_t *) 0x12345678UL;
 
-	result = libfsrefs_level2_metadata_initialize(
-	          &level2_metadata,
+	result = libfsrefs_node_header_initialize(
+	          &node_header,
 	          &error );
 
 	FSREFS_TEST_ASSERT_EQUAL_INT(
@@ -125,7 +129,7 @@ int fsrefs_test_level2_metadata_initialize(
 	libcerror_error_free(
 	 &error );
 
-	level2_metadata = NULL;
+	node_header = NULL;
 
 #if defined( HAVE_FSREFS_TEST_MEMORY )
 
@@ -133,22 +137,22 @@ int fsrefs_test_level2_metadata_initialize(
 	     test_number < number_of_malloc_fail_tests;
 	     test_number++ )
 	{
-		/* Test libfsrefs_level2_metadata_initialize with malloc failing
+		/* Test libfsrefs_node_header_initialize with malloc failing
 		 */
 		fsrefs_test_malloc_attempts_before_fail = test_number;
 
-		result = libfsrefs_level2_metadata_initialize(
-		          &level2_metadata,
+		result = libfsrefs_node_header_initialize(
+		          &node_header,
 		          &error );
 
 		if( fsrefs_test_malloc_attempts_before_fail != -1 )
 		{
 			fsrefs_test_malloc_attempts_before_fail = -1;
 
-			if( level2_metadata != NULL )
+			if( node_header != NULL )
 			{
-				libfsrefs_level2_metadata_free(
-				 &level2_metadata,
+				libfsrefs_node_header_free(
+				 &node_header,
 				 NULL );
 			}
 		}
@@ -160,8 +164,8 @@ int fsrefs_test_level2_metadata_initialize(
 			 -1 );
 
 			FSREFS_TEST_ASSERT_IS_NULL(
-			 "level2_metadata",
-			 level2_metadata );
+			 "node_header",
+			 node_header );
 
 			FSREFS_TEST_ASSERT_IS_NOT_NULL(
 			 "error",
@@ -175,22 +179,22 @@ int fsrefs_test_level2_metadata_initialize(
 	     test_number < number_of_memset_fail_tests;
 	     test_number++ )
 	{
-		/* Test libfsrefs_level2_metadata_initialize with memset failing
+		/* Test libfsrefs_node_header_initialize with memset failing
 		 */
 		fsrefs_test_memset_attempts_before_fail = test_number;
 
-		result = libfsrefs_level2_metadata_initialize(
-		          &level2_metadata,
+		result = libfsrefs_node_header_initialize(
+		          &node_header,
 		          &error );
 
 		if( fsrefs_test_memset_attempts_before_fail != -1 )
 		{
 			fsrefs_test_memset_attempts_before_fail = -1;
 
-			if( level2_metadata != NULL )
+			if( node_header != NULL )
 			{
-				libfsrefs_level2_metadata_free(
-				 &level2_metadata,
+				libfsrefs_node_header_free(
+				 &node_header,
 				 NULL );
 			}
 		}
@@ -202,8 +206,8 @@ int fsrefs_test_level2_metadata_initialize(
 			 -1 );
 
 			FSREFS_TEST_ASSERT_IS_NULL(
-			 "level2_metadata",
-			 level2_metadata );
+			 "node_header",
+			 node_header );
 
 			FSREFS_TEST_ASSERT_IS_NOT_NULL(
 			 "error",
@@ -223,19 +227,19 @@ on_error:
 		libcerror_error_free(
 		 &error );
 	}
-	if( level2_metadata != NULL )
+	if( node_header != NULL )
 	{
-		libfsrefs_level2_metadata_free(
-		 &level2_metadata,
+		libfsrefs_node_header_free(
+		 &node_header,
 		 NULL );
 	}
 	return( 0 );
 }
 
-/* Tests the libfsrefs_level2_metadata_free function
+/* Tests the libfsrefs_node_header_free function
  * Returns 1 if successful or 0 if not
  */
-int fsrefs_test_level2_metadata_free(
+int fsrefs_test_node_header_free(
      void )
 {
 	libcerror_error_t *error = NULL;
@@ -243,7 +247,7 @@ int fsrefs_test_level2_metadata_free(
 
 	/* Test error cases
 	 */
-	result = libfsrefs_level2_metadata_free(
+	result = libfsrefs_node_header_free(
 	          NULL,
 	          &error );
 
@@ -270,22 +274,20 @@ on_error:
 	return( 0 );
 }
 
-/* Tests the libfsrefs_level2_metadata_get_number_of_block_descriptors function
+/* Tests the libfsrefs_node_header_read_data function
  * Returns 1 if successful or 0 if not
  */
-int fsrefs_test_level2_metadata_get_number_of_block_descriptors(
+int fsrefs_test_node_header_read_data(
      void )
 {
-	libcerror_error_t *error                     = NULL;
-	libfsrefs_level2_metadata_t *level2_metadata = NULL;
-	int number_of_block_descriptors              = 0;
-	int number_of_block_descriptors_is_set       = 0;
-	int result                                   = 0;
+	libcerror_error_t *error             = NULL;
+	libfsrefs_node_header_t *node_header = NULL;
+	int result                           = 0;
 
 	/* Initialize test
 	 */
-	result = libfsrefs_level2_metadata_initialize(
-	          &level2_metadata,
+	result = libfsrefs_node_header_initialize(
+	          &node_header,
 	          &error );
 
 	FSREFS_TEST_ASSERT_EQUAL_INT(
@@ -294,8 +296,8 @@ int fsrefs_test_level2_metadata_get_number_of_block_descriptors(
 	 1 );
 
 	FSREFS_TEST_ASSERT_IS_NOT_NULL(
-	 "level2_metadata",
-	 level2_metadata );
+	 "node_header",
+	 node_header );
 
 	FSREFS_TEST_ASSERT_IS_NULL(
 	 "error",
@@ -303,27 +305,27 @@ int fsrefs_test_level2_metadata_get_number_of_block_descriptors(
 
 	/* Test regular cases
 	 */
-	result = libfsrefs_level2_metadata_get_number_of_block_descriptors(
-	          level2_metadata,
-	          &number_of_block_descriptors,
+	result = libfsrefs_node_header_read_data(
+	          node_header,
+	          fsrefs_test_node_header_data1,
+	          32,
 	          &error );
 
-	FSREFS_TEST_ASSERT_NOT_EQUAL_INT(
+	FSREFS_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
-	 -1 );
+	 1 );
 
 	FSREFS_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
-	number_of_block_descriptors_is_set = result;
-
 	/* Test error cases
 	 */
-	result = libfsrefs_level2_metadata_get_number_of_block_descriptors(
+	result = libfsrefs_node_header_read_data(
 	          NULL,
-	          &number_of_block_descriptors,
+	          fsrefs_test_node_header_data1,
+	          32,
 	          &error );
 
 	FSREFS_TEST_ASSERT_EQUAL_INT(
@@ -338,29 +340,67 @@ int fsrefs_test_level2_metadata_get_number_of_block_descriptors(
 	libcerror_error_free(
 	 &error );
 
-	if( number_of_block_descriptors_is_set != 0 )
-	{
-		result = libfsrefs_level2_metadata_get_number_of_block_descriptors(
-		          level2_metadata,
-		          NULL,
-		          &error );
+	result = libfsrefs_node_header_read_data(
+	          node_header,
+	          NULL,
+	          32,
+	          &error );
 
-		FSREFS_TEST_ASSERT_EQUAL_INT(
-		 "result",
-		 result,
-		 -1 );
+	FSREFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
 
-		FSREFS_TEST_ASSERT_IS_NOT_NULL(
-		 "error",
-		 error );
+	FSREFS_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
 
-		libcerror_error_free(
-		 &error );
-	}
+	libcerror_error_free(
+	 &error );
+
+	result = libfsrefs_node_header_read_data(
+	          node_header,
+	          fsrefs_test_node_header_data1,
+	          (size_t) SSIZE_MAX + 1,
+	          &error );
+
+	FSREFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	FSREFS_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	result = libfsrefs_node_header_read_data(
+	          node_header,
+	          fsrefs_test_node_header_data1,
+	          0,
+	          &error );
+
+	FSREFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	FSREFS_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+/* TODO: Test error case where data is invalid
+ */
+
 	/* Clean up
 	 */
-	result = libfsrefs_level2_metadata_free(
-	          &level2_metadata,
+	result = libfsrefs_node_header_free(
+	          &node_header,
 	          &error );
 
 	FSREFS_TEST_ASSERT_EQUAL_INT(
@@ -369,8 +409,8 @@ int fsrefs_test_level2_metadata_get_number_of_block_descriptors(
 	 1 );
 
 	FSREFS_TEST_ASSERT_IS_NULL(
-	 "level2_metadata",
-	 level2_metadata );
+	 "node_header",
+	 node_header );
 
 	FSREFS_TEST_ASSERT_IS_NULL(
 	 "error",
@@ -384,10 +424,10 @@ on_error:
 		libcerror_error_free(
 		 &error );
 	}
-	if( level2_metadata != NULL )
+	if( node_header != NULL )
 	{
-		libfsrefs_level2_metadata_free(
-		 &level2_metadata,
+		libfsrefs_node_header_free(
+		 &node_header,
 		 NULL );
 	}
 	return( 0 );
@@ -413,26 +453,26 @@ int main(
 #if defined( __GNUC__ ) && !defined( LIBFSREFS_DLL_IMPORT )
 
 	FSREFS_TEST_RUN(
-	 "libfsrefs_level2_metadata_initialize",
-	 fsrefs_test_level2_metadata_initialize );
+	 "libfsrefs_node_header_initialize",
+	 fsrefs_test_node_header_initialize );
 
 	FSREFS_TEST_RUN(
-	 "libfsrefs_level2_metadata_free",
-	 fsrefs_test_level2_metadata_free );
-
-	/* TODO: add tests for libfsrefs_level2_metadata_read */
+	 "libfsrefs_node_header_free",
+	 fsrefs_test_node_header_free );
 
 	FSREFS_TEST_RUN(
-	 "libfsrefs_level2_metadata_get_number_of_block_descriptors",
-	 fsrefs_test_level2_metadata_get_number_of_block_descriptors );
-
-	/* TODO: add tests for libfsrefs_level2_metadata_get_block_descriptor_by_index */
+	 "libfsrefs_node_header_read_data",
+	 fsrefs_test_node_header_read_data );
 
 #endif /* defined( __GNUC__ ) && !defined( LIBFSREFS_DLL_IMPORT ) */
 
 	return( EXIT_SUCCESS );
 
+#if defined( __GNUC__ ) && !defined( LIBFSREFS_DLL_IMPORT )
+
 on_error:
 	return( EXIT_FAILURE );
+
+#endif /* defined( __GNUC__ ) && !defined( LIBFSREFS_DLL_IMPORT ) */
 }
 

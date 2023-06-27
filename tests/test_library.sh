@@ -7,7 +7,7 @@ EXIT_SUCCESS=0;
 EXIT_FAILURE=1;
 EXIT_IGNORE=77;
 
-LIBRARY_TESTS="block_descriptor block_descriptors checkpoint directory error io_handle level2_metadata level3_metadata metadata_block metadata_block_header metadata_table metadata_value notify superblock volume_header volume_information volume_name";
+LIBRARY_TESTS="block_descriptor block_descriptors checkpoint directory error io_handle level3_metadata metadata_block metadata_block_header metadata_table metadata_value ministore_tree node_header node_record notify superblock volume_header volume_information volume_name";
 LIBRARY_TESTS_WITH_INPUT="support volume";
 OPTION_SETS="offset";
 

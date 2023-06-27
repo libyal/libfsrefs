@@ -40,6 +40,22 @@ struct libfsrefs_metadata_block_header
 	/* The signature
 	 */
 	uint8_t signature[ 4 ];
+
+	/* The first block number
+	 */
+	uint64_t block_number1;
+
+	/* The second block number
+	 */
+	uint64_t block_number2;
+
+	/* The third block number
+	 */
+	uint64_t block_number3;
+
+	/* The fourth block number
+	 */
+	uint64_t block_number4;
 };
 
 int libfsrefs_metadata_block_header_initialize(

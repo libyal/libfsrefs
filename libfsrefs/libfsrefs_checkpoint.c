@@ -36,7 +36,7 @@
 #include "fsrefs_checkpoint.h"
 #include "fsrefs_metadata_block.h"
 
-/* Creates checkpoint
+/* Creates a checkpoint
  * Make sure the value checkpoint is referencing, is set to NULL
  * Returns 1 if successful or -1 on error
  */
@@ -97,7 +97,7 @@ int libfsrefs_checkpoint_initialize(
 		goto on_error;
 	}
 	if( libcdata_array_initialize(
-	     &( ( *checkpoint )->level2_metadata_block_descriptors_array ),
+	     &( ( *checkpoint )->ministore_tree_block_descriptors_array ),
 	     0,
 	     error ) != 1 )
 	{
@@ -105,7 +105,7 @@ int libfsrefs_checkpoint_initialize(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-		 "%s: unable to create level 2 metadata block descriptors array.",
+		 "%s: unable to create ministore tree block descriptors array.",
 		 function );
 
 		goto on_error;
@@ -123,7 +123,7 @@ on_error:
 	return( -1 );
 }
 
-/* Frees checkpoint
+/* Frees a checkpoint
  * Returns 1 if successful or -1 on error
  */
 int libfsrefs_checkpoint_free(
@@ -147,7 +147,7 @@ int libfsrefs_checkpoint_free(
 	if( *checkpoint != NULL )
 	{
 		if( libcdata_array_free(
-		     &( ( *checkpoint )->level2_metadata_block_descriptors_array ),
+		     &( ( *checkpoint )->ministore_tree_block_descriptors_array ),
 		     (int (*)(intptr_t **, libcerror_error_t **)) &libfsrefs_block_descriptor_free,
 		     error ) != 1 )
 		{
@@ -155,7 +155,7 @@ int libfsrefs_checkpoint_free(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-			 "%s: unable to free level 2 metadata block descriptors array.",
+			 "%s: unable to free ministore tree block descriptors array.",
 			 function );
 
 			result = -1;
@@ -327,7 +327,7 @@ int libfsrefs_checkpoint_read_data(
 	data_offset = sizeof( fsrefs_checkpoint_header_t );
 
 	if( ( self_reference_data_offset < ( data_offset + header_size ) )
-	 || ( self_reference_data_offset >= io_handle->metadata_block_size ) )
+	 || ( self_reference_data_offset >= ( data_size + header_size ) ) )
 	{
 		libcerror_error_set(
 		 error,
@@ -365,12 +365,20 @@ int libfsrefs_checkpoint_read_data(
 #endif
 	if( io_handle->major_format_version == 1 )
 	{
+		byte_stream_copy_to_uint64_little_endian(
+		 ( (fsrefs_checkpoint_trailer_v1_t *) &( data[ data_offset ] ) )->unknown2,
+		 checkpoint->sequence_number );
+
 		byte_stream_copy_to_uint32_little_endian(
 		 ( (fsrefs_checkpoint_trailer_v1_t *) &( data[ data_offset ] ) )->number_of_offsets,
 		 number_of_offsets );
 	}
 	else if( io_handle->major_format_version == 3 )
 	{
+		byte_stream_copy_to_uint64_little_endian(
+		 ( (fsrefs_checkpoint_trailer_v3_t *) &( data[ data_offset ] ) )->unknown2,
+		 checkpoint->sequence_number );
+
 		byte_stream_copy_to_uint32_little_endian(
 		 ( (fsrefs_checkpoint_trailer_v3_t *) &( data[ data_offset ] ) )->number_of_offsets,
 		 number_of_offsets );
@@ -620,7 +628,7 @@ int libfsrefs_checkpoint_read_data(
 		}
 #endif
 		if( ( descriptor_offset < ( data_offset + header_size ) )
-		 || ( descriptor_offset >= io_handle->metadata_block_size ) )
+		 || ( descriptor_offset >= ( data_size + header_size ) ) )
 		{
 			libcerror_error_set(
 			 error,
@@ -663,7 +671,7 @@ int libfsrefs_checkpoint_read_data(
 			goto on_error;
 		}
 		if( libcdata_array_append_entry(
-		     checkpoint->level2_metadata_block_descriptors_array,
+		     checkpoint->ministore_tree_block_descriptors_array,
 		     &entry_index,
 		     (intptr_t *) block_descriptor,
 		     error ) != 1 )
@@ -845,6 +853,39 @@ int libfsrefs_checkpoint_read_file_io_handle(
 
 			goto on_error;
 		}
+		if( metadata_block_header->block_number2 != 0 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+			 "%s: invalid metadata block header - block number 2 value out of bounds.",
+			 function );
+
+			goto on_error;
+		}
+		if( metadata_block_header->block_number3 != 0 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+			 "%s: invalid metadata block header - block number 3 value out of bounds.",
+			 function );
+
+			goto on_error;
+		}
+		if( metadata_block_header->block_number4 != 0 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+			 "%s: invalid metadata block header - block number 4 value out of bounds.",
+			 function );
+
+			goto on_error;
+		}
 	}
 	if( libfsrefs_metadata_block_header_free(
 	     &metadata_block_header,
@@ -895,15 +936,15 @@ on_error:
 	return( -1 );
 }
 
-/* Retrieves the number of level 2 metadata block descriptors
+/* Retrieves the number of ministore tree block descriptors
  * Returns 1 if successful or -1 on error
  */
-int libfsrefs_checkpoint_get_number_of_level2_metadata_block_descriptors(
+int libfsrefs_checkpoint_get_number_of_ministore_tree_block_descriptors(
      libfsrefs_checkpoint_t *checkpoint,
      int *number_of_block_descriptors,
      libcerror_error_t **error )
 {
-	static char *function = "libfsrefs_checkpoint_get_number_of_level2_metadata_block_descriptors";
+	static char *function = "libfsrefs_checkpoint_get_number_of_ministore_tree_block_descriptors";
 
 	if( checkpoint == NULL )
 	{
@@ -917,7 +958,7 @@ int libfsrefs_checkpoint_get_number_of_level2_metadata_block_descriptors(
 		return( -1 );
 	}
 	if( libcdata_array_get_number_of_entries(
-	     checkpoint->level2_metadata_block_descriptors_array,
+	     checkpoint->ministore_tree_block_descriptors_array,
 	     number_of_block_descriptors,
 	     error ) != 1 )
 	{
@@ -933,16 +974,16 @@ int libfsrefs_checkpoint_get_number_of_level2_metadata_block_descriptors(
 	return( 1 );
 }
 
-/* Retrieves a specific level 2 metadata block descriptor
+/* Retrieves a specific ministore tree block descriptor
  * Returns 1 if successful or -1 on error
  */
-int libfsrefs_checkpoint_get_level2_metadata_block_descriptor_by_index(
+int libfsrefs_checkpoint_get_ministore_tree_block_descriptor_by_index(
      libfsrefs_checkpoint_t *checkpoint,
      int block_descriptor_index,
      libfsrefs_block_descriptor_t **block_descriptor,
      libcerror_error_t **error )
 {
-	static char *function = "libfsrefs_checkpoint_get_level2_metadata_block_descriptor_by_index";
+	static char *function = "libfsrefs_checkpoint_get_ministore_tree_block_descriptor_by_index";
 
 	if( checkpoint == NULL )
 	{
@@ -956,7 +997,7 @@ int libfsrefs_checkpoint_get_level2_metadata_block_descriptor_by_index(
 		return( -1 );
 	}
 	if( libcdata_array_get_entry_by_index(
-	     checkpoint->level2_metadata_block_descriptors_array,
+	     checkpoint->ministore_tree_block_descriptors_array,
 	     block_descriptor_index,
 	     (intptr_t **) block_descriptor,
 	     error ) != 1 )

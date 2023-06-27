@@ -20,9 +20,9 @@ AM_CPPFLAGS = \
 lib_LTLIBRARIES = libfsrefs.la
 
 libfsrefs_la_SOURCES = \
-	fsrefs_index.h \
 	fsrefs_checkpoint.h \
 	fsrefs_metadata_block.h \
+	fsrefs_ministore_tree.h \
 	fsrefs_superblock.h \
 	fsrefs_volume_header.h \
 	fsrefs_volume_information.h \
@@ -36,7 +36,6 @@ libfsrefs_la_SOURCES = \
 	libfsrefs_error.c libfsrefs_error.h \
 	libfsrefs_extern.h \
 	libfsrefs_io_handle.c libfsrefs_io_handle.h \
-	libfsrefs_level2_metadata.c libfsrefs_level2_metadata.h \
 	libfsrefs_level3_metadata.c libfsrefs_level3_metadata.h \
 	libfsrefs_libbfio.h \
 	libfsrefs_libcdata.h \
@@ -53,6 +52,9 @@ libfsrefs_la_SOURCES = \
 	libfsrefs_metadata_block_header.c libfsrefs_metadata_block_header.h \
 	libfsrefs_metadata_table.c libfsrefs_metadata_table.h \
 	libfsrefs_metadata_value.c libfsrefs_metadata_value.h \
+	libfsrefs_ministore_tree.c libfsrefs_ministore_tree.h \
+	libfsrefs_node_header.c libfsrefs_node_header.h \
+	libfsrefs_node_record.c libfsrefs_node_record.h \
 	libfsrefs_notify.c libfsrefs_notify.h \
 	libfsrefs_superblock.c libfsrefs_superblock.h \
 	libfsrefs_support.c libfsrefs_support.h \

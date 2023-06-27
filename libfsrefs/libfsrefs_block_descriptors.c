@@ -456,6 +456,20 @@ int libfsrefs_block_descriptors_read(
 
 			goto on_error;
 		}
+#if defined( HAVE_DEBUG_OUTPUT )
+		if( libcnotify_verbose != 0 )
+		{
+			libcnotify_printf(
+			 "%s: level: %d value: %02d identifier data:\n",
+			 function,
+			 level,
+			 metadata_table_value_index );
+			libcnotify_print_data(
+			 metadata_value->data,
+			 24,
+			 0 );
+		}
+#endif
 		if( libfsrefs_block_descriptor_set_identifier(
 		     block_descriptor,
 		     metadata_value->identifier_data,
@@ -471,79 +485,22 @@ int libfsrefs_block_descriptors_read(
 
 			goto on_error;
 		}
-#if defined( HAVE_DEBUG_OUTPUT )
-		if( libcnotify_verbose != 0 )
+		if( libfsrefs_block_descriptor_read_data(
+		     block_descriptor,
+		     io_handle,
+		     metadata_value->data,
+		     metadata_value->data_size,
+		     error ) != 1 )
 		{
-			libcnotify_printf(
-			 "%s: level: %d value: %02d identifier data:\n",
-			 function,
-			 level,
-			 metadata_table_value_index );
-			libcnotify_print_data(
-			 metadata_value->data,
-			 24,
-			 0 );
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_IO,
+			 LIBCERROR_IO_ERROR_READ_FAILED,
+			 "%s: unable to read block descriptor.",
+			 function );
+
+			goto on_error;
 		}
-#endif
-		byte_stream_copy_to_uint64_little_endian(
-		 metadata_value->data,
-		 block_descriptor->block_number );
-
-		byte_stream_copy_to_uint64_little_endian(
-		 &( metadata_value->data[ 8 ] ),
-		 block_descriptor->unknown );
-
-		byte_stream_copy_to_uint64_little_endian(
-		 &( metadata_value->data[ 16 ] ),
-		 block_descriptor->checksum );
-
-#if defined( HAVE_DEBUG_OUTPUT )
-		if( libcnotify_verbose != 0 )
-		{
-			libcnotify_printf(
-			 "%s: level: %d value: %02d block number\t\t: %" PRIu64 "\n",
-			 function,
-			 level,
-			 metadata_table_value_index,
-			 block_descriptor->block_number );
-
-			libcnotify_printf(
-			 "%s: level: %d value: %02d unknown1\t\t\t: 0x%08" PRIx64 "\n",
-			 function,
-			 level,
-			 metadata_table_value_index,
-			 block_descriptor->unknown );
-
-			libcnotify_printf(
-			 "%s: level: %d value: %02d checksum\t\t\t: 0x%08" PRIx64 "\n",
-			 function,
-			 level,
-			 metadata_table_value_index,
-			 block_descriptor->checksum );
-		}
-#endif
-#if defined( HAVE_DEBUG_OUTPUT )
-		if( libcnotify_verbose != 0 )
-		{
-			if( metadata_value->data_size > 24 )
-			{
-				libcnotify_printf(
-				 "%s: level: %d value: %02d remaining data:\n",
-				 function,
-				 level,
-				 metadata_table_value_index );
-				libcnotify_print_data(
-				 &( metadata_value->data[ 24 ] ),
-				 metadata_value->data_size - 24,
-				 LIBCNOTIFY_PRINT_DATA_FLAG_GROUP_DATA );
-			}
-			else
-			{
-				libcnotify_printf(
-				 "\n" );
-			}
-		}
-#endif
 		if( libcdata_array_append_entry(
 		     block_descriptors->block_descriptors_array,
 		     &array_entry_index,

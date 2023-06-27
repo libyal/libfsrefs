@@ -44,13 +44,21 @@ struct libfsrefs_block_descriptor
 	 */
 	uint16_t identifier_data_size;
 
-	/* The block number
+	/* The first block number
 	 */
-	uint64_t block_number;
+	uint64_t block_number1;
 
-	/* Unknown
+	/* The second block number
 	 */
-	uint64_t unknown;
+	uint64_t block_number2;
+
+	/* The third block number
+	 */
+	uint64_t block_number3;
+
+	/* The fourth block number
+	 */
+	uint64_t block_number4;
 
 	/* The checksum
 	 */

@@ -134,12 +134,14 @@ stamp-h[1-9]
 /tests/fsrefs_test_error
 /tests/fsrefs_test_file_entry
 /tests/fsrefs_test_io_handle
-/tests/fsrefs_test_level2_metadata
 /tests/fsrefs_test_level3_metadata
 /tests/fsrefs_test_metadata_block
 /tests/fsrefs_test_metadata_block_header
 /tests/fsrefs_test_metadata_table
 /tests/fsrefs_test_metadata_value
+/tests/fsrefs_test_ministore_tree
+/tests/fsrefs_test_node_header
+/tests/fsrefs_test_node_record
 /tests/fsrefs_test_notify
 /tests/fsrefs_test_superblock
 /tests/fsrefs_test_support

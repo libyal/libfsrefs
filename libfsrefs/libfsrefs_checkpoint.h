@@ -43,9 +43,9 @@ struct libfsrefs_checkpoint
 	 */
 	uint64_t sequence_number;
 
-	/* The level 2 metadata block descriptors array
+	/* The ministore tree block descriptors array
 	 */
-	libcdata_array_t *level2_metadata_block_descriptors_array;
+	libcdata_array_t *ministore_tree_block_descriptors_array;
 };
 
 int libfsrefs_checkpoint_initialize(
@@ -70,12 +70,12 @@ int libfsrefs_checkpoint_read_file_io_handle(
      off64_t file_offset,
      libcerror_error_t **error );
 
-int libfsrefs_checkpoint_get_number_of_level2_metadata_block_descriptors(
+int libfsrefs_checkpoint_get_number_of_ministore_tree_block_descriptors(
      libfsrefs_checkpoint_t *checkpoint,
      int *number_of_block_descriptors,
      libcerror_error_t **error );
 
-int libfsrefs_checkpoint_get_level2_metadata_block_descriptor_by_index(
+int libfsrefs_checkpoint_get_ministore_tree_block_descriptor_by_index(
      libfsrefs_checkpoint_t *checkpoint,
      int block_descriptor_index,
      libfsrefs_block_descriptor_t **block_descriptor,

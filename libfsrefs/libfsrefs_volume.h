@@ -25,12 +25,15 @@
 #include <common.h>
 #include <types.h>
 
+#include "libfsrefs_checkpoint.h"
 #include "libfsrefs_extern.h"
 #include "libfsrefs_io_handle.h"
 #include "libfsrefs_libbfio.h"
 #include "libfsrefs_libcerror.h"
 #include "libfsrefs_libfcache.h"
 #include "libfsrefs_libfdata.h"
+#include "libfsrefs_ministore_tree.h"
+#include "libfsrefs_superblock.h"
 #include "libfsrefs_types.h"
 
 #if defined( __cplusplus )
@@ -41,6 +44,18 @@ typedef struct libfsrefs_internal_volume libfsrefs_internal_volume_t;
 
 struct libfsrefs_internal_volume
 {
+	/* The superblock
+	 */
+	libfsrefs_superblock_t *superblock;
+
+	/* The (latest) checkpoint
+	 */
+	libfsrefs_checkpoint_t *checkpoint;
+
+	/* The containers (ministore) tree
+	 */
+	libfsrefs_ministore_tree_t *containers_tree;
+
 	/* The IO handle
 	 */
 	libfsrefs_io_handle_t *io_handle;
@@ -103,7 +118,14 @@ int libfsrefs_volume_close(
      libfsrefs_volume_t *volume,
      libcerror_error_t **error );
 
-int libfsrefs_volume_open_read(
+int libfsrefs_internal_volume_get_ministore_tree(
+     libfsrefs_internal_volume_t *internal_volume,
+     libbfio_handle_t *file_io_handle,
+     int ministore_tree_index,
+     libfsrefs_ministore_tree_t **ministore_tree,
+     libcerror_error_t **error );
+
+int libfsrefs_internal_volume_open_read(
      libfsrefs_internal_volume_t *internal_volume,
      libbfio_handle_t *file_io_handle,
      libcerror_error_t **error );

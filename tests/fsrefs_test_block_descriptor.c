@@ -35,6 +35,15 @@
 
 #include "../libfsrefs/libfsrefs_block_descriptor.h"
 
+uint8_t fsrefs_test_block_descriptor_data1[ 24 ] = {
+	0x1e, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0x08, 0x08, 0x00, 0x00, 0x00,
+	0x5d, 0x5f, 0xe6, 0x46, 0x0a, 0xde, 0xe1, 0xc4 };
+
+uint8_t fsrefs_test_block_descriptor_data2[ 44 ] = {
+	0x1e, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x01, 0x08, 0x04, 0x00, 0x00, 0x00, 0xe2, 0xfb, 0xbe, 0x68 };
+
 #if defined( __GNUC__ ) && !defined( LIBFSREFS_DLL_IMPORT )
 
 /* Tests the libfsrefs_block_descriptor_initialize function
@@ -270,6 +279,318 @@ on_error:
 	return( 0 );
 }
 
+/* Tests the libfsrefs_block_descriptor_read_data function
+ * Returns 1 if successful or 0 if not
+ */
+int fsrefs_test_block_descriptor_read_data(
+     void )
+{
+	libcerror_error_t *error                       = NULL;
+	libfsrefs_block_descriptor_t *block_descriptor = NULL;
+	libfsrefs_io_handle_t *io_handle               = NULL;
+	int result                                     = 0;
+
+	/* Initialize test
+	 */
+	result = libfsrefs_io_handle_initialize(
+	          &io_handle,
+	          &error );
+
+	FSREFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	FSREFS_TEST_ASSERT_IS_NOT_NULL(
+	 "io_handle",
+	 io_handle );
+
+	io_handle->metadata_block_size  = 16384;
+	io_handle->major_format_version = 1;
+
+	result = libfsrefs_block_descriptor_initialize(
+	          &block_descriptor,
+	          &error );
+
+	FSREFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	FSREFS_TEST_ASSERT_IS_NOT_NULL(
+	 "block_descriptor",
+	 block_descriptor );
+
+	FSREFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	/* Test regular cases
+	 */
+	result = libfsrefs_block_descriptor_read_data(
+	          block_descriptor,
+	          io_handle,
+	          fsrefs_test_block_descriptor_data1,
+	          24,
+	          &error );
+
+	FSREFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	FSREFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	/* Test error cases
+	 */
+	result = libfsrefs_block_descriptor_read_data(
+	          NULL,
+	          io_handle,
+	          fsrefs_test_block_descriptor_data1,
+	          24,
+	          &error );
+
+	FSREFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	FSREFS_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	result = libfsrefs_block_descriptor_read_data(
+	          block_descriptor,
+	          NULL,
+	          fsrefs_test_block_descriptor_data1,
+	          24,
+	          &error );
+
+	FSREFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	FSREFS_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	result = libfsrefs_block_descriptor_read_data(
+	          block_descriptor,
+	          io_handle,
+	          NULL,
+	          24,
+	          &error );
+
+	FSREFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	FSREFS_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	result = libfsrefs_block_descriptor_read_data(
+	          block_descriptor,
+	          io_handle,
+	          fsrefs_test_block_descriptor_data1,
+	          (size_t) SSIZE_MAX + 1,
+	          &error );
+
+	FSREFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	FSREFS_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	result = libfsrefs_block_descriptor_read_data(
+	          block_descriptor,
+	          io_handle,
+	          fsrefs_test_block_descriptor_data1,
+	          0,
+	          &error );
+
+	FSREFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	FSREFS_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+/* TODO: Test error case where data is invalid
+ */
+
+	/* Clean up
+	 */
+	result = libfsrefs_block_descriptor_free(
+	          &block_descriptor,
+	          &error );
+
+	FSREFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	FSREFS_TEST_ASSERT_IS_NULL(
+	 "block_descriptor",
+	 block_descriptor );
+
+	FSREFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	result = libfsrefs_io_handle_free(
+	          &io_handle,
+	          &error );
+
+	FSREFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	FSREFS_TEST_ASSERT_IS_NULL(
+	 "io_handle",
+	 io_handle );
+
+	FSREFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	/* Initialize test
+	 */
+	result = libfsrefs_io_handle_initialize(
+	          &io_handle,
+	          &error );
+
+	FSREFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	FSREFS_TEST_ASSERT_IS_NOT_NULL(
+	 "io_handle",
+	 io_handle );
+
+	io_handle->metadata_block_size  = 4096;
+	io_handle->major_format_version = 3;
+
+	result = libfsrefs_block_descriptor_initialize(
+	          &block_descriptor,
+	          &error );
+
+	FSREFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	FSREFS_TEST_ASSERT_IS_NOT_NULL(
+	 "block_descriptor",
+	 block_descriptor );
+
+	FSREFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	/* Test regular cases
+	 */
+	result = libfsrefs_block_descriptor_read_data(
+	          block_descriptor,
+	          io_handle,
+	          fsrefs_test_block_descriptor_data2,
+	          44,
+	          &error );
+
+	FSREFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	FSREFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	/* Clean up
+	 */
+	result = libfsrefs_block_descriptor_free(
+	          &block_descriptor,
+	          &error );
+
+	FSREFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	FSREFS_TEST_ASSERT_IS_NULL(
+	 "block_descriptor",
+	 block_descriptor );
+
+	FSREFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	result = libfsrefs_io_handle_free(
+	          &io_handle,
+	          &error );
+
+	FSREFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	FSREFS_TEST_ASSERT_IS_NULL(
+	 "io_handle",
+	 io_handle );
+
+	FSREFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	return( 1 );
+
+on_error:
+	if( error != NULL )
+	{
+		libcerror_error_free(
+		 &error );
+	}
+	if( block_descriptor != NULL )
+	{
+		libfsrefs_block_descriptor_free(
+		 &block_descriptor,
+		 NULL );
+	}
+	if( io_handle != NULL )
+	{
+		libfsrefs_io_handle_free(
+		 &io_handle,
+		 NULL );
+	}
+	return( 0 );
+}
+
 #endif /* defined( __GNUC__ ) && !defined( LIBFSREFS_DLL_IMPORT ) */
 
 /* The main program
@@ -297,7 +618,9 @@ int main(
 	 "libfsrefs_block_descriptor_free",
 	 fsrefs_test_block_descriptor_free );
 
-	/* TODO: add tests for libfsrefs_block_descriptor_read_data */
+	FSREFS_TEST_RUN(
+	 "libfsrefs_block_descriptor_read_data",
+	 fsrefs_test_block_descriptor_read_data );
 
 	/* TODO: add tests for libfsrefs_block_descriptor_set_identifier */
 

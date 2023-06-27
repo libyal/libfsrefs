@@ -202,10 +202,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\libfsrefs\libfsrefs_level2_metadata.c"
-				>
-			</File>
-			<File
 				RelativePath="..\..\libfsrefs\libfsrefs_level3_metadata.c"
 				>
 			</File>
@@ -223,6 +219,18 @@
 			</File>
 			<File
 				RelativePath="..\..\libfsrefs\libfsrefs_metadata_value.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfsrefs\libfsrefs_ministore_tree.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfsrefs\libfsrefs_node_header.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfsrefs\libfsrefs_node_record.c"
 				>
 			</File>
 			<File
@@ -264,11 +272,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\libfsrefs\fsrefs_index.h"
+				RelativePath="..\..\libfsrefs\fsrefs_metadata_block.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\libfsrefs\fsrefs_metadata_block.h"
+				RelativePath="..\..\libfsrefs\fsrefs_ministore_tree.h"
 				>
 			</File>
 			<File
@@ -317,10 +325,6 @@
 			</File>
 			<File
 				RelativePath="..\..\libfsrefs\libfsrefs_io_handle.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libfsrefs\libfsrefs_level2_metadata.h"
 				>
 			</File>
 			<File
@@ -385,6 +389,18 @@
 			</File>
 			<File
 				RelativePath="..\..\libfsrefs\libfsrefs_metadata_value.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfsrefs\libfsrefs_ministore_tree.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfsrefs\libfsrefs_node_header.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfsrefs\libfsrefs_node_record.h"
 				>
 			</File>
 			<File

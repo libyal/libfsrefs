@@ -5,12 +5,14 @@ MSVSCPP_FILES = \
 	fsrefs_test_directory/fsrefs_test_directory.vcproj \
 	fsrefs_test_error/fsrefs_test_error.vcproj \
 	fsrefs_test_io_handle/fsrefs_test_io_handle.vcproj \
-	fsrefs_test_level2_metadata/fsrefs_test_level2_metadata.vcproj \
 	fsrefs_test_level3_metadata/fsrefs_test_level3_metadata.vcproj \
 	fsrefs_test_metadata_block/fsrefs_test_metadata_block.vcproj \
 	fsrefs_test_metadata_block_header/fsrefs_test_metadata_block_header.vcproj \
 	fsrefs_test_metadata_table/fsrefs_test_metadata_table.vcproj \
 	fsrefs_test_metadata_value/fsrefs_test_metadata_value.vcproj \
+	fsrefs_test_ministore_tree/fsrefs_test_ministore_tree.vcproj \
+	fsrefs_test_node_header/fsrefs_test_node_header.vcproj \
+	fsrefs_test_node_record/fsrefs_test_node_record.vcproj \
 	fsrefs_test_notify/fsrefs_test_notify.vcproj \
 	fsrefs_test_superblock/fsrefs_test_superblock.vcproj \
 	fsrefs_test_support/fsrefs_test_support.vcproj \

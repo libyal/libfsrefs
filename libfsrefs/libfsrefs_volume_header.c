@@ -325,11 +325,6 @@ int libfsrefs_volume_header_read_data(
 		 function,
 		 value_32bit );
 
-		libcnotify_printf(
-		 "%s: volume serial number\t\t\t: 0x%08" PRIx64 "\n",
-		 function,
-		 volume_header->volume_serial_number );
-
 		byte_stream_copy_to_uint64_little_endian(
 		 ( (fsrefs_volume_header_t *) data )->unknown9,
 		 value_64bit );
@@ -337,6 +332,11 @@ int libfsrefs_volume_header_read_data(
 		 "%s: unknown9\t\t\t\t: 0x%08" PRIx64 "\n",
 		 function,
 		 value_64bit );
+
+		libcnotify_printf(
+		 "%s: volume serial number\t\t\t: 0x%08" PRIx64 "\n",
+		 function,
+		 volume_header->volume_serial_number );
 
 		byte_stream_copy_to_uint64_little_endian(
 		 ( (fsrefs_volume_header_t *) data )->unknown10,
@@ -434,6 +434,25 @@ int libfsrefs_volume_header_read_data(
 	{
 		volume_header->metadata_block_size = volume_header->block_size;
 	}
+
+#if defined( HAVE_DEBUG_OUTPUT )
+	if( libcnotify_verbose != 0 )
+	{
+		libcnotify_printf(
+		 "%s: metadata block size\t\t\t: %" PRIu32 "\n",
+		 function,
+		 volume_header->metadata_block_size );
+
+		libcnotify_printf(
+		 "%s: block size\t\t\t\t: %" PRIu32 "\n",
+		 function,
+		 volume_header->block_size );
+
+		libcnotify_printf(
+		 "\n" );
+	}
+#endif /* defined( HAVE_DEBUG_OUTPUT ) */
+
 	return( 1 );
 }
 

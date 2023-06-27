@@ -151,12 +151,12 @@ int libfsrefs_block_descriptor_read_data(
 {
 	static char *function        = "libfsrefs_block_descriptor_read_data";
 	size_t block_descriptor_size = 0;
+	size_t data_offset           = 0;
 	uint16_t checksum_data_size  = 0;
 	uint8_t checksum_data_offset = 0;
 	uint8_t checksum_type        = 0;
 
 #if defined( HAVE_DEBUG_OUTPUT )
-	uint64_t value_64bit         = 0;
 	uint16_t value_16bit         = 0;
 #endif
 
@@ -242,7 +242,7 @@ int libfsrefs_block_descriptor_read_data(
 	{
 		byte_stream_copy_to_uint64_little_endian(
 		 ( (fsrefs_metadata_block_descriptor_v1_t *) data )->block_number,
-		 block_descriptor->block_number );
+		 block_descriptor->block_number1 );
 
 		checksum_type = ( (fsrefs_metadata_block_descriptor_v1_t *) data )->checksum_type;
 
@@ -256,7 +256,19 @@ int libfsrefs_block_descriptor_read_data(
 	{
 		byte_stream_copy_to_uint64_little_endian(
 		 ( (fsrefs_metadata_block_descriptor_v3_t *) data )->block_number1,
-		 block_descriptor->block_number );
+		 block_descriptor->block_number1 );
+
+		byte_stream_copy_to_uint64_little_endian(
+		 ( (fsrefs_metadata_block_descriptor_v3_t *) data )->block_number2,
+		 block_descriptor->block_number2 );
+
+		byte_stream_copy_to_uint64_little_endian(
+		 ( (fsrefs_metadata_block_descriptor_v3_t *) data )->block_number3,
+		 block_descriptor->block_number3 );
+
+		byte_stream_copy_to_uint64_little_endian(
+		 ( (fsrefs_metadata_block_descriptor_v3_t *) data )->block_number4,
+		 block_descriptor->block_number4 );
 
 		checksum_type = ( (fsrefs_metadata_block_descriptor_v3_t *) data )->checksum_type;
 
@@ -274,38 +286,29 @@ int libfsrefs_block_descriptor_read_data(
 			libcnotify_printf(
 			 "%s: block number\t\t\t: %" PRIu64 "\n",
 			 function,
-			 block_descriptor->block_number );
+			 block_descriptor->block_number1 );
 		}
 		else if( io_handle->major_format_version == 3 )
 		{
 			libcnotify_printf(
 			 "%s: block number1\t\t\t: %" PRIu64 "\n",
 			 function,
-			 block_descriptor->block_number );
+			 block_descriptor->block_number1 );
 
-			byte_stream_copy_to_uint64_little_endian(
-			 ( (fsrefs_metadata_block_descriptor_v3_t *) data )->block_number2,
-			 value_64bit );
 			libcnotify_printf(
 			 "%s: block number2\t\t\t: %" PRIu64 "\n",
 			 function,
-			 value_64bit );
+			 block_descriptor->block_number2 );
 
-			byte_stream_copy_to_uint64_little_endian(
-			 ( (fsrefs_metadata_block_descriptor_v3_t *) data )->block_number3,
-			 value_64bit );
 			libcnotify_printf(
 			 "%s: block number3\t\t\t: %" PRIu64 "\n",
 			 function,
-			 value_64bit );
+			 block_descriptor->block_number3 );
 
-			byte_stream_copy_to_uint64_little_endian(
-			 ( (fsrefs_metadata_block_descriptor_v3_t *) data )->block_number4,
-			 value_64bit );
 			libcnotify_printf(
 			 "%s: block number4\t\t\t: %" PRIu64 "\n",
 			 function,
-			 value_64bit );
+			 block_descriptor->block_number4 );
 		}
 		if( io_handle->major_format_version == 1 )
 		{
@@ -376,11 +379,11 @@ int libfsrefs_block_descriptor_read_data(
 
 	if( io_handle->major_format_version == 1 )
 	{
-		checksum_data_offset += 8;
+		data_offset = 8 + checksum_data_offset;
 	}
 	else if( io_handle->major_format_version == 3 )
 	{
-		checksum_data_offset += 32;
+		data_offset = 32 + checksum_data_offset;
 	}
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )
@@ -389,11 +392,30 @@ int libfsrefs_block_descriptor_read_data(
 		 "%s: checksum data:\n",
 		 function );
 		libcnotify_print_data(
-		 &( data[ checksum_data_offset ] ),
+		 &( data[ data_offset ] ),
 		 checksum_data_size,
 		 LIBCNOTIFY_PRINT_DATA_FLAG_GROUP_DATA );
 	}
 #endif
+/* TODO
+	data_offset += checksum_data_size;
+
+#if defined( HAVE_DEBUG_OUTPUT )
+	if( libcnotify_verbose != 0 )
+	{
+		if( data_offset < data_size )
+		{
+			libcnotify_printf(
+			 "%s: trailing data:\n",
+			 function );
+			libcnotify_print_data(
+			 &( data[ data_offset ] ),
+			 data_size - data_offset,
+			 LIBCNOTIFY_PRINT_DATA_FLAG_GROUP_DATA );
+		}
+	}
+#endif
+*/
 	return( 1 );
 }
 

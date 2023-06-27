@@ -333,7 +333,7 @@ int libfsrefs_superblock_read_data(
 	data_offset = sizeof( fsrefs_superblock_t );
 
 	if( ( checkpoints_data_offset < ( data_offset + header_size ) )
-	 || ( checkpoints_data_offset >= io_handle->metadata_block_size ) )
+	 || ( checkpoints_data_offset >= ( data_size + header_size ) ) )
 	{
 		libcerror_error_set(
 		 error,
@@ -414,7 +414,7 @@ int libfsrefs_superblock_read_data(
 #endif /* defined( HAVE_DEBUG_OUTPUT ) */
 
 	if( ( self_reference_data_offset < ( data_offset + header_size ) )
-	 || ( self_reference_data_offset >= io_handle->metadata_block_size ) )
+	 || ( self_reference_data_offset >= ( data_size + header_size ) ) )
 	{
 		libcerror_error_set(
 		 error,
@@ -676,6 +676,39 @@ int libfsrefs_superblock_read_file_io_handle(
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
 			 "%s: invalid metadata block signature.",
+			 function );
+
+			goto on_error;
+		}
+		if( metadata_block_header->block_number2 != 0 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+			 "%s: invalid metadata block header - block number 2 value out of bounds.",
+			 function );
+
+			goto on_error;
+		}
+		if( metadata_block_header->block_number3 != 0 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+			 "%s: invalid metadata block header - block number 3 value out of bounds.",
+			 function );
+
+			goto on_error;
+		}
+		if( metadata_block_header->block_number4 != 0 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+			 "%s: invalid metadata block header - block number 4 value out of bounds.",
 			 function );
 
 			goto on_error;

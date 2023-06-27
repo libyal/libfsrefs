@@ -30,16 +30,14 @@
 #include "libfsrefs_checkpoint.h"
 #include "libfsrefs_debug.h"
 #include "libfsrefs_definitions.h"
-#include "libfsrefs_directory.h"
 #include "libfsrefs_io_handle.h"
-#include "libfsrefs_level2_metadata.h"
-#include "libfsrefs_level3_metadata.h"
 #include "libfsrefs_libbfio.h"
 #include "libfsrefs_libcerror.h"
 #include "libfsrefs_libcnotify.h"
 #include "libfsrefs_libfcache.h"
 #include "libfsrefs_libfdata.h"
 #include "libfsrefs_metadata_block.h"
+#include "libfsrefs_ministore_tree.h"
 #include "libfsrefs_superblock.h"
 #include "libfsrefs_volume.h"
 #include "libfsrefs_volume_header.h"
@@ -618,7 +616,7 @@ int libfsrefs_volume_open_file_io_handle(
 		}
 		file_io_handle_opened_in_library = 1;
 	}
-	if( libfsrefs_volume_open_read(
+	if( libfsrefs_internal_volume_open_read(
 	     internal_volume,
 	     file_io_handle,
 	     error ) != 1 )
@@ -752,39 +750,40 @@ int libfsrefs_volume_close(
 
 		result = -1;
 	}
+	if( internal_volume->superblock != NULL )
+	{
+		if( libfsrefs_superblock_free(
+		     &( internal_volume->superblock ),
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable to free superblock.",
+			 function );
+
+			result = -1;
+		}
+	}
 	return( result );
 }
 
-/* Opens a volume for reading
+
+/* Retrieves a specific ministore tree
  * Returns 1 if successful or -1 on error
  */
-int libfsrefs_volume_open_read(
+int libfsrefs_internal_volume_get_ministore_tree(
      libfsrefs_internal_volume_t *internal_volume,
      libbfio_handle_t *file_io_handle,
+     int ministore_tree_index,
+     libfsrefs_ministore_tree_t **ministore_tree,
      libcerror_error_t **error )
 {
-	libfsrefs_block_descriptor_t *level2_metadata_block_descriptor = NULL;
-	libfsrefs_block_descriptor_t *level3_metadata_block_descriptor = NULL;
-	libfsrefs_block_descriptor_t *level4_metadata_block_descriptor = NULL;
-	libfsrefs_block_descriptors_t *directory_block_descriptors     = NULL;
-	libfsrefs_checkpoint_t *primary_checkpoint                     = NULL;
-	libfsrefs_checkpoint_t *secondary_checkpoint                   = NULL;
-	libfsrefs_directory_t *directory                               = NULL;
-	libfsrefs_directory_t *root_directory                          = NULL;
-	libfsrefs_level2_metadata_t *level2_metadata                   = NULL;
-	libfsrefs_level3_metadata_t *level3_metadata                   = NULL;
-	libfsrefs_superblock_t *superblock                             = NULL;
-	libfsrefs_volume_header_t *volume_header                       = NULL;
-	static char *function                                          = "libfsrefs_volume_open_read";
-	off64_t checkpoint_offset                                      = 0;
-	off64_t superblock_offset                                      = 0;
-	uint64_t value_identifier                                      = 0;
-	int level2_metadata_block_descriptor_index                     = 0;
-	int level3_metadata_block_descriptor_index                     = 0;
-	int level4_metadata_block_descriptor_index                     = 0;
-	int number_of_level2_metadata_block_descriptors                = 0;
-	int number_of_level3_metadata_block_descriptors                = 0;
-	int number_of_level4_metadata_block_descriptors                = 0;
+	libfsrefs_block_descriptor_t *block_descriptor  = NULL;
+	libfsrefs_ministore_tree_t *safe_ministore_tree = NULL;
+	static char *function                           = "libfsrefs_internal_volume_get_ministore_tree";
+	off64_t ministore_tree_offset                   = 0;
 
 	if( internal_volume == NULL )
 	{
@@ -792,7 +791,7 @@ int libfsrefs_volume_open_read(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid internal volume.",
+		 "%s: invalid volume.",
 		 function );
 
 		return( -1 );
@@ -803,7 +802,158 @@ int libfsrefs_volume_open_read(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-		 "%s: invalid internal volume - missing IO handle.",
+		 "%s: invalid volume - missing IO handle.",
+		 function );
+
+		return( -1 );
+	}
+	if( ministore_tree == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid ministore tree.",
+		 function );
+
+		return( -1 );
+	}
+	if( libfsrefs_checkpoint_get_ministore_tree_block_descriptor_by_index(
+	     internal_volume->checkpoint,
+	     ministore_tree_index,
+	     &block_descriptor,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve ministore tree: %d block descriptor from checkpoint.",
+		 function,
+		 ministore_tree_index );
+
+		goto on_error;
+	}
+	if( block_descriptor == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 "%s: missing ministore tree: %d block descriptor.",
+		 function,
+		 ministore_tree_index );
+
+		goto on_error;
+	}
+	if( libfsrefs_ministore_tree_initialize(
+	     &safe_ministore_tree,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to create ministore tree: %d.",
+		 function,
+		 ministore_tree_index );
+
+		goto on_error;
+	}
+	ministore_tree_offset = block_descriptor->block_number1 * internal_volume->io_handle->metadata_block_size;
+
+	if( libfsrefs_ministore_tree_read_file_io_handle(
+	     safe_ministore_tree,
+	     internal_volume->io_handle,
+	     file_io_handle,
+	     ministore_tree_offset,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_IO,
+		 LIBCERROR_IO_ERROR_READ_FAILED,
+		 "%s: unable to read ministore tree: %d block: %" PRIu64 " at offset: %" PRIi64 " (0x%08" PRIx64 ").",
+		 function,
+		 ministore_tree_index,
+		 block_descriptor->block_number1,
+		 ministore_tree_offset,
+		 ministore_tree_offset );
+
+		goto on_error;
+	}
+	*ministore_tree = safe_ministore_tree;
+
+	return( 1 );
+
+on_error:
+	if( safe_ministore_tree != NULL )
+	{
+		libfsrefs_ministore_tree_free(
+		 &safe_ministore_tree,
+		 NULL );
+	}
+	return( -1 );
+}
+
+/* Opens a volume for reading
+ * Returns 1 if successful or -1 on error
+ */
+int libfsrefs_internal_volume_open_read(
+     libfsrefs_internal_volume_t *internal_volume,
+     libbfio_handle_t *file_io_handle,
+     libcerror_error_t **error )
+{
+	libfsrefs_checkpoint_t *primary_checkpoint     = NULL;
+	libfsrefs_checkpoint_t *secondary_checkpoint   = NULL;
+	libfsrefs_ministore_tree_t *ministore_tree     = NULL;
+	libfsrefs_superblock_t *superblock             = NULL;
+	libfsrefs_volume_header_t *volume_header       = NULL;
+	static char *function                          = "libfsrefs_internal_volume_open_read";
+	off64_t checkpoint_offset                      = 0;
+	off64_t superblock_offset                      = 0;
+	int number_of_ministore_tree_block_descriptors = 0;
+
+	if( internal_volume == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid volume.",
+		 function );
+
+		return( -1 );
+	}
+	if( internal_volume->io_handle == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 "%s: invalid volume - missing IO handle.",
+		 function );
+
+		return( -1 );
+	}
+	if( internal_volume->superblock != NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 "%s: invalid volume - superblock value already set.",
+		 function );
+
+		return( -1 );
+	}
+	if( internal_volume->checkpoint != NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 "%s: invalid volume - checkpoint value already set.",
 		 function );
 
 		return( -1 );
@@ -860,7 +1010,7 @@ int libfsrefs_volume_open_read(
 	}
 #endif
 	if( libfsrefs_superblock_initialize(
-	     &superblock,
+	     &( internal_volume->superblock ),
 	     error ) != 1 )
 	{
 		libcerror_error_set(
@@ -873,7 +1023,7 @@ int libfsrefs_volume_open_read(
 		goto on_error;
 	}
 	if( libfsrefs_superblock_read_file_io_handle(
-	     superblock,
+	     internal_volume->superblock,
 	     internal_volume->io_handle,
 	     file_io_handle,
 	     superblock_offset,
@@ -890,6 +1040,8 @@ int libfsrefs_volume_open_read(
 
 		goto on_error;
 	}
+/* TODO support more than 2 checkpoints */
+
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )
 	{
@@ -910,7 +1062,7 @@ int libfsrefs_volume_open_read(
 
 		goto on_error;
 	}
-	checkpoint_offset = superblock->primary_checkpoint_block_number * internal_volume->io_handle->metadata_block_size;
+	checkpoint_offset = internal_volume->superblock->primary_checkpoint_block_number * internal_volume->io_handle->metadata_block_size;
 
 	if( libfsrefs_checkpoint_read_file_io_handle(
 	     primary_checkpoint,
@@ -950,7 +1102,7 @@ int libfsrefs_volume_open_read(
 
 		goto on_error;
 	}
-	checkpoint_offset = superblock->secondary_checkpoint_block_number * internal_volume->io_handle->metadata_block_size;
+	checkpoint_offset = internal_volume->superblock->secondary_checkpoint_block_number * internal_volume->io_handle->metadata_block_size;
 
 	if( libfsrefs_checkpoint_read_file_io_handle(
 	     secondary_checkpoint,
@@ -970,549 +1122,139 @@ int libfsrefs_volume_open_read(
 
 		goto on_error;
 	}
-#if defined( HAVE_DEBUG_OUTPUT )
-	if( libcnotify_verbose != 0 )
-	{
-		libcnotify_printf(
-		 "Reading level 2 metadata:\n" );
-	}
-#endif
 	if( primary_checkpoint->sequence_number >= secondary_checkpoint->sequence_number )
 	{
-		if( libfsrefs_checkpoint_get_number_of_level2_metadata_block_descriptors(
-		     primary_checkpoint,
-		     &number_of_level2_metadata_block_descriptors,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve number of level 2 metadata block descriptors from primary checkpoint.",
-			 function );
-
-			goto on_error;
-		}
-	}
-	else
-	{
-		if( libfsrefs_checkpoint_get_number_of_level2_metadata_block_descriptors(
-		     secondary_checkpoint,
-		     &number_of_level2_metadata_block_descriptors,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve number of level 2 metadata block descriptors from secondary checkpoint.",
-			 function );
-
-			goto on_error;
-		}
-	}
-	for( level2_metadata_block_descriptor_index = 0;
-	     level2_metadata_block_descriptor_index < number_of_level2_metadata_block_descriptors;
-	     level2_metadata_block_descriptor_index++ )
-	{
-		if( primary_checkpoint->sequence_number >= secondary_checkpoint->sequence_number )
-		{
-			if( libfsrefs_checkpoint_get_level2_metadata_block_descriptor_by_index(
-			     primary_checkpoint,
-			     level2_metadata_block_descriptor_index,
-			     &level2_metadata_block_descriptor,
-			     error ) != 1 )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-				 "%s: unable to retrieve level 2 metadata block descriptor: %d from primary checkpoint.",
-				 function,
-				 level2_metadata_block_descriptor_index );
-
-				goto on_error;
-			}
-		}
-		else
-		{
-			if( libfsrefs_checkpoint_get_level2_metadata_block_descriptor_by_index(
-			     secondary_checkpoint,
-			     level2_metadata_block_descriptor_index,
-			     &level2_metadata_block_descriptor,
-			     error ) != 1 )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-				 "%s: unable to retrieve level 2 metadata block descriptor: %d from secondary checkpoint.",
-				 function,
-				 level2_metadata_block_descriptor_index );
-
-				goto on_error;
-			}
-		}
-		if( level2_metadata_block_descriptor == NULL )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-			 "%s: missing level 2 metadata block descriptor: %d.",
-			 function,
-			 level2_metadata_block_descriptor_index );
-
-			goto on_error;
-		}
-		if( libfsrefs_level2_metadata_initialize(
-		     &level2_metadata,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-			 "%s: unable to create level 2 metadata.",
-			 function );
-
-			goto on_error;
-		}
-		if( libfsrefs_level2_metadata_read(
-		     level2_metadata,
-		     internal_volume->io_handle,
-		     file_io_handle,
-		     level2_metadata_block_descriptor->block_number * internal_volume->io_handle->metadata_block_size,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_IO,
-			 LIBCERROR_IO_ERROR_READ_FAILED,
-			 "%s: unable to read level 2 metadata block: %" PRIu64 ".",
-			 function,
-			 level2_metadata_block_descriptor->block_number );
-
-			goto on_error;
-		}
-		if( libfsrefs_level2_metadata_get_number_of_block_descriptors(
-		     level2_metadata,
-		     &number_of_level3_metadata_block_descriptors,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve number of level 3 metadata block descriptors.",
-			 function );
-
-			goto on_error;
-		}
-		for( level3_metadata_block_descriptor_index = 0;
-		     level3_metadata_block_descriptor_index < number_of_level3_metadata_block_descriptors;
-		     level3_metadata_block_descriptor_index++ )
-		{
-			if( libfsrefs_level2_metadata_get_block_descriptor_by_index(
-			     level2_metadata,
-			     level3_metadata_block_descriptor_index,
-			     &level3_metadata_block_descriptor,
-			     error ) != 1 )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-				 "%s: unable to retrieve level 3 metadata block descriptor: %d.",
-				 function,
-				 level3_metadata_block_descriptor_index );
-
-				goto on_error;
-			}
-			if( level3_metadata_block_descriptor == NULL )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-				 "%s: missing level 3 metadata block descriptor: %d.",
-				 function,
-				 level3_metadata_block_descriptor_index );
-
-				goto on_error;
-			}
-			if( level3_metadata_block_descriptor->identifier_data_size == 16 )
-			{
-				byte_stream_copy_to_uint64_little_endian(
-				 &( level3_metadata_block_descriptor->identifier_data[ 8 ] ),
-				 value_identifier );
-			}
-			else
-			{
-				value_identifier = 0;
-			}
-			if( value_identifier == 0x00000600UL )
-			{
-				if( libfsrefs_directory_initialize(
-				     &root_directory,
-				     error ) != 1 )
-				{
-					libcerror_error_set(
-					 error,
-					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-					 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-					 "%s: unable to create root directory.",
-					 function );
-
-					goto on_error;
-				}
-				if( libfsrefs_directory_read(
-				     root_directory,
-				     internal_volume->io_handle,
-				     file_io_handle,
-				     level3_metadata_block_descriptor->block_number * internal_volume->io_handle->metadata_block_size,
-				     4,
-				     error ) != 1 )
-				{
-					libcerror_error_set(
-					 error,
-					 LIBCERROR_ERROR_DOMAIN_IO,
-					 LIBCERROR_IO_ERROR_READ_FAILED,
-					 "%s: unable to read root directory block: %" PRIu64 ".",
-					 function,
-					 level3_metadata_block_descriptor->block_number );
-
-					goto on_error;
-				}
-				if( libfsrefs_directory_free(
-				     &root_directory,
-				     error ) != 1 )
-				{
-					libcerror_error_set(
-					 error,
-					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-					 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-					 "%s: unable to free root directory.",
-					 function );
-
-					goto on_error;
-				}
-			}
-			else if( value_identifier == 0x00000701UL )
-			{
-				if( libfsrefs_directory_initialize(
-				     &directory,
-				     error ) != 1 )
-				{
-					libcerror_error_set(
-					 error,
-					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-					 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-					 "%s: unable to create directory.",
-					 function );
-
-					goto on_error;
-				}
-				if( libfsrefs_directory_read(
-				     directory,
-				     internal_volume->io_handle,
-				     file_io_handle,
-				     level3_metadata_block_descriptor->block_number * internal_volume->io_handle->metadata_block_size,
-				     4,
-				     error ) != 1 )
-				{
-					libcerror_error_set(
-					 error,
-					 LIBCERROR_ERROR_DOMAIN_IO,
-					 LIBCERROR_IO_ERROR_READ_FAILED,
-					 "%s: unable to read directory block: %" PRIu64 ".",
-					 function,
-					 level4_metadata_block_descriptor->block_number );
-
-					goto on_error;
-				}
-				if( libfsrefs_directory_free(
-				     &directory,
-				     error ) != 1 )
-				{
-					libcerror_error_set(
-					 error,
-					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-					 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-					 "%s: unable to free directory.",
-					 function );
-
-					goto on_error;
-				}
-#ifdef TODO
-				if( libfsrefs_block_descriptors_initialize(
-				     &directory_block_descriptors,
-				     error ) != 1 )
-				{
-					libcerror_error_set(
-					 error,
-					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-					 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-					 "%s: unable to create directory block descriptors.",
-					 function );
-
-					goto on_error;
-				}
-				if( libfsrefs_block_descriptors_read(
-				     directory_block_descriptors,
-				     internal_volume->io_handle,
-				     file_io_handle,
-				     level3_metadata_block_descriptor->block_number * internal_volume->io_handle->metadata_block_size,
-				     4,
-				     error ) != 1 )
-				{
-					libcerror_error_set(
-					 error,
-					 LIBCERROR_ERROR_DOMAIN_IO,
-					 LIBCERROR_IO_ERROR_READ_FAILED,
-					 "%s: unable to read level 2 metadata block: %" PRIu64 ".",
-					 function,
-					 level3_metadata_block_descriptor->block_number );
-
-					goto on_error;
-				}
-				if( libfsrefs_block_descriptors_get_number_of_block_descriptors(
-				     directory_block_descriptors,
-				     &number_of_level4_metadata_block_descriptors,
-				     error ) != 1 )
-				{
-					libcerror_error_set(
-					 error,
-					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-					 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-					 "%s: unable to retrieve number of level 4 metadata block descriptors.",
-					 function );
-
-					goto on_error;
-				}
-				for( level4_metadata_block_descriptor_index = 0;
-				     level4_metadata_block_descriptor_index < number_of_level4_metadata_block_descriptors;
-				     level4_metadata_block_descriptor_index++ )
-				{
-					if( libfsrefs_block_descriptors_get_block_descriptor_by_index(
-					     directory_block_descriptors,
-					     level4_metadata_block_descriptor_index,
-					     &level4_metadata_block_descriptor,
-					     error ) != 1 )
-					{
-						libcerror_error_set(
-						 error,
-						 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-						 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-						 "%s: unable to retrieve level 4 metadata block descriptor: %d.",
-						 function,
-						 level4_metadata_block_descriptor_index );
-
-						goto on_error;
-					}
-					if( level4_metadata_block_descriptor == NULL )
-					{
-						libcerror_error_set(
-						 error,
-						 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-						 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-						 "%s: missing level 4 metadata block descriptor: %d.",
-						 function,
-						 level4_metadata_block_descriptor_index );
-
-						goto on_error;
-					}
-					if( libfsrefs_directory_initialize(
-					     &directory,
-					     error ) != 1 )
-					{
-						libcerror_error_set(
-						 error,
-						 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-						 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-						 "%s: unable to create directory.",
-						 function );
-
-						goto on_error;
-					}
-					if( libfsrefs_directory_read(
-					     directory,
-					     internal_volume->io_handle,
-					     file_io_handle,
-					     level4_metadata_block_descriptor->block_number * internal_volume->io_handle->metadata_block_size,
-					     5,
-					     error ) != 1 )
-					{
-						libcerror_error_set(
-						 error,
-						 LIBCERROR_ERROR_DOMAIN_IO,
-						 LIBCERROR_IO_ERROR_READ_FAILED,
-						 "%s: unable to read directory block: %" PRIu64 ".",
-						 function,
-						 level4_metadata_block_descriptor->block_number );
-
-						goto on_error;
-					}
-					if( libfsrefs_directory_free(
-					     &directory,
-					     error ) != 1 )
-					{
-						libcerror_error_set(
-						 error,
-						 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-						 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-						 "%s: unable to free directory.",
-						 function );
-
-						goto on_error;
-					}
-				}
-				if( libfsrefs_block_descriptors_free(
-				     &directory_block_descriptors,
-				     error ) != 1 )
-				{
-					libcerror_error_set(
-					 error,
-					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-					 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-					 "%s: unable to free directory block descriptors.",
-					 function );
-
-					goto on_error;
-				}
-#endif /* TODO */
-			}
-			else
-			{
-				if( libfsrefs_level3_metadata_initialize(
-				     &level3_metadata,
-				     error ) != 1 )
-				{
-					libcerror_error_set(
-					 error,
-					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-					 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-					 "%s: unable to create level 3 metadata.",
-					 function );
-
-					goto on_error;
-				}
-				if( libfsrefs_level3_metadata_read(
-				     level3_metadata,
-				     internal_volume->io_handle,
-				     file_io_handle,
-				     level3_metadata_block_descriptor->block_number * internal_volume->io_handle->metadata_block_size,
-				     error ) != 1 )
-				{
-					libcerror_error_set(
-					 error,
-					 LIBCERROR_ERROR_DOMAIN_IO,
-					 LIBCERROR_IO_ERROR_READ_FAILED,
-					 "%s: unable to read level 3 metadata block: %" PRIu64 ".",
-					 function,
-					 level3_metadata_block_descriptor->block_number );
-
-					goto on_error;
-				}
-				if( libfsrefs_level3_metadata_free(
-				     &level3_metadata,
-				     error ) != 1 )
-				{
-					libcerror_error_set(
-					 error,
-					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-					 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-					 "%s: unable to free level 3 metadata.",
-					 function );
-
-					goto on_error;
-				}
-			}
-		}
-		if( libfsrefs_level2_metadata_free(
-		     &level2_metadata,
+		if( libfsrefs_checkpoint_free(
+		     &secondary_checkpoint,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-			 "%s: unable to free level 2 metadata.",
+			 "%s: unable to free secondary checkpoint.",
+			 function );
+
+			goto on_error;
+		}
+		internal_volume->checkpoint = primary_checkpoint;
+	}
+	else
+	{
+		if( libfsrefs_checkpoint_free(
+		     &primary_checkpoint,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable to free primary checkpoint.",
+			 function );
+
+			goto on_error;
+		}
+		internal_volume->checkpoint = secondary_checkpoint;
+	}
+	if( libfsrefs_checkpoint_get_number_of_ministore_tree_block_descriptors(
+	     internal_volume->checkpoint,
+	     &number_of_ministore_tree_block_descriptors,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve number of ministore tree block descriptors from checkpoint.",
+		 function );
+
+		goto on_error;
+	}
+	if( number_of_ministore_tree_block_descriptors >= 8 )
+	{
+#if defined( HAVE_DEBUG_OUTPUT )
+		if( libcnotify_verbose != 0 )
+		{
+			libcnotify_printf(
+			 "Reading ministore tree: 7 (containers)\n" );
+		}
+#endif
+		if( libfsrefs_internal_volume_get_ministore_tree(
+		     internal_volume,
+		     file_io_handle,
+		     7,
+		     &ministore_tree,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve ministore tree: 7 (containers).",
+			 function );
+
+			return( -1 );
+		}
+		if( libfsrefs_ministore_tree_free(
+		     &ministore_tree,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable to free ministore tree: 7 (containers).",
 			 function );
 
 			goto on_error;
 		}
 	}
-	if( libfsrefs_checkpoint_free(
-	     &secondary_checkpoint,
-	     error ) != 1 )
+	if( number_of_ministore_tree_block_descriptors >= 9 )
 	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-		 "%s: unable to free secondary checkpoint.",
-		 function );
+#if defined( HAVE_DEBUG_OUTPUT )
+		if( libcnotify_verbose != 0 )
+		{
+			libcnotify_printf(
+			 "Reading ministore tree: 8 (containers)\n" );
+		}
+#endif
+		if( libfsrefs_internal_volume_get_ministore_tree(
+		     internal_volume,
+		     file_io_handle,
+		     8,
+		     &ministore_tree,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve ministore tree: 8 (containers).",
+			 function );
 
-		goto on_error;
-	}
-	if( libfsrefs_checkpoint_free(
-	     &primary_checkpoint,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-		 "%s: unable to free primary checkpoint.",
-		 function );
+			return( -1 );
+		}
+		if( libfsrefs_ministore_tree_free(
+		     &ministore_tree,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable to free ministore tree: 8 (containers).",
+			 function );
 
-		goto on_error;
-	}
-	if( libfsrefs_superblock_free(
-	     &superblock,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-		 "%s: unable to free superblock.",
-		 function );
-
-		goto on_error;
+			goto on_error;
+		}
 	}
 	return( 1 );
 
 on_error:
-	if( directory != NULL )
+	if( ministore_tree != NULL )
 	{
-		libfsrefs_directory_free(
-		 &directory,
-		 NULL );
-	}
-	if( directory_block_descriptors != NULL )
-	{
-		libfsrefs_block_descriptors_free(
-		 &directory_block_descriptors,
-		 NULL );
-	}
-	if( level3_metadata != NULL )
-	{
-		libfsrefs_level3_metadata_free(
-		 &level3_metadata,
-		 NULL );
-	}
-	if( root_directory != NULL )
-	{
-		libfsrefs_directory_free(
-		 &root_directory,
-		 NULL );
-	}
-	if( level2_metadata != NULL )
-	{
-		libfsrefs_level2_metadata_free(
-		 &level2_metadata,
+		libfsrefs_ministore_tree_free(
+		 &ministore_tree,
 		 NULL );
 	}
 	if( secondary_checkpoint != NULL )
@@ -1527,10 +1269,12 @@ on_error:
 		 &primary_checkpoint,
 		 NULL );
 	}
-	if( superblock != NULL )
+	internal_volume->checkpoint = NULL;
+
+	if( internal_volume->superblock != NULL )
 	{
 		libfsrefs_superblock_free(
-		 &superblock,
+		 &( internal_volume->superblock ),
 		 NULL );
 	}
 	if( volume_header != NULL )
@@ -1733,7 +1477,6 @@ int libfsrefs_volume_get_version(
 {
 	libfsrefs_internal_volume_t *internal_volume = NULL;
 	static char *function                        = "libfsrefs_volume_get_version";
-	int result                                   = 0;
 
 	if( volume == NULL )
 	{
