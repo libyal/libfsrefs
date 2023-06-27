@@ -1,5 +1,5 @@
 /*
- * Ministor node record functions
+ * Ministore node record functions
  *
  * Copyright (C) 2012-2023, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -43,17 +43,17 @@ struct libfsrefs_node_record
 	 */
 	uint16_t flags;
 
-	/* The key data offset
+	/* The key data
 	 */
-	uint16_t key_data_offset;
+	const uint8_t *key_data;
 
 	/* The key data size
 	 */
 	uint16_t key_data_size;
 
-	/* The value data offset
+	/* The value data
 	 */
-	uint16_t value_data_offset;
+	const uint8_t *value_data;
 
 	/* The value data size
 	 */

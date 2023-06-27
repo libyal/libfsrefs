@@ -1,5 +1,5 @@
 /*
- * Library level3_metadata type test program
+ * Library ministore_node type test program
  *
  * Copyright (C) 2012-2023, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -33,30 +33,30 @@
 #include "fsrefs_test_memory.h"
 #include "fsrefs_test_unused.h"
 
-#include "../libfsrefs/libfsrefs_level3_metadata.h"
+#include "../libfsrefs/libfsrefs_ministore_node.h"
 
 #if defined( __GNUC__ ) && !defined( LIBFSREFS_DLL_IMPORT )
 
-/* Tests the libfsrefs_level3_metadata_initialize function
+/* Tests the libfsrefs_ministore_node_initialize function
  * Returns 1 if successful or 0 if not
  */
-int fsrefs_test_level3_metadata_initialize(
+int fsrefs_test_ministore_node_initialize(
      void )
 {
-	libcerror_error_t *error                     = NULL;
-	libfsrefs_level3_metadata_t *level3_metadata = NULL;
-	int result                                   = 0;
+	libcerror_error_t *error                   = NULL;
+	libfsrefs_ministore_node_t *ministore_node = NULL;
+	int result                                 = 0;
 
 #if defined( HAVE_FSREFS_TEST_MEMORY )
-	int number_of_malloc_fail_tests              = 1;
-	int number_of_memset_fail_tests              = 1;
-	int test_number                              = 0;
+	int number_of_malloc_fail_tests            = 1;
+	int number_of_memset_fail_tests            = 1;
+	int test_number                            = 0;
 #endif
 
 	/* Test regular cases
 	 */
-	result = libfsrefs_level3_metadata_initialize(
-	          &level3_metadata,
+	result = libfsrefs_ministore_node_initialize(
+	          &ministore_node,
 	          &error );
 
 	FSREFS_TEST_ASSERT_EQUAL_INT(
@@ -65,15 +65,15 @@ int fsrefs_test_level3_metadata_initialize(
 	 1 );
 
 	FSREFS_TEST_ASSERT_IS_NOT_NULL(
-	 "level3_metadata",
-	 level3_metadata );
+	 "ministore_node",
+	 ministore_node );
 
 	FSREFS_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
-	result = libfsrefs_level3_metadata_free(
-	          &level3_metadata,
+	result = libfsrefs_ministore_node_free(
+	          &ministore_node,
 	          &error );
 
 	FSREFS_TEST_ASSERT_EQUAL_INT(
@@ -82,8 +82,8 @@ int fsrefs_test_level3_metadata_initialize(
 	 1 );
 
 	FSREFS_TEST_ASSERT_IS_NULL(
-	 "level3_metadata",
-	 level3_metadata );
+	 "ministore_node",
+	 ministore_node );
 
 	FSREFS_TEST_ASSERT_IS_NULL(
 	 "error",
@@ -91,7 +91,7 @@ int fsrefs_test_level3_metadata_initialize(
 
 	/* Test error cases
 	 */
-	result = libfsrefs_level3_metadata_initialize(
+	result = libfsrefs_ministore_node_initialize(
 	          NULL,
 	          &error );
 
@@ -107,10 +107,10 @@ int fsrefs_test_level3_metadata_initialize(
 	libcerror_error_free(
 	 &error );
 
-	level3_metadata = (libfsrefs_level3_metadata_t *) 0x12345678UL;
+	ministore_node = (libfsrefs_ministore_node_t *) 0x12345678UL;
 
-	result = libfsrefs_level3_metadata_initialize(
-	          &level3_metadata,
+	result = libfsrefs_ministore_node_initialize(
+	          &ministore_node,
 	          &error );
 
 	FSREFS_TEST_ASSERT_EQUAL_INT(
@@ -125,7 +125,7 @@ int fsrefs_test_level3_metadata_initialize(
 	libcerror_error_free(
 	 &error );
 
-	level3_metadata = NULL;
+	ministore_node = NULL;
 
 #if defined( HAVE_FSREFS_TEST_MEMORY )
 
@@ -133,22 +133,22 @@ int fsrefs_test_level3_metadata_initialize(
 	     test_number < number_of_malloc_fail_tests;
 	     test_number++ )
 	{
-		/* Test libfsrefs_level3_metadata_initialize with malloc failing
+		/* Test libfsrefs_ministore_node_initialize with malloc failing
 		 */
 		fsrefs_test_malloc_attempts_before_fail = test_number;
 
-		result = libfsrefs_level3_metadata_initialize(
-		          &level3_metadata,
+		result = libfsrefs_ministore_node_initialize(
+		          &ministore_node,
 		          &error );
 
 		if( fsrefs_test_malloc_attempts_before_fail != -1 )
 		{
 			fsrefs_test_malloc_attempts_before_fail = -1;
 
-			if( level3_metadata != NULL )
+			if( ministore_node != NULL )
 			{
-				libfsrefs_level3_metadata_free(
-				 &level3_metadata,
+				libfsrefs_ministore_node_free(
+				 &ministore_node,
 				 NULL );
 			}
 		}
@@ -160,8 +160,8 @@ int fsrefs_test_level3_metadata_initialize(
 			 -1 );
 
 			FSREFS_TEST_ASSERT_IS_NULL(
-			 "level3_metadata",
-			 level3_metadata );
+			 "ministore_node",
+			 ministore_node );
 
 			FSREFS_TEST_ASSERT_IS_NOT_NULL(
 			 "error",
@@ -175,22 +175,22 @@ int fsrefs_test_level3_metadata_initialize(
 	     test_number < number_of_memset_fail_tests;
 	     test_number++ )
 	{
-		/* Test libfsrefs_level3_metadata_initialize with memset failing
+		/* Test libfsrefs_ministore_node_initialize with memset failing
 		 */
 		fsrefs_test_memset_attempts_before_fail = test_number;
 
-		result = libfsrefs_level3_metadata_initialize(
-		          &level3_metadata,
+		result = libfsrefs_ministore_node_initialize(
+		          &ministore_node,
 		          &error );
 
 		if( fsrefs_test_memset_attempts_before_fail != -1 )
 		{
 			fsrefs_test_memset_attempts_before_fail = -1;
 
-			if( level3_metadata != NULL )
+			if( ministore_node != NULL )
 			{
-				libfsrefs_level3_metadata_free(
-				 &level3_metadata,
+				libfsrefs_ministore_node_free(
+				 &ministore_node,
 				 NULL );
 			}
 		}
@@ -202,8 +202,8 @@ int fsrefs_test_level3_metadata_initialize(
 			 -1 );
 
 			FSREFS_TEST_ASSERT_IS_NULL(
-			 "level3_metadata",
-			 level3_metadata );
+			 "ministore_node",
+			 ministore_node );
 
 			FSREFS_TEST_ASSERT_IS_NOT_NULL(
 			 "error",
@@ -223,19 +223,19 @@ on_error:
 		libcerror_error_free(
 		 &error );
 	}
-	if( level3_metadata != NULL )
+	if( ministore_node != NULL )
 	{
-		libfsrefs_level3_metadata_free(
-		 &level3_metadata,
+		libfsrefs_ministore_node_free(
+		 &ministore_node,
 		 NULL );
 	}
 	return( 0 );
 }
 
-/* Tests the libfsrefs_level3_metadata_free function
+/* Tests the libfsrefs_ministore_node_free function
  * Returns 1 if successful or 0 if not
  */
-int fsrefs_test_level3_metadata_free(
+int fsrefs_test_ministore_node_free(
      void )
 {
 	libcerror_error_t *error = NULL;
@@ -243,7 +243,7 @@ int fsrefs_test_level3_metadata_free(
 
 	/* Test error cases
 	 */
-	result = libfsrefs_level3_metadata_free(
+	result = libfsrefs_ministore_node_free(
 	          NULL,
 	          &error );
 
@@ -290,20 +290,26 @@ int main(
 #if defined( __GNUC__ ) && !defined( LIBFSREFS_DLL_IMPORT )
 
 	FSREFS_TEST_RUN(
-	 "libfsrefs_level3_metadata_initialize",
-	 fsrefs_test_level3_metadata_initialize );
+	 "libfsrefs_ministore_node_initialize",
+	 fsrefs_test_ministore_node_initialize );
 
 	FSREFS_TEST_RUN(
-	 "libfsrefs_level3_metadata_free",
-	 fsrefs_test_level3_metadata_free );
+	 "libfsrefs_ministore_node_free",
+	 fsrefs_test_ministore_node_free );
 
-	/* TODO: add tests for libfsrefs_level3_metadata_read */
+	/* TODO: add tests for libfsrefs_ministore_node_read_data */
+
+	/* TODO: add tests for libfsrefs_ministore_node_read_file_io_handle */
 
 #endif /* defined( __GNUC__ ) && !defined( LIBFSREFS_DLL_IMPORT ) */
 
 	return( EXIT_SUCCESS );
 
+#if defined( __GNUC__ ) && !defined( LIBFSREFS_DLL_IMPORT )
+
 on_error:
 	return( EXIT_FAILURE );
+
+#endif /* defined( __GNUC__ ) && !defined( LIBFSREFS_DLL_IMPORT ) */
 }
 

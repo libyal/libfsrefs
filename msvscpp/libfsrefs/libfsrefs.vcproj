@@ -39,8 +39,8 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="..\..\include;..\..\common;..\..\libcerror;..\..\libcdata;..\..\libclocale;..\..\libcnotify;..\..\libcsplit;..\..\libuna;..\..\libcfile;..\..\libcpath;..\..\libbfio;..\..\libfcache;..\..\libfdata;..\..\libfdatetime;..\..\libfguid;..\..\libfwnt"
-				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE;HAVE_LOCAL_LIBCERROR;HAVE_LOCAL_LIBCDATA;HAVE_LOCAL_LIBCLOCALE;HAVE_LOCAL_LIBCNOTIFY;HAVE_LOCAL_LIBCSPLIT;HAVE_LOCAL_LIBUNA;HAVE_LOCAL_LIBCFILE;HAVE_LOCAL_LIBCPATH;HAVE_LOCAL_LIBBFIO;HAVE_LOCAL_LIBFCACHE;HAVE_LOCAL_LIBFDATA;HAVE_LOCAL_LIBFDATETIME;HAVE_LOCAL_LIBFGUID;HAVE_LOCAL_LIBFWNT;LIBFSREFS_DLL_EXPORT"
+				AdditionalIncludeDirectories="..\..\include;..\..\common;..\..\libcerror;..\..\libcthreads;..\..\libcdata;..\..\libclocale;..\..\libcnotify;..\..\libcsplit;..\..\libuna;..\..\libcfile;..\..\libcpath;..\..\libbfio;..\..\libfcache;..\..\libfdata;..\..\libfdatetime;..\..\libfguid;..\..\libfwnt"
+				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE;HAVE_LOCAL_LIBCERROR;HAVE_LOCAL_LIBCTHREADS;HAVE_LOCAL_LIBCDATA;HAVE_LOCAL_LIBCLOCALE;HAVE_LOCAL_LIBCNOTIFY;HAVE_LOCAL_LIBCSPLIT;HAVE_LOCAL_LIBUNA;HAVE_LOCAL_LIBCFILE;HAVE_LOCAL_LIBCPATH;HAVE_LOCAL_LIBBFIO;HAVE_LOCAL_LIBFCACHE;HAVE_LOCAL_LIBFDATA;HAVE_LOCAL_LIBFDATETIME;HAVE_LOCAL_LIBFGUID;HAVE_LOCAL_LIBFWNT;LIBFSREFS_DLL_EXPORT"
 				RuntimeLibrary="2"
 				WarningLevel="4"
 				CompileAs="1"
@@ -110,8 +110,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\include;..\..\common;..\..\libcerror;..\..\libcdata;..\..\libclocale;..\..\libcnotify;..\..\libcsplit;..\..\libuna;..\..\libcfile;..\..\libcpath;..\..\libbfio;..\..\libfcache;..\..\libfdata;..\..\libfdatetime;..\..\libfguid;..\..\libfwnt"
-				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE;HAVE_LOCAL_LIBCERROR;HAVE_LOCAL_LIBCDATA;HAVE_LOCAL_LIBCLOCALE;HAVE_LOCAL_LIBCNOTIFY;HAVE_LOCAL_LIBCSPLIT;HAVE_LOCAL_LIBUNA;HAVE_LOCAL_LIBCFILE;HAVE_LOCAL_LIBCPATH;HAVE_LOCAL_LIBBFIO;HAVE_LOCAL_LIBFCACHE;HAVE_LOCAL_LIBFDATA;HAVE_LOCAL_LIBFDATETIME;HAVE_LOCAL_LIBFGUID;HAVE_LOCAL_LIBFWNT;LIBFSREFS_DLL_EXPORT"
+				AdditionalIncludeDirectories="..\..\include;..\..\common;..\..\libcerror;..\..\libcthreads;..\..\libcdata;..\..\libclocale;..\..\libcnotify;..\..\libcsplit;..\..\libuna;..\..\libcfile;..\..\libcpath;..\..\libbfio;..\..\libfcache;..\..\libfdata;..\..\libfdatetime;..\..\libfguid;..\..\libfwnt"
+				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE;HAVE_LOCAL_LIBCERROR;HAVE_LOCAL_LIBCTHREADS;HAVE_LOCAL_LIBCDATA;HAVE_LOCAL_LIBCLOCALE;HAVE_LOCAL_LIBCNOTIFY;HAVE_LOCAL_LIBCSPLIT;HAVE_LOCAL_LIBUNA;HAVE_LOCAL_LIBCFILE;HAVE_LOCAL_LIBCPATH;HAVE_LOCAL_LIBBFIO;HAVE_LOCAL_LIBFCACHE;HAVE_LOCAL_LIBFDATA;HAVE_LOCAL_LIBFDATETIME;HAVE_LOCAL_LIBFGUID;HAVE_LOCAL_LIBFWNT;LIBFSREFS_DLL_EXPORT"
 				BasicRuntimeChecks="3"
 				SmallerTypeCheck="true"
 				RuntimeLibrary="3"
@@ -178,10 +178,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\libfsrefs\libfsrefs_block_descriptors.c"
-				>
-			</File>
-			<File
 				RelativePath="..\..\libfsrefs\libfsrefs_checkpoint.c"
 				>
 			</File>
@@ -198,11 +194,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\libfsrefs\libfsrefs_io_handle.c"
+				RelativePath="..\..\libfsrefs\libfsrefs_file_system.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\libfsrefs\libfsrefs_level3_metadata.c"
+				RelativePath="..\..\libfsrefs\libfsrefs_io_handle.c"
 				>
 			</File>
 			<File
@@ -222,7 +218,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\libfsrefs\libfsrefs_ministore_tree.c"
+				RelativePath="..\..\libfsrefs\libfsrefs_ministore_node.c"
 				>
 			</File>
 			<File
@@ -235,6 +231,10 @@
 			</File>
 			<File
 				RelativePath="..\..\libfsrefs\libfsrefs_notify.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfsrefs\libfsrefs_objects_tree.c"
 				>
 			</File>
 			<File
@@ -296,10 +296,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\libfsrefs\libfsrefs_block_descriptors.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\libfsrefs\libfsrefs_checkpoint.h"
 				>
 			</File>
@@ -324,11 +320,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\libfsrefs\libfsrefs_io_handle.h"
+				RelativePath="..\..\libfsrefs\libfsrefs_file_system.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\libfsrefs\libfsrefs_level3_metadata.h"
+				RelativePath="..\..\libfsrefs\libfsrefs_io_handle.h"
 				>
 			</File>
 			<File
@@ -349,6 +345,10 @@
 			</File>
 			<File
 				RelativePath="..\..\libfsrefs\libfsrefs_libcnotify.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfsrefs\libfsrefs_libcthreads.h"
 				>
 			</File>
 			<File
@@ -392,7 +392,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\libfsrefs\libfsrefs_ministore_tree.h"
+				RelativePath="..\..\libfsrefs\libfsrefs_ministore_node.h"
 				>
 			</File>
 			<File
@@ -405,6 +405,10 @@
 			</File>
 			<File
 				RelativePath="..\..\libfsrefs\libfsrefs_notify.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfsrefs\libfsrefs_objects_tree.h"
 				>
 			</File>
 			<File

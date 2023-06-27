@@ -25,15 +25,17 @@
 #include <common.h>
 #include <types.h>
 
-#include "libfsrefs_checkpoint.h"
 #include "libfsrefs_extern.h"
+#include "libfsrefs_file_system.h"
 #include "libfsrefs_io_handle.h"
 #include "libfsrefs_libbfio.h"
 #include "libfsrefs_libcerror.h"
+#include "libfsrefs_libcthreads.h"
 #include "libfsrefs_libfcache.h"
 #include "libfsrefs_libfdata.h"
-#include "libfsrefs_ministore_tree.h"
-#include "libfsrefs_superblock.h"
+#include "libfsrefs_ministore_node.h"
+#include "libfsrefs_node_record.h"
+#include "libfsrefs_objects_tree.h"
 #include "libfsrefs_types.h"
 
 #if defined( __cplusplus )
@@ -44,17 +46,21 @@ typedef struct libfsrefs_internal_volume libfsrefs_internal_volume_t;
 
 struct libfsrefs_internal_volume
 {
-	/* The superblock
+	/* The file system
 	 */
-	libfsrefs_superblock_t *superblock;
+	libfsrefs_file_system_t *file_system;
 
-	/* The (latest) checkpoint
+	/* The objects tree
 	 */
-	libfsrefs_checkpoint_t *checkpoint;
+	libfsrefs_objects_tree_t *objects_tree;
 
-	/* The containers (ministore) tree
+	/* The volume information object
 	 */
-	libfsrefs_ministore_tree_t *containers_tree;
+	libfsrefs_ministore_node_t *volume_information_object;
+
+	/* The volume name record
+	 */
+	libfsrefs_node_record_t *volume_name_record;
 
 	/* The IO handle
 	 */
@@ -71,6 +77,12 @@ struct libfsrefs_internal_volume
 	/* Value to indicate if the file IO handle was opened inside the library
 	 */
 	uint8_t file_io_handle_opened_in_library;
+
+#if defined( HAVE_LIBFSREFS_MULTI_THREAD_SUPPORT )
+	/* The read/write lock
+	 */
+	libcthreads_read_write_lock_t *read_write_lock;
+#endif
 };
 
 LIBFSREFS_EXTERN \
@@ -118,16 +130,13 @@ int libfsrefs_volume_close(
      libfsrefs_volume_t *volume,
      libcerror_error_t **error );
 
-int libfsrefs_internal_volume_get_ministore_tree(
-     libfsrefs_internal_volume_t *internal_volume,
-     libbfio_handle_t *file_io_handle,
-     int ministore_tree_index,
-     libfsrefs_ministore_tree_t **ministore_tree,
-     libcerror_error_t **error );
-
 int libfsrefs_internal_volume_open_read(
      libfsrefs_internal_volume_t *internal_volume,
      libbfio_handle_t *file_io_handle,
+     libcerror_error_t **error );
+
+int libfsrefs_internal_volume_get_volume_name_record(
+     libfsrefs_internal_volume_t *internal_volume,
      libcerror_error_t **error );
 
 LIBFSREFS_EXTERN \

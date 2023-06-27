@@ -43,9 +43,9 @@ struct libfsrefs_checkpoint
 	 */
 	uint64_t sequence_number;
 
-	/* The ministore tree block descriptors array
+	/* The (ministore tree) block descriptors array
 	 */
-	libcdata_array_t *ministore_tree_block_descriptors_array;
+	libcdata_array_t *block_descriptors_array;
 };
 
 int libfsrefs_checkpoint_initialize(

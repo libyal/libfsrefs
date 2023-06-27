@@ -233,6 +233,10 @@ int libfsrefs_volume_header_read_data(
 	 ( (fsrefs_volume_header_t *) data )->volume_serial_number,
 	 volume_header->volume_serial_number );
 
+	byte_stream_copy_to_uint64_little_endian(
+	 ( (fsrefs_volume_header_t *) data )->container_size,
+	 volume_header->container_size );
+
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )
 	{
@@ -338,13 +342,10 @@ int libfsrefs_volume_header_read_data(
 		 function,
 		 volume_header->volume_serial_number );
 
-		byte_stream_copy_to_uint64_little_endian(
-		 ( (fsrefs_volume_header_t *) data )->unknown10,
-		 value_64bit );
 		libcnotify_printf(
-		 "%s: unknown10\t\t\t\t: 0x%08" PRIx64 "\n",
+		 "%s: container size\t\t\t: %" PRIu64 "\n",
 		 function,
-		 value_64bit );
+		 volume_header->container_size );
 
 		libcnotify_printf(
 		 "%s: unknown11\n",
@@ -430,23 +431,36 @@ int libfsrefs_volume_header_read_data(
 	{
 		volume_header->metadata_block_size = 16 * 1024;
 	}
-	else
+	else if( volume_header->major_format_version == 3 )
 	{
 		volume_header->metadata_block_size = volume_header->block_size;
-	}
 
+		if( volume_header->container_size == 0 )
+		{
+			volume_header->container_size = 0x4000;
+		}
+		else
+		{
+			volume_header->container_size /= volume_header->block_size;
+		}
+	}
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )
 	{
+		libcnotify_printf(
+		 "%s: block size\t\t\t\t: %" PRIu32 "\n",
+		 function,
+		 volume_header->block_size );
+
 		libcnotify_printf(
 		 "%s: metadata block size\t\t\t: %" PRIu32 "\n",
 		 function,
 		 volume_header->metadata_block_size );
 
 		libcnotify_printf(
-		 "%s: block size\t\t\t\t: %" PRIu32 "\n",
+		 "%s: container size\t\t\t: %" PRIu64 " blocks\n",
 		 function,
-		 volume_header->block_size );
+		 volume_header->container_size );
 
 		libcnotify_printf(
 		 "\n" );

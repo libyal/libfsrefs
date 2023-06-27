@@ -1,11 +1,17 @@
 TODO
-* Format support
-** For version 3.x map block number to container
+
+Format support
+* Move checkpoint into file system
+* Get volume information from object identifiers table
+* Get root directory from object identifiers table
+* For version 3.x map block number to container
+* For version 3.x use descriptor to read metadata block
+
+Clean up
+* remove metadata table
 
 * API
   - complete volume name functions
-* metadata table
-  - check value entry offsets
 * directory
   - complete first approach to directory handling code
   - sub parse directory entry - type file tables

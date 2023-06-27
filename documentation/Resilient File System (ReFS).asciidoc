@@ -83,7 +83,7 @@ There are multiple version of ReFS.
 [cols="1,5",options="header"]
 |===
 | ReFS version | Remarks
-| 1.1 | Used by Windows 8 (preview) and Windows Server 2012 
+| 1.1 | Used by Windows 8 (preview) and Windows Server 2012
 | 1.2 | Used by Windows 8.1, Windows 10 (1507 to 1607) and Windows Server 2012 R2
 | |
 | 2.0 | Used by Windows Server 2016 (preview)
@@ -141,11 +141,14 @@ The volume header is 512 bytes of size and consists of:
 | 44 | 4 | | [yellow-background]*Unknown*
 | 48 | 8 | 0x00 | [yellow-background]*Unknown (empty values)*
 | 56 | 8 | | Volume serial number
-| 64 | 8 | | [yellow-background]*Unknown (container (or band) size?)*
+| 64 | 8 | | Container (or band size)
 | 72 | 440 | 0x00 | [yellow-background]*Unknown (empty values)*
 |===
 
 Seen 4096 and 65536 as supported allocation unit byte sizes.
+
+[NOTE]
+Note the container size has been first observed in format version 3.4, in previous format versions such as 3.1, which has containers, this value is 0.
 
 == Metadata
 
@@ -176,8 +179,7 @@ The format version 1 metadata block header is 48 bytes of size and consists of:
 The block number is relative from the start of the volume
 | 8 | 8 | | [yellow-background]*Unknown (sequence number?)*
 | 16 | 8 | 0x00 | [yellow-background]*Unknown (empty values)*
-| 24 | 8 | | Object identifier +
-See section: <<object_identifiers,Object identifiers>>
+| 24 | 8 | | [yellow-background]*Unknown*
 | 32 | 8 | 0x01 | [yellow-background]*Unknown (flags or level?)*
 | 40 | 8 | 0x00 | [yellow-background]*Unknown (empty values)*
 |===
@@ -207,47 +209,6 @@ The format version 3 metadata block header is 80 bytes of size and consists of:
 
 [NOTE]
 In format version 3 the metadata can span multiple metadata blocks.
-
-=== [[object_identifiers]]Object identifiers
-
-==== Level 0 and 1
-
-[cols="1,1,5",options="header"]
-|===
-| Value | Identifier | Description
-| 0x00000000 | | Level 0 and level 1 metadata
-|===
-
-==== Level 2
-
-[cols="1,1,5",options="header"]
-|===
-| Value | Identifier | Description
-| 0x00000001 | | Level 2 metadata
-| 0x00000002 | | Level 2 metadata
-| 0x00000003 | | Level 2 metadata
-| | |
-| 0x0000000c | | Level 2 metadata
-| 0x0000000d | | Level 2 metadata
-| 0x0000000e | | Level 2 metadata
-|===
-
-==== Level 3
-
-[cols="1,1,5",options="header"]
-|===
-| Value | Identifier | Description
-| 0x00000500 | REFS_OBJECT_UNKNOWN_1 | Volume
-| 0x00000520 | REFS_OBJECT_UNKNOWN_2 |
-| 0x00000530 | |
-| | |
-| 0x00000600 | REFS_ROOT_DIRECTORY_ID |
-| | |
-| 0x00000700 | REFS_OBJECT_UNKNOWN_3 |
-| 0x00000701 | | Used for first sub directory
-|===
-
-Values 0x00000701 and above are used for sub directories
 
 === [[metadata_block_descriptor]]Metadata block descriptor
 
@@ -302,7 +263,7 @@ The offset is relative to the start of the checksum descriptor
 Checksum data size is 8 bytes
 |===
 
-=== Superblock (level 0) metadata
+== Superblock (level 0) metadata
 
 The superblock metadata consists of:
 
@@ -311,7 +272,7 @@ The superblock metadata consists of:
 * Checkpoint references data
 * Self <<metadata_block_descriptor,metadata block descriptor>>
 
-==== Superblock
+=== Superblock
 
 The superblock is 48 bytes of size and consists of:
 
@@ -329,7 +290,7 @@ The offset is relative to the start of the metadata block
 | 44 | 4 | | Self descriptor data size
 |===
 
-==== Checkpoint references data
+=== Checkpoint references data
 
 The checkpoint references data is variable of size and consists of:
 
@@ -339,7 +300,7 @@ The checkpoint references data is variable of size and consists of:
 | 0 | number of entries x 8 | | Checkpoint metadata block number
 |===
 
-=== Checkpoint (level 1) metadata
+== Checkpoint (level 1) metadata
 
 The checkpoint metadata consists of:
 
@@ -350,7 +311,7 @@ The checkpoint metadata consists of:
 * Self <<metadata_block_descriptor,metadata block descriptor>
 * Ministore tree <<metadata_block_descriptor,metadata block descriptors>>
 
-==== Checkpoint header
+=== Checkpoint header
 
 The checkpoint header is 16 bytes of size and consists of:
 
@@ -365,9 +326,9 @@ The offset is relative to the start of the metadata block
 | 12 | 4 | | Self descriptor data size
 |===
 
-==== Checkpoint trailer
+=== Checkpoint trailer
 
-===== Checkpoint trailer - format version 1
+==== Checkpoint trailer - format version 1
 
 The format version 1 checkpoint trailer is variable of size and consists of:
 
@@ -384,7 +345,7 @@ The offset is relative to the start of the metadata block
 | ... | ... | 0x00 | [yellow-background]*Unknown (empty values)*
 |===
 
-===== Checkpoint trailer - format version 3
+==== Checkpoint trailer - format version 3
 
 The format version 3 checkpoint trailer is variable of size and consists of:
 
@@ -405,18 +366,19 @@ The offset is relative to the start of the metadata block
 | ... | ... | 0x00 | [yellow-background]*Unknown (empty values)*
 |===
 
-==== Ministore tree block descriptors
+=== Ministore tree block descriptors
 
 [cols="1,1,5",options="header"]
 |===
 | Index | Identifier | Description
-| 0 | | Object identifiers tree
+| 0 | | Objects tree
 | 1 | | Medium allocator tree
 | 2 | | Container allocator tree
 | 3 | | Schema tree
 | 4 | | Parent-child relationship tree
-| 5 | | Copy of object identifier tree
+| 5 | | Copy of object tree
 | 6 | | Block reference count tree
+3+| _Seen in format version 3_
 | 7 | | Container tree
 | 8 | | Copy of container tree
 | 9 | | Copy of schema tree
@@ -425,7 +387,7 @@ The offset is relative to the start of the metadata block
 | 12 | | Small allocator tree
 |===
 
-=== Ministore tree (level 2) metadata
+== [[ministore_tree]]Ministore tree (level 2+) metadata
 
 The ministore tree metadata consists of:
 
@@ -436,7 +398,11 @@ The ministore tree metadata consists of:
 * Unused
 * Node record offsets
 
-==== Tree header
+[NOTE]
+Note that in format version 3 the upper 16-bit of the record offsets is set
+to 0xffff.
+
+=== Tree header
 
 The tree header is variable in size and consists of:
 
@@ -452,7 +418,7 @@ The offset is relative to the start of the tree header
 | 12 | 2 | | [yellow-background]*Unknown*
 |===
 
-==== Node header
+=== Node header
 
 The node header is 32 bytes of size and consists of:
 
@@ -485,7 +451,7 @@ The offset is relative to the start of the node information entry or 0 if not se
 | 0x04 | | Is stream node
 |===
 
-==== Node record
+=== Node record
 
 The node record is variable of size and consists of:
 
@@ -514,6 +480,119 @@ The offset is relative to the start of the node record
 | 0x40 | | Is stream record
 |===
 
+== Objects tree
+
+The objects tree is a <<ministore_tree,Ministore B+-tree>> that contains
+object records.
+
+=== Object record
+
+An object record consists of:
+
+* key, containing an <<object_identifiers,object identifier>>
+* value, containing a <<metadata_block_descriptor,metadata block descriptor>> that reference the corresponding object <<ministore_tree,Ministore B+-tree>>
+
+==== Object record key
+
+The object record key is 16 bytes in size and consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 8 | | [yellow-background]*Unknown (empty values)*
+| 8 | 8 | | Object identifier +
+See section: <<object_identifiers,object identifiers>>
+|===
+
+==== Object record value - format version 1
+
+The format version 1 object record value is 48 bytes in size and consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 24 | | Block descriptor +
+See section: <<metadata_block_descriptor,metadata block descriptor>>
+| 24 | 8 | | [yellow-background]*Unknown*
+| 32 | 4 | | [yellow-background]*Unknown*
+| 36 | 4 | | [yellow-background]*Unknown*
+| 40 | 8 | | [yellow-background]*Unknown (related object identifier?)*
+|===
+
+===== Object record value - format version 3
+
+The format version 3 object record value is variable in size and consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 8 | | [yellow-background]*Unknown*
+| 8 | 4 | | [yellow-background]*Unknown*
+| 12 | 4 | | [yellow-background]*Unknown (size of block descriptor data?)*
+| 16 | 4 | | [yellow-background]*Unknown (size of used record data?)*
+| 20 | 4 | | [yellow-background]*Unknown*
+| 24 | 4 | | [yellow-background]*Unknown*
+| 28 | 4 | | [yellow-background]*Unknown*
+| 32 | 48 | | Block descriptor +
+See section: <<metadata_block_descriptor,metadata block descriptor>>
+| ... | ... | | [yellow-background]*Unknown (remnant data?)*
+|===
+
+===== [[object_identifiers]]Object identifiers
+
+[cols="1,1,5",options="header"]
+|===
+| Value | Identifier | Description
+| 0x00000007 | | Upcase object +
+Introduced in format version 3?
+| 0x00000008 | | Copy of Upcase object +
+Introduced in format version 3?
+| 0x00000009 | | Logfile information object +
+Introduced in format version 3?
+| 0x0000000a | | Copy of logfile information object +
+Introduced in format version 3?
+| | |
+| 0x0000000d | | Trash stream object +
+Introduced in format version 3?
+| | |
+| 0x00000500 | | <<volume_information_object,Volume information object>>
+| 0x00000501 | | Copy of volume information object +
+Introduced in format version 3?
+| | |
+| 0x00000520 | | <<file_system_information_object,File system information object>>
+| | |
+| 0x00000530 | |
+| | |
+| 0x00000540 | | +
+Introduced in format version 3?
+| 0x00000541 | | +
+Introduced in format version 3?
+| | |
+| 0x00000600 | REFS_ROOT_DIRECTORY_ID | Root directory object
+| | |
+| 0x00000701 | REFS_OBJECT_UNKNOWN_3 | Directory object +
+Values 0x00000700 and above are used for sub directories.
+|===
+
+== Container tree
+
+The container tree is a <<ministore_tree,Ministore B+-tree>> that contains
+container records.
+
+[NOTE]
+Note that the container tree has only been observed with format version 3.
+
+=== Container record
+
+A container record consists of:
+
+* key, containing the container (or band) identifier
+* value, containing information about the container
+
+==== Container record key
+
+The container record key is the first 16 bytes of the container record value.
+
 ==== Container record value
 
 The container record value is 160 bytes in size and consists of:
@@ -529,12 +608,88 @@ The container record value is 160 bytes in size and consists of:
 | 24 | 8 | | [yellow-background]*Unknown*
 | 32 | 8 | | [yellow-background]*Unknown (number of unused cluster blocks?)*
 | 40 | 8 | | [yellow-background]*Unknown*
-| 48 | 28 | | [yellow-background]*Unknown (empty)*
+| 48 | 28 | | [yellow-background]*Unknown (empty values)*
 | 76 | 4 | | [yellow-background]*Unknown*
-| 80 | 64 | | [yellow-background]*Unknown (empty)*
+| 80 | 64 | | [yellow-background]*Unknown (empty values)*
 | 144 | 8 | | Cluster block number
 | 152 | 8 | | Cluster size +
 Contains the number of (cluster) blocks
+|===
+
+== [[file_system_information_object]]File system information object
+
+The file system information object is a <<ministore_tree,Ministore B+-tree>>
+that contains a single file system information record.
+
+=== File system information record
+
+A file system information record consists of:
+
+* key, [yellow-background]*TODO: describe*
+* value, [yellow-background]*TODO: describe*
+
+==== File system information record key
+
+The file system information record key is variable in size and consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 2 | 0x30 | [yellow-background]*Unknown*
+| 2 | 2 | 0x01 | [yellow-background]*Unknown*
+| 4 | ... | "Volume Direct IO File" | String +
+Contains an UTF-16 little-endian without end-of-string character
+|===
+
+==== File system information record value
+
+The file system record value is TODO bytes in size and consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+|===
+
+[yellow-background]*TODO: describe*
+
+== [[volume_information_object]]Volume information object
+
+The volume information object is a <<ministore_tree,Ministore B+-tree>> that
+contains multiple volume information records.
+
+=== Volume information record key
+
+The volume information record key is 8 bytes in size and consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 8 | | Object identifier +
+See section: <<object_identifiers,object identifiers>>
+|===
+
+[cols="1,1,5",options="header"]
+|===
+| Value | Identifier | Description
+| 0x00000510 | | Volume name record +
+Comparable to NTFS volume name attribute ($VOLUME_NAME) 
+| | |
+| 0x00000520 | | [yellow-background]*TODO: describe*
+| | |
+| 0x00000530 | | [yellow-background]*TODO: describe*
+| | |
+| 0x00000540 | | [yellow-background]*TODO: describe*
+|===
+
+=== Volume name record value
+
+The volume name record value is variable in size and consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | ... | | Volume name +
+Contains an UTF-16 little-endian without end-of-string character
 |===
 
 :numbered!:

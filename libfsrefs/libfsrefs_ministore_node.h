@@ -1,5 +1,5 @@
 /*
- * Ministore tree (or level 2 metadata) functions
+ * Ministore node (or level 2 metadata) functions
  *
  * Copyright (C) 2012-2023, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -19,67 +19,71 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if !defined( _LIBFSREFS_MINISTORE_TREE_H )
-#define _LIBFSREFS_MINISTORE_TREE_H
+#if !defined( _LIBFSREFS_MINISTORE_NODE_H )
+#define _LIBFSREFS_MINISTORE_NODE_H
 
 #include <common.h>
 #include <types.h>
 
-#include "libfsrefs_block_descriptor.h"
 #include "libfsrefs_io_handle.h"
 #include "libfsrefs_libbfio.h"
 #include "libfsrefs_libcdata.h"
 #include "libfsrefs_libcerror.h"
+#include "libfsrefs_node_record.h"
 
 #if defined( __cplusplus )
 extern "C" {
 #endif
 
-typedef struct libfsrefs_ministore_tree libfsrefs_ministore_tree_t;
+typedef struct libfsrefs_ministore_node libfsrefs_ministore_node_t;
 
-struct libfsrefs_ministore_tree
+struct libfsrefs_ministore_node
 {
-	/* The block descriptors array
+	/* The data
 	 */
-	libcdata_array_t *block_descriptors_array;
+	uint8_t *data;
+
+	/* The data size
+	 */
+	size_t data_size;
+
+	/* The records array
+	 */
+	libcdata_array_t *records_array;
 };
 
-int libfsrefs_ministore_tree_initialize(
-     libfsrefs_ministore_tree_t **ministore_tree,
+int libfsrefs_ministore_node_initialize(
+     libfsrefs_ministore_node_t **ministore_node,
      libcerror_error_t **error );
 
-int libfsrefs_ministore_tree_free(
-     libfsrefs_ministore_tree_t **ministore_tree,
+int libfsrefs_ministore_node_free(
+     libfsrefs_ministore_node_t **ministore_node,
      libcerror_error_t **error );
 
-int libfsrefs_ministore_tree_read_data(
-     libfsrefs_ministore_tree_t *ministore_tree,
+int libfsrefs_ministore_node_read_data(
+     libfsrefs_ministore_node_t *ministore_node,
      libfsrefs_io_handle_t *io_handle,
      const uint8_t *data,
      size_t data_size,
      libcerror_error_t **error );
 
-int libfsrefs_ministore_tree_read_file_io_handle(
-     libfsrefs_ministore_tree_t *ministore_tree,
+int libfsrefs_ministore_node_read_file_io_handle(
+     libfsrefs_ministore_node_t *ministore_node,
      libfsrefs_io_handle_t *io_handle,
      libbfio_handle_t *file_io_handle,
      off64_t file_offset,
      libcerror_error_t **error );
 
-int libfsrefs_ministore_tree_get_number_of_block_descriptors(
-     libfsrefs_ministore_tree_t *ministore_tree,
-     int *number_of_block_descriptors,
-     libcerror_error_t **error );
-
-int libfsrefs_ministore_tree_get_block_descriptor_by_index(
-     libfsrefs_ministore_tree_t *ministore_tree,
-     int block_descriptor_index,
-     libfsrefs_block_descriptor_t **block_descriptor,
+int libfsrefs_ministore_node_get_record(
+     libfsrefs_ministore_node_t *ministore_node,
+     const uint8_t *key_data,
+     size_t key_data_size,
+     libfsrefs_node_record_t **node_record,
      libcerror_error_t **error );
 
 #if defined( __cplusplus )
 }
 #endif
 
-#endif /* !defined( _LIBFSREFS_MINISTORE_TREE_H ) */
+#endif /* !defined( _LIBFSREFS_MINISTORE_NODE_H ) */
 

@@ -110,10 +110,10 @@ struct fsrefs_volume_header
 	 */
 	uint8_t volume_serial_number[ 8 ];
 
-	/* Unknown
+	/* Container size
 	 * Consists of 8 bytes
 	 */
-	uint8_t unknown10[ 8 ];
+	uint8_t container_size[ 8 ];
 
 	/* Unknown
 	 * Consists of 440 bytes

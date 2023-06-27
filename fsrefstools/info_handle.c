@@ -578,7 +578,12 @@ int info_handle_volume_fprint(
      info_handle_t *info_handle,
      libcerror_error_t **error )
 {
-	static char *function = "info_handle_volume_fprint";
+	system_character_t *volume_name = NULL;
+	static char *function           = "info_handle_volume_fprint";
+	size_t volume_name_size         = 0;
+	uint8_t major_version           = 0;
+	uint8_t minor_version           = 0;
+	int result                      = 0;
 
 	if( info_handle == NULL )
 	{
@@ -599,13 +604,132 @@ int info_handle_volume_fprint(
 	 info_handle->notify_stream,
 	 "\nVolume information:\n" );
 
-/* TODO */
+	fprintf(
+	 info_handle->notify_stream,
+	 "\tName\t\t\t\t:" );
 
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
+	result = libfsrefs_volume_get_utf16_name_size(
+	          info_handle->input_volume,
+	          &volume_name_size,
+	          error );
+#else
+	result = libfsrefs_volume_get_utf8_name_size(
+	          info_handle->input_volume,
+	          &volume_name_size,
+	          error );
+#endif
+	if( result == -1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve volume name string size.",
+		 function );
+
+		goto on_error;
+	}
+	else if( ( result != 0 )
+	      && ( volume_name_size > 0 ) )
+	{
+		volume_name = system_string_allocate(
+		               volume_name_size );
+
+		if( volume_name == NULL )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_MEMORY,
+			 LIBCERROR_MEMORY_ERROR_INSUFFICIENT,
+			 "%s: unable to create volume name string.",
+			 function );
+
+			goto on_error;
+		}
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
+		result = libfsrefs_volume_get_utf16_name(
+		          info_handle->input_volume,
+		          (uint16_t *) volume_name,
+		          volume_name_size,
+		          error );
+#else
+		result = libfsrefs_volume_get_utf8_name(
+		          info_handle->input_volume,
+		          (uint8_t *) volume_name,
+		          volume_name_size,
+		          error );
+#endif
+		if( result != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve volume name string.",
+			 function );
+
+			goto on_error;
+		}
+		fprintf(
+		 info_handle->notify_stream,
+		 " %" PRIs_SYSTEM "",
+		 volume_name );
+
+		memory_free(
+		 volume_name );
+
+		volume_name = NULL;
+	}
+	fprintf(
+	 info_handle->notify_stream,
+	 "\n" );
+
+	fprintf(
+	 info_handle->notify_stream,
+	 "\tVersion\t\t\t\t:" );
+
+	if( libfsrefs_volume_get_version(
+	     info_handle->input_volume,
+	     &major_version,
+	     &minor_version,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve version.",
+		 function );
+
+		return( -1 );
+	}
+	else if( result != 0 )
+	{
+		fprintf(
+		 info_handle->notify_stream,
+		 " %" PRIu8 ".%" PRIu8 "",
+		 major_version,
+		 minor_version );
+	}
+	fprintf(
+	 info_handle->notify_stream,
+	 "\n" );
+
+/* TODO */
 
 	fprintf(
 	 info_handle->notify_stream,
 	 "\n" );
 
 	return( 1 );
+
+on_error:
+	if( volume_name != NULL )
+	{
+		memory_free(
+		 volume_name );
+	}
+	return( -1 );
 }
 

@@ -55,15 +55,15 @@ struct libfsrefs_io_handle
 
 	/* The block size
 	 */
-	size_t block_size;
+	size32_t block_size;
 
 	/* The metadata block size
 	 */
-	size_t metadata_block_size;
+	size32_t metadata_block_size;
 
 	/* The container size
 	 */
-	uint64_t container_size;
+	size64_t container_size;
 
 	/* Value to indicate if abort was signalled
 	 */

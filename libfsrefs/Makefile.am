@@ -2,6 +2,7 @@ AM_CPPFLAGS = \
 	-I$(top_srcdir)/include \
 	-I$(top_srcdir)/common \
 	@LIBCERROR_CPPFLAGS@ \
+	@LIBCTHREADS_CPPFLAGS@ \
 	@LIBCDATA_CPPFLAGS@ \
 	@LIBCLOCALE_CPPFLAGS@ \
 	@LIBCNOTIFY_CPPFLAGS@ \
@@ -15,6 +16,7 @@ AM_CPPFLAGS = \
 	@LIBFDATETIME_CPPFLAGS@ \
 	@LIBFGUID_CPPFLAGS@ \
 	@LIBFWNT_CPPFLAGS@ \
+	@PTHREAD_CPPFLAGS@ \
 	@LIBFSREFS_DLL_EXPORT@
 
 lib_LTLIBRARIES = libfsrefs.la
@@ -32,16 +34,16 @@ libfsrefs_la_SOURCES = \
 	libfsrefs_definitions.h \
 	libfsrefs_directory.c libfsrefs_directory.h \
 	libfsrefs_block_descriptor.c libfsrefs_block_descriptor.h \
-	libfsrefs_block_descriptors.c libfsrefs_block_descriptors.h \
 	libfsrefs_error.c libfsrefs_error.h \
 	libfsrefs_extern.h \
+	libfsrefs_file_system.c libfsrefs_file_system.h \
 	libfsrefs_io_handle.c libfsrefs_io_handle.h \
-	libfsrefs_level3_metadata.c libfsrefs_level3_metadata.h \
 	libfsrefs_libbfio.h \
 	libfsrefs_libcdata.h \
 	libfsrefs_libcerror.h \
 	libfsrefs_libclocale.h \
 	libfsrefs_libcnotify.h \
+	libfsrefs_libcthreads.h \
 	libfsrefs_libfcache.h \
 	libfsrefs_libfdata.h \
 	libfsrefs_libfdatetime.h \
@@ -52,10 +54,11 @@ libfsrefs_la_SOURCES = \
 	libfsrefs_metadata_block_header.c libfsrefs_metadata_block_header.h \
 	libfsrefs_metadata_table.c libfsrefs_metadata_table.h \
 	libfsrefs_metadata_value.c libfsrefs_metadata_value.h \
-	libfsrefs_ministore_tree.c libfsrefs_ministore_tree.h \
+	libfsrefs_ministore_node.c libfsrefs_ministore_node.h \
 	libfsrefs_node_header.c libfsrefs_node_header.h \
 	libfsrefs_node_record.c libfsrefs_node_record.h \
 	libfsrefs_notify.c libfsrefs_notify.h \
+	libfsrefs_objects_tree.c libfsrefs_objects_tree.h \
 	libfsrefs_superblock.c libfsrefs_superblock.h \
 	libfsrefs_support.c libfsrefs_support.h \
 	libfsrefs_types.h \
@@ -67,6 +70,7 @@ libfsrefs_la_SOURCES = \
 
 libfsrefs_la_LIBADD = \
 	@LIBCERROR_LIBADD@ \
+	@LIBCTHREADS_LIBADD@ \
 	@LIBCDATA_LIBADD@ \
 	@LIBCLOCALE_LIBADD@ \
 	@LIBCNOTIFY_LIBADD@ \
@@ -79,7 +83,8 @@ libfsrefs_la_LIBADD = \
 	@LIBFDATA_LIBADD@ \
 	@LIBFDATETIME_LIBADD@ \
 	@LIBFGUID_LIBADD@ \
-	@LIBFWNT_LIBADD@
+	@LIBFWNT_LIBADD@ \
+	@PTHREAD_LIBADD@
 
 libfsrefs_la_LDFLAGS = -no-undefined -version-info 1:0:0
 

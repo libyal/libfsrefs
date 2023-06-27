@@ -26,19 +26,21 @@
 #include <wide_string.h>
 
 #include "libfsrefs_block_descriptor.h"
-#include "libfsrefs_block_descriptors.h"
-#include "libfsrefs_checkpoint.h"
 #include "libfsrefs_debug.h"
 #include "libfsrefs_definitions.h"
+#include "libfsrefs_file_system.h"
 #include "libfsrefs_io_handle.h"
 #include "libfsrefs_libbfio.h"
 #include "libfsrefs_libcerror.h"
 #include "libfsrefs_libcnotify.h"
+#include "libfsrefs_libcthreads.h"
 #include "libfsrefs_libfcache.h"
 #include "libfsrefs_libfdata.h"
+#include "libfsrefs_libuna.h"
 #include "libfsrefs_metadata_block.h"
-#include "libfsrefs_ministore_tree.h"
-#include "libfsrefs_superblock.h"
+#include "libfsrefs_ministore_node.h"
+#include "libfsrefs_node_record.h"
+#include "libfsrefs_objects_tree.h"
 #include "libfsrefs_volume.h"
 #include "libfsrefs_volume_header.h"
 #include "libfsrefs_volume_name.h"
@@ -102,7 +104,10 @@ int libfsrefs_volume_initialize(
 		 "%s: unable to clear volume.",
 		 function );
 
-		goto on_error;
+		memory_free(
+		 internal_volume );
+
+		return( -1 );
 	}
 	if( libfsrefs_io_handle_initialize(
 	     &( internal_volume->io_handle ),
@@ -117,6 +122,21 @@ int libfsrefs_volume_initialize(
 
 		goto on_error;
 	}
+#if defined( HAVE_LIBFSREFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_initialize(
+	     &( internal_volume->read_write_lock ),
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to initialize read/write lock.",
+		 function );
+
+		goto on_error;
+	}
+#endif
 	*volume = (libfsrefs_volume_t *) internal_volume;
 
 	return( 1 );
@@ -124,6 +144,12 @@ int libfsrefs_volume_initialize(
 on_error:
 	if( internal_volume != NULL )
 	{
+		if( internal_volume->io_handle != NULL )
+		{
+			libfsrefs_io_handle_free(
+			 &( internal_volume->io_handle ),
+			 NULL );
+		}
 		memory_free(
 		 internal_volume );
 	}
@@ -174,6 +200,21 @@ int libfsrefs_volume_free(
 		}
 		*volume = NULL;
 
+#if defined( HAVE_LIBFSREFS_MULTI_THREAD_SUPPORT )
+		if( libcthreads_read_write_lock_free(
+		     &( internal_volume->read_write_lock ),
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable to free read/write lock.",
+			 function );
+
+			result = -1;
+		}
+#endif
 		if( libfsrefs_io_handle_free(
 		     &( internal_volume->io_handle ),
 		     error ) != 1 )
@@ -353,8 +394,40 @@ int libfsrefs_volume_open(
 
 		goto on_error;
 	}
+#if defined( HAVE_LIBFSREFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_grab_for_write(
+	     internal_volume->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to grab read/write lock for writing.",
+		 function );
+
+		goto on_error;
+	}
+#endif
 	internal_volume->file_io_handle_created_in_library = 1;
 
+#if defined( HAVE_LIBFSREFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_release_for_write(
+	     internal_volume->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to release read/write lock for writing.",
+		 function );
+
+		internal_volume->file_io_handle_created_in_library = 0;
+
+		goto on_error;
+	}
+#endif
 	return( 1 );
 
 on_error:
@@ -490,8 +563,40 @@ int libfsrefs_volume_open_wide(
 
 		goto on_error;
 	}
+#if defined( HAVE_LIBFSREFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_grab_for_write(
+	     internal_volume->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to grab read/write lock for writing.",
+		 function );
+
+		goto on_error;
+	}
+#endif
 	internal_volume->file_io_handle_created_in_library = 1;
 
+#if defined( HAVE_LIBFSREFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_release_for_write(
+	     internal_volume->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to release read/write lock for writing.",
+		 function );
+
+		internal_volume->file_io_handle_created_in_library = 0;
+
+		goto on_error;
+	}
+#endif
 	return( 1 );
 
 on_error:
@@ -630,9 +735,42 @@ int libfsrefs_volume_open_file_io_handle(
 
 		goto on_error;
 	}
-	internal_volume->file_io_handle                   = file_io_handle;
-	internal_volume->file_io_handle_opened_in_library = file_io_handle_opened_in_library;
+#if defined( HAVE_LIBFSREFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_grab_for_write(
+	     internal_volume->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to grab read/write lock for writing.",
+		 function );
 
+		goto on_error;
+	}
+#endif
+	internal_volume->file_io_handle                   = file_io_handle;
+	internal_volume->file_io_handle_opened_in_library = (uint8_t) file_io_handle_opened_in_library;
+
+#if defined( HAVE_LIBFSREFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_release_for_write(
+	     internal_volume->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to release read/write lock for writing.",
+		 function );
+
+		internal_volume->file_io_handle                   = NULL;
+		internal_volume->file_io_handle_opened_in_library = 0;
+
+		goto on_error;
+	}
+#endif
 	return( 1 );
 
 on_error:
@@ -669,17 +807,32 @@ int libfsrefs_volume_close(
 	}
 	internal_volume = (libfsrefs_internal_volume_t *) volume;
 
-	if( internal_volume->io_handle == NULL )
+	if( internal_volume->file_io_handle == NULL )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-		 "%s: invalid volume - missing IO handle.",
+		 "%s: invalid volume - missing file IO handle.",
 		 function );
 
 		return( -1 );
 	}
+#if defined( HAVE_LIBFSREFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_grab_for_write(
+	     internal_volume->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to grab read/write lock for writing.",
+		 function );
+
+		return( -1 );
+	}
+#endif
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )
 	{
@@ -700,7 +853,8 @@ int libfsrefs_volume_close(
 			}
 		}
 	}
-#endif
+#endif /* defined( HAVE_DEBUG_OUTPUT ) */
+
 	if( internal_volume->file_io_handle_opened_in_library != 0 )
 	{
 		if( libbfio_handle_close(
@@ -750,150 +904,71 @@ int libfsrefs_volume_close(
 
 		result = -1;
 	}
-	if( internal_volume->superblock != NULL )
+	if( internal_volume->file_system != NULL )
 	{
-		if( libfsrefs_superblock_free(
-		     &( internal_volume->superblock ),
+		if( libfsrefs_file_system_free(
+		     &( internal_volume->file_system ),
 		     error ) != 1 )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-			 "%s: unable to free superblock.",
+			 "%s: unable to free file system.",
 			 function );
 
 			result = -1;
 		}
 	}
+	if( internal_volume->objects_tree != NULL )
+	{
+		if( libfsrefs_objects_tree_free(
+		     &( internal_volume->objects_tree ),
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable to free objects tree.",
+			 function );
+
+			result = -1;
+		}
+	}
+	if( internal_volume->volume_information_object != NULL )
+	{
+		if( libfsrefs_ministore_node_free(
+		     &( internal_volume->volume_information_object ),
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable to free volume information object.",
+			 function );
+
+			result = -1;
+		}
+		internal_volume->volume_name_record = NULL;
+	}
+#if defined( HAVE_LIBFSREFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_release_for_write(
+	     internal_volume->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to release read/write lock for writing.",
+		 function );
+
+		return( -1 );
+	}
+#endif
 	return( result );
-}
-
-
-/* Retrieves a specific ministore tree
- * Returns 1 if successful or -1 on error
- */
-int libfsrefs_internal_volume_get_ministore_tree(
-     libfsrefs_internal_volume_t *internal_volume,
-     libbfio_handle_t *file_io_handle,
-     int ministore_tree_index,
-     libfsrefs_ministore_tree_t **ministore_tree,
-     libcerror_error_t **error )
-{
-	libfsrefs_block_descriptor_t *block_descriptor  = NULL;
-	libfsrefs_ministore_tree_t *safe_ministore_tree = NULL;
-	static char *function                           = "libfsrefs_internal_volume_get_ministore_tree";
-	off64_t ministore_tree_offset                   = 0;
-
-	if( internal_volume == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid volume.",
-		 function );
-
-		return( -1 );
-	}
-	if( internal_volume->io_handle == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-		 "%s: invalid volume - missing IO handle.",
-		 function );
-
-		return( -1 );
-	}
-	if( ministore_tree == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid ministore tree.",
-		 function );
-
-		return( -1 );
-	}
-	if( libfsrefs_checkpoint_get_ministore_tree_block_descriptor_by_index(
-	     internal_volume->checkpoint,
-	     ministore_tree_index,
-	     &block_descriptor,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve ministore tree: %d block descriptor from checkpoint.",
-		 function,
-		 ministore_tree_index );
-
-		goto on_error;
-	}
-	if( block_descriptor == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-		 "%s: missing ministore tree: %d block descriptor.",
-		 function,
-		 ministore_tree_index );
-
-		goto on_error;
-	}
-	if( libfsrefs_ministore_tree_initialize(
-	     &safe_ministore_tree,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-		 "%s: unable to create ministore tree: %d.",
-		 function,
-		 ministore_tree_index );
-
-		goto on_error;
-	}
-	ministore_tree_offset = block_descriptor->block_number1 * internal_volume->io_handle->metadata_block_size;
-
-	if( libfsrefs_ministore_tree_read_file_io_handle(
-	     safe_ministore_tree,
-	     internal_volume->io_handle,
-	     file_io_handle,
-	     ministore_tree_offset,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_IO,
-		 LIBCERROR_IO_ERROR_READ_FAILED,
-		 "%s: unable to read ministore tree: %d block: %" PRIu64 " at offset: %" PRIi64 " (0x%08" PRIx64 ").",
-		 function,
-		 ministore_tree_index,
-		 block_descriptor->block_number1,
-		 ministore_tree_offset,
-		 ministore_tree_offset );
-
-		goto on_error;
-	}
-	*ministore_tree = safe_ministore_tree;
-
-	return( 1 );
-
-on_error:
-	if( safe_ministore_tree != NULL )
-	{
-		libfsrefs_ministore_tree_free(
-		 &safe_ministore_tree,
-		 NULL );
-	}
-	return( -1 );
 }
 
 /* Opens a volume for reading
@@ -904,15 +979,10 @@ int libfsrefs_internal_volume_open_read(
      libbfio_handle_t *file_io_handle,
      libcerror_error_t **error )
 {
-	libfsrefs_checkpoint_t *primary_checkpoint     = NULL;
-	libfsrefs_checkpoint_t *secondary_checkpoint   = NULL;
-	libfsrefs_ministore_tree_t *ministore_tree     = NULL;
-	libfsrefs_superblock_t *superblock             = NULL;
-	libfsrefs_volume_header_t *volume_header       = NULL;
-	static char *function                          = "libfsrefs_internal_volume_open_read";
-	off64_t checkpoint_offset                      = 0;
-	off64_t superblock_offset                      = 0;
-	int number_of_ministore_tree_block_descriptors = 0;
+	libfsrefs_volume_header_t *volume_header = NULL;
+	static char *function                    = "libfsrefs_internal_volume_open_read";
+	off64_t superblock_offset                = 0;
+	int number_of_ministore_trees            = 0;
 
 	if( internal_volume == NULL )
 	{
@@ -936,24 +1006,24 @@ int libfsrefs_internal_volume_open_read(
 
 		return( -1 );
 	}
-	if( internal_volume->superblock != NULL )
+	if( internal_volume->file_system != NULL )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
-		 "%s: invalid volume - superblock value already set.",
+		 "%s: invalid volume - file system value already set.",
 		 function );
 
 		return( -1 );
 	}
-	if( internal_volume->checkpoint != NULL )
+	if( internal_volume->objects_tree != NULL )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
-		 "%s: invalid volume - checkpoint value already set.",
+		 "%s: invalid volume - objects tree value already set.",
 		 function );
 
 		return( -1 );
@@ -999,9 +1069,21 @@ int libfsrefs_internal_volume_open_read(
 	internal_volume->io_handle->minor_format_version = volume_header->minor_format_version;
 	internal_volume->io_handle->block_size           = volume_header->block_size;
 	internal_volume->io_handle->metadata_block_size  = volume_header->metadata_block_size;
+	internal_volume->io_handle->container_size       = volume_header->container_size;
 
-	superblock_offset = 30 * internal_volume->io_handle->metadata_block_size;
+	if( libfsrefs_file_system_initialize(
+	     &( internal_volume->file_system ),
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to create file system.",
+		 function );
 
+		goto on_error;
+	}
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )
 	{
@@ -1009,21 +1091,10 @@ int libfsrefs_internal_volume_open_read(
 		 "Reading superblock:\n" );
 	}
 #endif
-	if( libfsrefs_superblock_initialize(
-	     &( internal_volume->superblock ),
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-		 "%s: unable to create superblock.",
-		 function );
+	superblock_offset = 30 * internal_volume->io_handle->metadata_block_size;
 
-		goto on_error;
-	}
-	if( libfsrefs_superblock_read_file_io_handle(
-	     internal_volume->superblock,
+	if( libfsrefs_file_system_read_superblock(
+	     internal_volume->file_system,
 	     internal_volume->io_handle,
 	     file_io_handle,
 	     superblock_offset,
@@ -1040,241 +1111,157 @@ int libfsrefs_internal_volume_open_read(
 
 		goto on_error;
 	}
-/* TODO support more than 2 checkpoints */
-
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )
 	{
 		libcnotify_printf(
-		 "Reading primary checkpoint:\n" );
+		 "Reading checkpoints:\n" );
 	}
 #endif
-	if( libfsrefs_checkpoint_initialize(
-	     &primary_checkpoint,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-		 "%s: unable to create primary checkpoint.",
-		 function );
-
-		goto on_error;
-	}
-	checkpoint_offset = internal_volume->superblock->primary_checkpoint_block_number * internal_volume->io_handle->metadata_block_size;
-
-	if( libfsrefs_checkpoint_read_file_io_handle(
-	     primary_checkpoint,
+	if( libfsrefs_file_system_read_checkpoints(
+	     internal_volume->file_system,
 	     internal_volume->io_handle,
 	     file_io_handle,
-	     checkpoint_offset,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_IO,
 		 LIBCERROR_IO_ERROR_READ_FAILED,
-		 "%s: unable to read primary checkpoint at offset: %" PRIi64 " (0x%08" PRIx64 ").",
-		 function,
-		 checkpoint_offset,
-		 checkpoint_offset );
-
-		goto on_error;
-	}
-#if defined( HAVE_DEBUG_OUTPUT )
-	if( libcnotify_verbose != 0 )
-	{
-		libcnotify_printf(
-		 "Reading secondary checkpoint:\n" );
-	}
-#endif
-	if( libfsrefs_checkpoint_initialize(
-	     &secondary_checkpoint,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-		 "%s: unable to create secondary checkpoint.",
+		 "%s: unable to read checkpoints.",
 		 function );
 
 		goto on_error;
 	}
-	checkpoint_offset = internal_volume->superblock->secondary_checkpoint_block_number * internal_volume->io_handle->metadata_block_size;
-
-	if( libfsrefs_checkpoint_read_file_io_handle(
-	     secondary_checkpoint,
-	     internal_volume->io_handle,
-	     file_io_handle,
-	     checkpoint_offset,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_IO,
-		 LIBCERROR_IO_ERROR_READ_FAILED,
-		 "%s: unable to read secondary checkpoint at offset: %" PRIi64 " (0x%08" PRIx64 ").",
-		 function,
-		 checkpoint_offset,
-		 checkpoint_offset );
-
-		goto on_error;
-	}
-	if( primary_checkpoint->sequence_number >= secondary_checkpoint->sequence_number )
-	{
-		if( libfsrefs_checkpoint_free(
-		     &secondary_checkpoint,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-			 "%s: unable to free secondary checkpoint.",
-			 function );
-
-			goto on_error;
-		}
-		internal_volume->checkpoint = primary_checkpoint;
-	}
-	else
-	{
-		if( libfsrefs_checkpoint_free(
-		     &primary_checkpoint,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-			 "%s: unable to free primary checkpoint.",
-			 function );
-
-			goto on_error;
-		}
-		internal_volume->checkpoint = secondary_checkpoint;
-	}
-	if( libfsrefs_checkpoint_get_number_of_ministore_tree_block_descriptors(
-	     internal_volume->checkpoint,
-	     &number_of_ministore_tree_block_descriptors,
+	if( libfsrefs_file_system_get_number_of_ministore_trees(
+	     internal_volume->file_system,
+	     &number_of_ministore_trees,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve number of ministore tree block descriptors from checkpoint.",
+		 "%s: unable to retrieve number of ministore trees.",
 		 function );
 
 		goto on_error;
 	}
-	if( number_of_ministore_tree_block_descriptors >= 8 )
+	if( number_of_ministore_trees == 0 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: invalid number of ministore trees value out of bounds.",
+		 function );
+
+		goto on_error;
+	}
+	if( number_of_ministore_trees > 8 )
 	{
 #if defined( HAVE_DEBUG_OUTPUT )
 		if( libcnotify_verbose != 0 )
 		{
 			libcnotify_printf(
-			 "Reading ministore tree: 7 (containers)\n" );
+			 "Reading container trees:\n" );
 		}
 #endif
-		if( libfsrefs_internal_volume_get_ministore_tree(
-		     internal_volume,
+		if( libfsrefs_file_system_read_container_trees(
+		     internal_volume->file_system,
+		     internal_volume->io_handle,
 		     file_io_handle,
-		     7,
-		     &ministore_tree,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
 			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve ministore tree: 7 (containers).",
-			 function );
-
-			return( -1 );
-		}
-		if( libfsrefs_ministore_tree_free(
-		     &ministore_tree,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-			 "%s: unable to free ministore tree: 7 (containers).",
+			 LIBCERROR_ERROR_DOMAIN_IO,
+			 LIBCERROR_IO_ERROR_READ_FAILED,
+			 "%s: unable to read container trees.",
 			 function );
 
 			goto on_error;
 		}
 	}
-	if( number_of_ministore_tree_block_descriptors >= 9 )
-	{
 #if defined( HAVE_DEBUG_OUTPUT )
-		if( libcnotify_verbose != 0 )
-		{
-			libcnotify_printf(
-			 "Reading ministore tree: 8 (containers)\n" );
-		}
+	if( libcnotify_verbose != 0 )
+	{
+		libcnotify_printf(
+		 "Reading objects tree\n" );
+	}
 #endif
-		if( libfsrefs_internal_volume_get_ministore_tree(
-		     internal_volume,
-		     file_io_handle,
-		     8,
-		     &ministore_tree,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve ministore tree: 8 (containers).",
-			 function );
+	if( libfsrefs_objects_tree_initialize(
+	     &( internal_volume->objects_tree ),
+	     internal_volume->file_system,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to create objects tree.",
+		 function );
 
-			return( -1 );
-		}
-		if( libfsrefs_ministore_tree_free(
-		     &ministore_tree,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-			 "%s: unable to free ministore tree: 8 (containers).",
-			 function );
+		goto on_error;
+	}
+	if( libfsrefs_objects_tree_read(
+	     internal_volume->objects_tree,
+	     internal_volume->io_handle,
+	     file_io_handle,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_IO,
+		 LIBCERROR_IO_ERROR_READ_FAILED,
+		 "%s: unable to read objects tree.",
+		 function );
 
-			goto on_error;
-		}
+		goto on_error;
+	}
+#if defined( HAVE_DEBUG_OUTPUT )
+	if( libcnotify_verbose != 0 )
+	{
+		libcnotify_printf(
+		 "Reading volume information object\n" );
+	}
+#endif
+	if( libfsrefs_objects_get_ministore_tree_by_identifier(
+	     internal_volume->objects_tree,
+	     internal_volume->io_handle,
+	     file_io_handle,
+	     (uint64_t) 0x00000500UL,
+	     &( internal_volume->volume_information_object ),
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve volume information object from objects tree.",
+		 function );
+
+		goto on_error;
 	}
 	return( 1 );
 
 on_error:
-	if( ministore_tree != NULL )
+	if( internal_volume != NULL )
 	{
-		libfsrefs_ministore_tree_free(
-		 &ministore_tree,
+		libfsrefs_ministore_node_free(
+		 &( internal_volume->volume_information_object ),
 		 NULL );
 	}
-	if( secondary_checkpoint != NULL )
+	if( internal_volume->objects_tree != NULL )
 	{
-		libfsrefs_checkpoint_free(
-		 &secondary_checkpoint,
+		libfsrefs_objects_tree_free(
+		 &( internal_volume->objects_tree ),
 		 NULL );
 	}
-	if( primary_checkpoint != NULL )
+	if( internal_volume->file_system != NULL )
 	{
-		libfsrefs_checkpoint_free(
-		 &primary_checkpoint,
-		 NULL );
-	}
-	internal_volume->checkpoint = NULL;
-
-	if( internal_volume->superblock != NULL )
-	{
-		libfsrefs_superblock_free(
-		 &( internal_volume->superblock ),
+		libfsrefs_file_system_free(
+		 &( internal_volume->file_system ),
 		 NULL );
 	}
 	if( volume_header != NULL )
@@ -1284,6 +1271,75 @@ on_error:
 		 NULL );
 	}
 	return( -1 );
+}
+
+/* Retrieves the volume name record
+ * Returns 1 if successful or -1 on error
+ */
+int libfsrefs_internal_volume_get_volume_name_record(
+     libfsrefs_internal_volume_t *internal_volume,
+     libcerror_error_t **error )
+{
+	uint8_t key_data[ 8 ];
+
+	static char *function      = "libfsrefs_internal_volume_get_volume_name_record";
+	uint64_t object_identifier = 0x00000510UL;
+
+	if( internal_volume == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid volume.",
+		 function );
+
+		return( -1 );
+	}
+	if( internal_volume->volume_information_object == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 "%s: invalid volume - missing volume information object.",
+		 function );
+
+		return( -1 );
+	}
+	if( internal_volume->volume_name_record != NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 "%s: invalid volume - volume name record already set.",
+		 function );
+
+		return( -1 );
+	}
+	byte_stream_copy_from_uint64_little_endian(
+	 key_data,
+	 object_identifier );
+
+	if( libfsrefs_ministore_node_get_record(
+	     internal_volume->volume_information_object,
+	     key_data,
+	     8,
+	     &( internal_volume->volume_name_record ),
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve identifier: 0x%08" PRIx64 " from volume information object.",
+		 function,
+		 object_identifier );
+
+		return( -1 );
+	}
+	return( 1 );
 }
 
 /* Retrieves the size of the UTF-8 encoded name
@@ -1297,6 +1353,7 @@ int libfsrefs_volume_get_utf8_name_size(
 {
 	libfsrefs_internal_volume_t *internal_volume = NULL;
 	static char *function                        = "libfsrefs_volume_get_utf8_name_size";
+	int result                                   = 1;
 
 	if( volume == NULL )
 	{
@@ -1311,23 +1368,80 @@ int libfsrefs_volume_get_utf8_name_size(
 	}
 	internal_volume = (libfsrefs_internal_volume_t *) volume;
 
-/* TODO get volume name value */
-
-	if( libfsrefs_volume_name_get_utf8_name_size(
-	     NULL,
-	     utf8_string_size,
+#if defined( HAVE_LIBFSREFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_grab_for_write(
+	     internal_volume->read_write_lock,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve size of UTF-8 name from volume name attribute.",
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to grab read/write lock for writing.",
 		 function );
 
 		return( -1 );
 	}
-	return( 1 );
+#endif
+	if( internal_volume->volume_name_record == NULL )
+	{
+		if( libfsrefs_internal_volume_get_volume_name_record(
+		     internal_volume,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve volume name record.",
+			 function );
+
+			result = -1;
+		}
+	}
+	if( internal_volume->volume_name_record == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 "%s: invalid volume - missing volume name record.",
+		 function );
+
+		result = -1;
+	}
+	else if( libuna_utf8_string_size_from_utf16_stream(
+	          internal_volume->volume_name_record->value_data,
+	          internal_volume->volume_name_record->value_data_size,
+	          LIBUNA_ENDIAN_LITTLE,
+	          utf8_string_size,
+	          error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve size of UTF-8 name from volume name record.",
+		 function );
+
+		result = -1;
+	}
+#if defined( HAVE_LIBFSREFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_release_for_write(
+	     internal_volume->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to release read/write lock for writing.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	return( result );
 }
 
 /* Retrieves the UTF-8 encoded name value
@@ -1342,6 +1456,7 @@ int libfsrefs_volume_get_utf8_name(
 {
 	libfsrefs_internal_volume_t *internal_volume = NULL;
 	static char *function                        = "libfsrefs_volume_get_utf8_name";
+	int result                                   = 1;
 
 	if( volume == NULL )
 	{
@@ -1356,24 +1471,81 @@ int libfsrefs_volume_get_utf8_name(
 	}
 	internal_volume = (libfsrefs_internal_volume_t *) volume;
 
-/* TODO get volume name value */
-
-	if( libfsrefs_volume_name_get_utf8_name(
-	     NULL,
-	     utf8_string,
-	     utf8_string_size,
+#if defined( HAVE_LIBFSREFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_grab_for_write(
+	     internal_volume->read_write_lock,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve UTF-8 name from volume name attribute.",
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to grab read/write lock for writing.",
 		 function );
 
 		return( -1 );
 	}
-	return( 1 );
+#endif
+	if( internal_volume->volume_name_record == NULL )
+	{
+		if( libfsrefs_internal_volume_get_volume_name_record(
+		     internal_volume,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve volume name record.",
+			 function );
+
+			result = -1;
+		}
+	}
+	if( internal_volume->volume_name_record == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 "%s: invalid volume - missing volume name record.",
+		 function );
+
+		result = -1;
+	}
+	else if( libuna_utf8_string_copy_from_utf16_stream(
+	          utf8_string,
+	          utf8_string_size,
+	          internal_volume->volume_name_record->value_data,
+	          internal_volume->volume_name_record->value_data_size,
+	          LIBUNA_ENDIAN_LITTLE,
+	          error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve UTF-8 name from volume name record.",
+		 function );
+
+		result = -1;
+	}
+#if defined( HAVE_LIBFSREFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_release_for_write(
+	     internal_volume->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to release read/write lock for writing.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	return( result );
 }
 
 /* Retrieves the size of the UTF-16 encoded name
@@ -1387,6 +1559,7 @@ int libfsrefs_volume_get_utf16_name_size(
 {
 	libfsrefs_internal_volume_t *internal_volume = NULL;
 	static char *function                        = "libfsrefs_volume_get_utf16_name_size";
+	int result                                   = 1;
 
 	if( volume == NULL )
 	{
@@ -1401,23 +1574,80 @@ int libfsrefs_volume_get_utf16_name_size(
 	}
 	internal_volume = (libfsrefs_internal_volume_t *) volume;
 
-/* TODO get volume name value */
-
-	if( libfsrefs_volume_name_get_utf16_name_size(
-	     NULL,
-	     utf16_string_size,
+#if defined( HAVE_LIBFSREFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_grab_for_write(
+	     internal_volume->read_write_lock,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve size of UTF-16 name from volume name attribute.",
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to grab read/write lock for writing.",
 		 function );
 
 		return( -1 );
 	}
-	return( 1 );
+#endif
+	if( internal_volume->volume_name_record == NULL )
+	{
+		if( libfsrefs_internal_volume_get_volume_name_record(
+		     internal_volume,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve volume name record.",
+			 function );
+
+			result = -1;
+		}
+	}
+	if( internal_volume->volume_name_record == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 "%s: invalid volume - missing volume name record.",
+		 function );
+
+		result = -1;
+	}
+	else if( libuna_utf16_string_size_from_utf16_stream(
+	          internal_volume->volume_name_record->value_data,
+	          internal_volume->volume_name_record->value_data_size,
+	          LIBUNA_ENDIAN_LITTLE,
+	          utf16_string_size,
+	          error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve size of UTF-16 name from volume name record.",
+		 function );
+
+		result = -1;
+	}
+#if defined( HAVE_LIBFSREFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_release_for_write(
+	     internal_volume->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to release read/write lock for writing.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	return( result );
 }
 
 /* Retrieves the UTF-16 encoded name value
@@ -1432,6 +1662,7 @@ int libfsrefs_volume_get_utf16_name(
 {
 	libfsrefs_internal_volume_t *internal_volume = NULL;
 	static char *function                        = "libfsrefs_volume_get_utf16_name";
+	int result                                   = 1;
 
 	if( volume == NULL )
 	{
@@ -1446,24 +1677,81 @@ int libfsrefs_volume_get_utf16_name(
 	}
 	internal_volume = (libfsrefs_internal_volume_t *) volume;
 
-/* TODO get volume name value */
-
-	if( libfsrefs_volume_name_get_utf16_name(
-	     NULL,
-	     utf16_string,
-	     utf16_string_size,
+#if defined( HAVE_LIBFSREFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_grab_for_write(
+	     internal_volume->read_write_lock,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve UTF-16 name from volume name attribute.",
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to grab read/write lock for writing.",
 		 function );
 
 		return( -1 );
 	}
-	return( 1 );
+#endif
+	if( internal_volume->volume_name_record == NULL )
+	{
+		if( libfsrefs_internal_volume_get_volume_name_record(
+		     internal_volume,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve volume name record.",
+			 function );
+
+			result = -1;
+		}
+	}
+	if( internal_volume->volume_name_record == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 "%s: invalid volume - missing volume name record.",
+		 function );
+
+		result = -1;
+	}
+	else if( libuna_utf16_string_copy_from_utf16_stream(
+	          utf16_string,
+	          utf16_string_size,
+	          internal_volume->volume_name_record->value_data,
+	          internal_volume->volume_name_record->value_data_size,
+	          LIBUNA_ENDIAN_LITTLE,
+	          error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve UTF-16 name from volume name record.",
+		 function );
+
+		result = -1;
+	}
+#if defined( HAVE_LIBFSREFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_release_for_write(
+	     internal_volume->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to release read/write lock for writing.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	return( result );
 }
 
 /* Retrieves the format version
@@ -1524,9 +1812,39 @@ int libfsrefs_volume_get_version(
 
 		return( -1 );
 	}
+#if defined( HAVE_LIBFSREFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_grab_for_read(
+	     internal_volume->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to grab read/write lock for reading.",
+		 function );
+
+		return( -1 );
+	}
+#endif
 	*major_version = internal_volume->io_handle->major_format_version;
 	*minor_version = internal_volume->io_handle->minor_format_version;
 
+#if defined( HAVE_LIBFSREFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_release_for_read(
+	     internal_volume->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to release read/write lock for reading.",
+		 function );
+
+		return( -1 );
+	}
+#endif
 	return( 1 );
 }
 

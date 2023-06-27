@@ -1,5 +1,5 @@
 /*
- * Ministor node record functions
+ * Ministore node record functions
  *
  * Copyright (C) 2012-2023, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -125,6 +125,8 @@ int libfsrefs_node_record_free(
 	}
 	if( *node_record != NULL )
 	{
+		/* The key_data and value_data references are freed elsewhere
+		 */
 		memory_free(
 		 *node_record );
 
@@ -142,8 +144,10 @@ int libfsrefs_node_record_read_data(
      size_t data_size,
      libcerror_error_t **error )
 {
-	static char *function = "libfsrefs_node_record_read_data";
-	size_t data_offset    = 0;
+	static char *function      = "libfsrefs_node_record_read_data";
+	size_t data_offset         = 0;
+	uint16_t key_data_offset   = 0;
+	uint16_t value_data_offset = 0;
 
 	if( node_record == NULL )
 	{
@@ -197,7 +201,7 @@ int libfsrefs_node_record_read_data(
 
 	byte_stream_copy_to_uint16_little_endian(
 	 ( (fsrefs_ministore_tree_node_record_t *) data )->key_data_offset,
-	 node_record->key_data_offset );
+	 key_data_offset );
 
 	byte_stream_copy_to_uint16_little_endian(
 	 ( (fsrefs_ministore_tree_node_record_t *) data )->key_data_size,
@@ -209,7 +213,7 @@ int libfsrefs_node_record_read_data(
 
 	byte_stream_copy_to_uint16_little_endian(
 	 ( (fsrefs_ministore_tree_node_record_t *) data )->value_data_offset,
-	 node_record->value_data_offset );
+	 value_data_offset );
 
 	byte_stream_copy_to_uint16_little_endian(
 	 ( (fsrefs_ministore_tree_node_record_t *) data )->value_data_size,
@@ -226,7 +230,7 @@ int libfsrefs_node_record_read_data(
 		libcnotify_printf(
 		 "%s: key data offset\t\t\t: 0x%04" PRIx16 "\n",
 		 function,
-		 node_record->key_data_offset );
+		 key_data_offset );
 
 		libcnotify_printf(
 		 "%s: key data size\t\t\t\t: %" PRIu32 "\n",
@@ -241,7 +245,7 @@ int libfsrefs_node_record_read_data(
 		libcnotify_printf(
 		 "%s: value data offset\t\t\t: 0x%04" PRIx16 "\n",
 		 function,
-		 node_record->value_data_offset );
+		 value_data_offset );
 
 		libcnotify_printf(
 		 "%s: value data size\t\t\t: %" PRIu32 "\n",
@@ -255,8 +259,8 @@ int libfsrefs_node_record_read_data(
 
 	data_offset = sizeof( fsrefs_ministore_tree_node_record_t );
 
-	if( ( node_record->key_data_offset < data_offset )
-	 || ( node_record->key_data_offset >= data_size ) )
+	if( ( key_data_offset < data_offset )
+	 || ( key_data_offset >= data_size ) )
 	{
 		libcerror_error_set(
 		 error,
@@ -267,7 +271,7 @@ int libfsrefs_node_record_read_data(
 
 		return( -1 );
 	}
-	if( node_record->key_data_size > ( data_size - node_record->key_data_offset ) )
+	if( node_record->key_data_size > ( data_size - key_data_offset ) )
 	{
 		libcerror_error_set(
 		 error,
@@ -278,6 +282,8 @@ int libfsrefs_node_record_read_data(
 
 		return( -1 );
 	}
+	node_record->key_data = &( data[ key_data_offset ] );
+
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )
 	{
@@ -285,13 +291,13 @@ int libfsrefs_node_record_read_data(
 		 "%s: key data:\n",
 		 function );
 		libcnotify_print_data(
-		 &( data[ node_record->key_data_offset ] ),
+		 node_record->key_data,
 		 node_record->key_data_size,
 		 LIBCNOTIFY_PRINT_DATA_FLAG_GROUP_DATA );
 	}
 #endif
-	if( ( node_record->value_data_offset < data_offset )
-	 || ( node_record->value_data_offset >= data_size ) )
+	if( ( value_data_offset < data_offset )
+	 || ( value_data_offset >= data_size ) )
 	{
 		libcerror_error_set(
 		 error,
@@ -302,7 +308,7 @@ int libfsrefs_node_record_read_data(
 
 		return( -1 );
 	}
-	if( node_record->value_data_size > ( data_size - node_record->value_data_offset ) )
+	if( node_record->value_data_size > ( data_size - value_data_offset ) )
 	{
 		libcerror_error_set(
 		 error,
@@ -313,6 +319,8 @@ int libfsrefs_node_record_read_data(
 
 		return( -1 );
 	}
+	node_record->value_data = &( data[ value_data_offset ] );
+
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )
 	{
@@ -320,7 +328,7 @@ int libfsrefs_node_record_read_data(
 		 "%s: value data:\n",
 		 function );
 		libcnotify_print_data(
-		 &( data[ node_record->value_data_offset ] ),
+		 node_record->value_data,
 		 node_record->value_data_size,
 		 LIBCNOTIFY_PRINT_DATA_FLAG_GROUP_DATA );
 	}

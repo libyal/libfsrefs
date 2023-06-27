@@ -1,5 +1,5 @@
 /*
- * Ministore tree (or level 2 metadata) functions
+ * Ministore node (or level 2 metadata) functions
  *
  * Copyright (C) 2012-2023, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -27,81 +27,85 @@
 #include "libfsrefs_block_descriptor.h"
 #include "libfsrefs_io_handle.h"
 #include "libfsrefs_libbfio.h"
-#include "libfsrefs_libcdata.h"
 #include "libfsrefs_libcerror.h"
 #include "libfsrefs_libcnotify.h"
 #include "libfsrefs_metadata_block.h"
 #include "libfsrefs_metadata_block_header.h"
 #include "libfsrefs_metadata_value.h"
-#include "libfsrefs_ministore_tree.h"
+#include "libfsrefs_ministore_node.h"
 #include "libfsrefs_node_header.h"
 #include "libfsrefs_node_record.h"
 
 #include "fsrefs_metadata_block.h"
 #include "fsrefs_ministore_tree.h"
 
-/* Creates a ministore tree
- * Make sure the value ministore_tree is referencing, is set to NULL
+/* Creates a ministore node
+ * Make sure the value ministore_node is referencing, is set to NULL
  * Returns 1 if successful or -1 on error
  */
-int libfsrefs_ministore_tree_initialize(
-     libfsrefs_ministore_tree_t **ministore_tree,
+int libfsrefs_ministore_node_initialize(
+     libfsrefs_ministore_node_t **ministore_node,
      libcerror_error_t **error )
 {
-	static char *function = "libfsrefs_ministore_tree_initialize";
+	static char *function = "libfsrefs_ministore_node_initialize";
 
-	if( ministore_tree == NULL )
+	if( ministore_node == NULL )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid ministore tree.",
+		 "%s: invalid ministore node.",
 		 function );
 
 		return( -1 );
 	}
-	if( *ministore_tree != NULL )
+	if( *ministore_node != NULL )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
-		 "%s: invalid ministore tree value already set.",
+		 "%s: invalid ministore node value already set.",
 		 function );
 
 		return( -1 );
 	}
-	*ministore_tree = memory_allocate_structure(
-	                   libfsrefs_ministore_tree_t );
+	*ministore_node = memory_allocate_structure(
+	                   libfsrefs_ministore_node_t );
 
-	if( *ministore_tree == NULL )
+	if( *ministore_node == NULL )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_MEMORY,
 		 LIBCERROR_MEMORY_ERROR_INSUFFICIENT,
-		 "%s: unable to create ministore tree.",
+		 "%s: unable to create ministore node.",
 		 function );
 
 		goto on_error;
 	}
 	if( memory_set(
-	     *ministore_tree,
+	     *ministore_node,
 	     0,
-	     sizeof( libfsrefs_ministore_tree_t ) ) == NULL )
+	     sizeof( libfsrefs_ministore_node_t ) ) == NULL )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_MEMORY,
 		 LIBCERROR_MEMORY_ERROR_SET_FAILED,
-		 "%s: unable to clear ministore tree.",
+		 "%s: unable to clear ministore node.",
 		 function );
 
-		goto on_error;
+		memory_free(
+		 *ministore_node );
+
+		*ministore_node = NULL;
+
+		return( -1 );
 	}
 	if( libcdata_array_initialize(
-	     &( ( *ministore_tree )->block_descriptors_array ),
+	     &( ( *ministore_node )->records_array ),
 	     0,
 	     error ) != 1 )
 	{
@@ -109,7 +113,7 @@ int libfsrefs_ministore_tree_initialize(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-		 "%s: unable to create block descriptors array.",
+		 "%s: unable to create records array.",
 		 function );
 
 		goto on_error;
@@ -117,66 +121,71 @@ int libfsrefs_ministore_tree_initialize(
 	return( 1 );
 
 on_error:
-	if( *ministore_tree != NULL )
+	if( *ministore_node != NULL )
 	{
 		memory_free(
-		 *ministore_tree );
+		 *ministore_node );
 
-		*ministore_tree = NULL;
+		*ministore_node = NULL;
 	}
 	return( -1 );
 }
 
-/* Frees a ministore tree
+/* Frees a ministore node
  * Returns 1 if successful or -1 on error
  */
-int libfsrefs_ministore_tree_free(
-     libfsrefs_ministore_tree_t **ministore_tree,
+int libfsrefs_ministore_node_free(
+     libfsrefs_ministore_node_t **ministore_node,
      libcerror_error_t **error )
 {
-	static char *function = "libfsrefs_ministore_tree_free";
+	static char *function = "libfsrefs_ministore_node_free";
 	int result            = 1;
 
-	if( ministore_tree == NULL )
+	if( ministore_node == NULL )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid ministore tree.",
+		 "%s: invalid ministore node.",
 		 function );
 
 		return( -1 );
 	}
-	if( *ministore_tree != NULL )
+	if( *ministore_node != NULL )
 	{
 		if( libcdata_array_free(
-		     &( ( *ministore_tree )->block_descriptors_array ),
-		     (int (*)(intptr_t **, libcerror_error_t **)) &libfsrefs_block_descriptor_free,
+		     &( ( *ministore_node )->records_array ),
+		     (int (*)(intptr_t **, libcerror_error_t **)) &libfsrefs_node_record_free,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-			 "%s: unable to free block descriptors array.",
+			 "%s: unable to free records array.",
 			 function );
 
 			result = -1;
 		}
+		if( ( *ministore_node )->data != NULL )
+		{
+			memory_free(
+			 ( *ministore_node )->data );
+		}
 		memory_free(
-		 *ministore_tree );
+		 *ministore_node );
 
-		*ministore_tree = NULL;
+		*ministore_node = NULL;
 	}
 	return( result );
 }
 
-/* Reads a ministore tree
+/* Reads a ministore node
  * Returns 1 if successful or -1 on error
  */
-int libfsrefs_ministore_tree_read_data(
-     libfsrefs_ministore_tree_t *ministore_tree,
+int libfsrefs_ministore_node_read_data(
+     libfsrefs_ministore_node_t *ministore_node,
      libfsrefs_io_handle_t *io_handle,
      const uint8_t *data,
      size_t data_size,
@@ -184,27 +193,27 @@ int libfsrefs_ministore_tree_read_data(
 {
 	libfsrefs_node_header_t *node_header = NULL;
 	libfsrefs_node_record_t *node_record = NULL;
-	static char *function                = "libfsrefs_ministore_tree_read_data";
+	static char *function                = "libfsrefs_ministore_node_read_data";
 	size_t data_offset                   = 0;
-	size_t header_size                   = 0;
 	size_t node_header_data_offset       = 0;
 	size_t record_offsets_data_offset    = 0;
 	uint32_t information_entry_size      = 0;
 	uint32_t record_data_offset          = 0;
 	uint32_t record_data_size            = 0;
 	uint32_t record_offsets_index        = 0;
+	int entry_index                      = 0;
 
 #if defined( HAVE_DEBUG_OUTPUT )
 	size_t data_area_start_offset        = 0;
 #endif
 
-	if( ministore_tree == NULL )
+	if( ministore_node == NULL )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid ministore tree.",
+		 "%s: invalid ministore node.",
 		 function );
 
 		return( -1 );
@@ -220,15 +229,8 @@ int libfsrefs_ministore_tree_read_data(
 
 		return( -1 );
 	}
-	if( io_handle->major_format_version == 1 )
-	{
-		header_size = sizeof( fsrefs_metadata_block_header_v1_t );
-	}
-	else if( io_handle->major_format_version == 3 )
-	{
-		header_size = sizeof( fsrefs_metadata_block_header_v3_t );
-	}
-	else
+	if( ( io_handle->major_format_version != 1 )
+	 && ( io_handle->major_format_version != 3 ) )
 	{
 		libcerror_error_set(
 		 error,
@@ -427,7 +429,7 @@ int libfsrefs_ministore_tree_read_data(
 	if( libcnotify_verbose != 0 )
 	{
 		libcnotify_printf(
-		 "%s: ministore tree data:\n",
+		 "%s: ministore node data:\n",
 		 function );
 		libcnotify_print_data(
 		 &( data[ node_header_data_offset ] ),
@@ -450,16 +452,29 @@ int libfsrefs_ministore_tree_read_data(
 #if defined( HAVE_DEBUG_OUTPUT )
 		if( libcnotify_verbose != 0 )
 		{
-			libcnotify_printf(
-			 "%s: record: %02" PRIu32 " data offset\t\t: 0x%08" PRIx32 " (0x%08" PRIx32 ")\n",
-			 function,
-			 record_offsets_index,
-			 record_data_offset & 0x0000ffffUL,
-			 record_data_offset );
+			if( io_handle->major_format_version == 1 )
+			{
+				libcnotify_printf(
+				 "%s: record: %02" PRIu32 " data offset\t\t: 0x%08" PRIx32 "\n",
+				 function,
+				 record_offsets_index,
+				 record_data_offset );
+			}
+			else if( io_handle->major_format_version == 3 )
+			{
+				libcnotify_printf(
+				 "%s: record: %02" PRIu32 " data offset\t\t: 0x%08" PRIx32 " (0x%08" PRIx32 ")\n",
+				 function,
+				 record_offsets_index,
+				 record_data_offset & 0x0000ffffUL,
+				 record_data_offset );
+			}
 		}
 #endif
-		record_data_offset &= 0x0000ffffUL;
-
+		if( io_handle->major_format_version == 3 )
+		{
+			record_data_offset &= 0x0000ffffUL;
+		}
 		if( ( record_data_offset < node_header->data_area_start_offset )
 		 || ( record_data_offset >= node_header->data_area_end_offset ) )
 		{
@@ -529,20 +544,23 @@ int libfsrefs_ministore_tree_read_data(
 
 			goto on_error;
 		}
-		if( libfsrefs_node_record_free(
-		     &node_record,
+		if( libcdata_array_append_entry(
+		     ministore_node->records_array,
+		     &entry_index,
+		     (intptr_t *) node_record,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-			 "%s: unable to free node record: %" PRIu32 ".",
+			 LIBCERROR_RUNTIME_ERROR_APPEND_FAILED,
+			 "%s: unable to append node record: %" PRIu32 " to array.",
 			 function,
 			 record_offsets_index );
 
 			goto on_error;
 		}
+		node_record = NULL;
 	}
 	if( libfsrefs_node_header_free(
 	     &node_header,
@@ -560,6 +578,12 @@ int libfsrefs_ministore_tree_read_data(
 	return( 1 );
 
 on_error:
+	if( node_record != NULL )
+	{
+		libfsrefs_node_record_free(
+		 &node_record,
+		 NULL );
+	}
 	if( node_header != NULL )
 	{
 		libfsrefs_node_header_free(
@@ -569,30 +593,40 @@ on_error:
 	return( -1 );
 }
 
-/* Reads a ministore tree
+/* Reads a ministore node
  * Returns 1 if successful or -1 on error
  */
-int libfsrefs_ministore_tree_read_file_io_handle(
-     libfsrefs_ministore_tree_t *ministore_tree,
+int libfsrefs_ministore_node_read_file_io_handle(
+     libfsrefs_ministore_node_t *ministore_node,
      libfsrefs_io_handle_t *io_handle,
      libbfio_handle_t *file_io_handle,
      off64_t file_offset,
      libcerror_error_t **error )
 {
 	libfsrefs_metadata_block_header_t *metadata_block_header = NULL;
-	uint8_t *metadata_block_data                             = NULL;
-	static char *function                                    = "libfsrefs_ministore_tree_read_file_io_handle";
+	static char *function                                    = "libfsrefs_ministore_node_read_file_io_handle";
 	size_t header_size                                       = 0;
 	size_t read_size                                         = 0;
 	ssize_t read_count                                       = 0;
 
-	if( ministore_tree == NULL )
+	if( ministore_node == NULL )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid ministore tree.",
+		 "%s: invalid ministore node.",
+		 function );
+
+		return( -1 );
+	}
+	if( ministore_node->data != NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 "%s: invalid ministore_node - data value already set.",
 		 function );
 
 		return( -1 );
@@ -647,10 +681,10 @@ int libfsrefs_ministore_tree_read_file_io_handle(
 
 		return( -1 );
 	}
-	metadata_block_data = (uint8_t *) memory_allocate(
-	                                   read_size );
+	ministore_node->data = (uint8_t *) memory_allocate(
+	                                    read_size );
 
-	if( metadata_block_data == NULL )
+	if( ministore_node->data == NULL )
 	{
 		libcerror_error_set(
 		 error,
@@ -661,9 +695,11 @@ int libfsrefs_ministore_tree_read_file_io_handle(
 
 		goto on_error;
 	}
+	ministore_node->data_size = read_size;
+
 	read_count = libbfio_handle_read_buffer_at_offset(
 	              file_io_handle,
-	              metadata_block_data,
+	              ministore_node->data,
 	              read_size,
 	              file_offset,
 	              error );
@@ -674,7 +710,7 @@ int libfsrefs_ministore_tree_read_file_io_handle(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_IO,
 		 LIBCERROR_IO_ERROR_READ_FAILED,
-		 "%s: unable to read ministore tree metadata at offset: %" PRIi64 " (0x%08" PRIx64 ").",
+		 "%s: unable to read ministore node metadata at offset: %" PRIi64 " (0x%08" PRIx64 ").",
 		 function,
 		 file_offset,
 		 file_offset );
@@ -697,7 +733,7 @@ int libfsrefs_ministore_tree_read_file_io_handle(
 	if( libfsrefs_metadata_block_header_read_data(
 	     metadata_block_header,
 	     io_handle,
-	     metadata_block_data,
+	     ministore_node->data,
 	     header_size,
 	     error ) != 1 )
 	{
@@ -780,10 +816,10 @@ int libfsrefs_ministore_tree_read_file_io_handle(
 
 		goto on_error;
 	}
-	if( libfsrefs_ministore_tree_read_data(
-	     ministore_tree,
+	if( libfsrefs_ministore_node_read_data(
+	     ministore_node,
 	     io_handle,
-	     &( metadata_block_data[ header_size ] ),
+	     &( ministore_node->data[ header_size ] ),
 	     read_size - header_size,
 	     error ) != 1 )
 	{
@@ -791,14 +827,11 @@ int libfsrefs_ministore_tree_read_file_io_handle(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_IO,
 		 LIBCERROR_IO_ERROR_READ_FAILED,
-		 "%s: unable to read ministore tree metadata.",
+		 "%s: unable to read ministore node metadata.",
 		 function );
 
 		goto on_error;
 	}
-	memory_free(
-	 metadata_block_data );
-
 	return( 1 );
 
 on_error:
@@ -808,90 +841,200 @@ on_error:
 		 &metadata_block_header,
 		 NULL );
 	}
-	if( metadata_block_data != NULL )
+	if( ministore_node->data != NULL )
 	{
 		memory_free(
-		 metadata_block_data );
+		 ministore_node->data );
+
+		ministore_node->data = NULL;
 	}
+	ministore_node->data_size = 0;
+
 	return( -1 );
 }
 
-/* Retrieves the number of block descriptors
- * Returns 1 if successful or -1 on error
+/* Retrieves the record for a specific key
+ * Returns 1 if successful, 0 if not available or -1 on error
  */
-int libfsrefs_ministore_tree_get_number_of_block_descriptors(
-     libfsrefs_ministore_tree_t *ministore_tree,
-     int *number_of_block_descriptors,
+int libfsrefs_ministore_node_get_record(
+     libfsrefs_ministore_node_t *ministore_node,
+     const uint8_t *key_data,
+     size_t key_data_size,
+     libfsrefs_node_record_t **node_record,
      libcerror_error_t **error )
 {
-	static char *function = "libfsrefs_ministore_tree_get_number_of_block_descriptors";
+	libfsrefs_node_record_t *safe_node_record = NULL;
+	size_t key_data_offset                    = 0;
+	static char *function                     = "libfsrefs_ministore_node_read_file_io_handle";
+	int number_of_records                     = 0;
+	int record_index                          = 0;
+	int result                                = 0;
 
-	if( ministore_tree == NULL )
+	if( ministore_node == NULL )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid ministore tree.",
+		 "%s: invalid ministore node.",
+		 function );
+
+		return( -1 );
+	}
+	if( ministore_node->data == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 "%s: invalid ministore node - missing data.",
+		 function );
+
+		return( -1 );
+	}
+	if( key_data == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid key data.",
+		 function );
+
+		return( -1 );
+	}
+	if( ( key_data_size == 0 )
+	 || ( key_data_size > (size_t) SSIZE_MAX ) )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: invalid key data size value out of bounds.",
 		 function );
 
 		return( -1 );
 	}
 	if( libcdata_array_get_number_of_entries(
-	     ministore_tree->block_descriptors_array,
-	     number_of_block_descriptors,
+	     ministore_node->records_array,
+	     &number_of_records,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve number of entries from array.",
+		 "%s: unable to retrieve number of entries from records array.",
 		 function );
 
 		return( -1 );
 	}
-	return( 1 );
-}
+/* TODO add support for branch nodes */
 
-/* Retrieves a specific block descriptor
- * Returns 1 if successful or -1 on error
- */
-int libfsrefs_ministore_tree_get_block_descriptor_by_index(
-     libfsrefs_ministore_tree_t *ministore_tree,
-     int block_descriptor_index,
-     libfsrefs_block_descriptor_t **block_descriptor,
-     libcerror_error_t **error )
-{
-	static char *function = "libfsrefs_ministore_tree_get_block_descriptor_by_index";
-
-	if( ministore_tree == NULL )
+	for( record_index = 0;
+	     record_index < number_of_records;
+	     record_index++ )
 	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid ministore tree.",
+		if( libcdata_array_get_entry_by_index(
+		     ministore_node->records_array,
+		     record_index,
+		     (intptr_t **) &safe_node_record,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve entry: %d from records array.",
+			 function,
+			 record_index );
+
+			return( -1 );
+		}
+		if( safe_node_record == NULL )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+			 "%s: missing node record: %d.",
+			 function,
+			 record_index );
+
+			return( -1 );
+		}
+		if( safe_node_record->key_data == NULL )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+			 "%s: invalid node record: %d - missing key data.",
+			 function,
+			 record_index );
+
+			return( -1 );
+		}
+		if( key_data_size != safe_node_record->key_data_size )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+			 "%s: invalid node record: %d - key data size mismatch.",
+			 function,
+			 record_index );
+
+			return( -1 );
+		}
+		key_data_offset = key_data_size;
+
+#if defined( HAVE_DEBUG_OUTPUT )
+	if( libcnotify_verbose != 0 )
+	{
+		libcnotify_printf(
+		 "%s: key data:\n",
 		 function );
+		libcnotify_print_data(
+		 key_data,
+		 key_data_size,
+		 0 );
 
-		return( -1 );
+		libcnotify_printf(
+		 "%s: node key data:\n",
+		 function );
+		libcnotify_print_data(
+		 safe_node_record->key_data,
+		 key_data_size,
+		 0 );
 	}
-	if( libcdata_array_get_entry_by_index(
-	     ministore_tree->block_descriptors_array,
-	     block_descriptor_index,
-	     (intptr_t **) block_descriptor,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve entry: %d from array.",
-		 function,
-		 block_descriptor_index );
+#endif
+		do
+		{
+			key_data_offset--;
 
-		return( -1 );
+			result = (int) key_data[ key_data_offset ] - (int) safe_node_record->key_data[ key_data_offset ];
+
+			if( result != 0 )
+			{
+				break;
+			}
+		}
+		while( key_data_offset > 0 );
+
+fprintf( stderr, "X: %zd, %d\n", key_data_offset, result );
+
+		if( result == 0 )
+		{
+			*node_record = safe_node_record;
+
+			return( 1 );
+		}
+		else if( result < 0 )
+		{
+			break;
+		}
 	}
-	return( 1 );
+	return( 0 );
 }
 

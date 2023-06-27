@@ -1,5 +1,5 @@
 /*
- * Block descriptors functions
+ * Objects tree functions
  *
  * Copyright (C) 2012-2023, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -19,61 +19,61 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if !defined( _LIBFSREFS_BLOCK_DESCRIPTORS_H )
-#define _LIBFSREFS_BLOCK_DESCRIPTORS_H
+#if !defined( _LIBFSREFS_OBJECTS_TREE_H )
+#define _LIBFSREFS_OBJECTS_TREE_H
 
 #include <common.h>
 #include <types.h>
 
-#include "libfsrefs_block_descriptor.h"
+#include "libfsrefs_file_system.h"
 #include "libfsrefs_io_handle.h"
 #include "libfsrefs_libbfio.h"
-#include "libfsrefs_libcdata.h"
 #include "libfsrefs_libcerror.h"
+#include "libfsrefs_ministore_node.h"
 
 #if defined( __cplusplus )
 extern "C" {
 #endif
 
-typedef struct libfsrefs_block_descriptors libfsrefs_block_descriptors_t;
+typedef struct libfsrefs_objects_tree libfsrefs_objects_tree_t;
 
-struct libfsrefs_block_descriptors
+struct libfsrefs_objects_tree
 {
-	/* The block descriptors array
+	/* File system
 	 */
-	libcdata_array_t *block_descriptors_array;
+	libfsrefs_file_system_t *file_system;
+
+	/* Ministore root node
+	 */
+	libfsrefs_ministore_node_t *root_node;
 };
 
-int libfsrefs_block_descriptors_initialize(
-     libfsrefs_block_descriptors_t **block_descriptors,
+int libfsrefs_objects_tree_initialize(
+     libfsrefs_objects_tree_t **objects_tree,
+     libfsrefs_file_system_t *file_system,
      libcerror_error_t **error );
 
-int libfsrefs_block_descriptors_free(
-     libfsrefs_block_descriptors_t **block_descriptors,
+int libfsrefs_objects_tree_free(
+     libfsrefs_objects_tree_t **objects_tree,
      libcerror_error_t **error );
 
-int libfsrefs_block_descriptors_read(
-     libfsrefs_block_descriptors_t *block_descriptors,
+int libfsrefs_objects_tree_read(
+     libfsrefs_objects_tree_t *objects_tree,
      libfsrefs_io_handle_t *io_handle,
      libbfio_handle_t *file_io_handle,
-     off64_t file_offset,
-     int level,
      libcerror_error_t **error );
 
-int libfsrefs_block_descriptors_get_number_of_block_descriptors(
-     libfsrefs_block_descriptors_t *block_descriptors,
-     int *number_of_block_descriptors,
-     libcerror_error_t **error );
-
-int libfsrefs_block_descriptors_get_block_descriptor_by_index(
-     libfsrefs_block_descriptors_t *block_descriptors,
-     int block_descriptor_index,
-     libfsrefs_block_descriptor_t **block_descriptor,
+int libfsrefs_objects_get_ministore_tree_by_identifier(
+     libfsrefs_objects_tree_t *objects_tree,
+     libfsrefs_io_handle_t *io_handle,
+     libbfio_handle_t *file_io_handle,
+     uint64_t object_identifier,
+     libfsrefs_ministore_node_t **root_node,
      libcerror_error_t **error );
 
 #if defined( __cplusplus )
 }
 #endif
 
-#endif /* !defined( _LIBFSREFS_BLOCK_DESCRIPTORS_H ) */
+#endif /* !defined( _LIBFSREFS_OBJECTS_TREE_H ) */
 

@@ -1,5 +1,5 @@
 /*
- * Ministor node header functions
+ * Ministore node header functions
  *
  * Copyright (C) 2012-2023, Joachim Metz <joachim.metz@gmail.com>
  *

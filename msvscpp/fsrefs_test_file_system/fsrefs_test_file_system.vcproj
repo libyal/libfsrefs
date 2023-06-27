@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9,00"
-	Name="fsrefs_test_block_descriptors"
-	ProjectGUID="{91D86977-243E-45A0-A506-F0C954801288}"
-	RootNamespace="fsrefs_test_block_descriptors"
+	Name="fsrefs_test_file_system"
+	ProjectGUID="{F139F66F-812A-4AE5-9950-DA583DF64F90}"
+	RootNamespace="fsrefs_test_file_system"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="131072"
 	>
@@ -176,7 +176,7 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\..\tests\fsrefs_test_block_descriptors.c"
+				RelativePath="..\..\tests\fsrefs_test_file_system.c"
 				>
 			</File>
 			<File

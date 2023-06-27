@@ -94,10 +94,15 @@ int libfsrefs_checkpoint_initialize(
 		 "%s: unable to clear checkpoint.",
 		 function );
 
-		goto on_error;
+		memory_free(
+		 *checkpoint );
+
+		*checkpoint = NULL;
+
+		return( -1 );
 	}
 	if( libcdata_array_initialize(
-	     &( ( *checkpoint )->ministore_tree_block_descriptors_array ),
+	     &( ( *checkpoint )->block_descriptors_array ),
 	     0,
 	     error ) != 1 )
 	{
@@ -105,7 +110,7 @@ int libfsrefs_checkpoint_initialize(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-		 "%s: unable to create ministore tree block descriptors array.",
+		 "%s: unable to create block descriptors array.",
 		 function );
 
 		goto on_error;
@@ -147,7 +152,7 @@ int libfsrefs_checkpoint_free(
 	if( *checkpoint != NULL )
 	{
 		if( libcdata_array_free(
-		     &( ( *checkpoint )->ministore_tree_block_descriptors_array ),
+		     &( ( *checkpoint )->block_descriptors_array ),
 		     (int (*)(intptr_t **, libcerror_error_t **)) &libfsrefs_block_descriptor_free,
 		     error ) != 1 )
 		{
@@ -155,7 +160,7 @@ int libfsrefs_checkpoint_free(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-			 "%s: unable to free ministore tree block descriptors array.",
+			 "%s: unable to free block descriptors array.",
 			 function );
 
 			result = -1;
@@ -671,7 +676,7 @@ int libfsrefs_checkpoint_read_data(
 			goto on_error;
 		}
 		if( libcdata_array_append_entry(
-		     checkpoint->ministore_tree_block_descriptors_array,
+		     checkpoint->block_descriptors_array,
 		     &entry_index,
 		     (intptr_t *) block_descriptor,
 		     error ) != 1 )
@@ -958,7 +963,7 @@ int libfsrefs_checkpoint_get_number_of_ministore_tree_block_descriptors(
 		return( -1 );
 	}
 	if( libcdata_array_get_number_of_entries(
-	     checkpoint->ministore_tree_block_descriptors_array,
+	     checkpoint->block_descriptors_array,
 	     number_of_block_descriptors,
 	     error ) != 1 )
 	{
@@ -966,7 +971,7 @@ int libfsrefs_checkpoint_get_number_of_ministore_tree_block_descriptors(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve number of entries from array.",
+		 "%s: unable to retrieve number of entries from block descriptors array.",
 		 function );
 
 		return( -1 );
@@ -997,7 +1002,7 @@ int libfsrefs_checkpoint_get_ministore_tree_block_descriptor_by_index(
 		return( -1 );
 	}
 	if( libcdata_array_get_entry_by_index(
-	     checkpoint->ministore_tree_block_descriptors_array,
+	     checkpoint->block_descriptors_array,
 	     block_descriptor_index,
 	     (intptr_t **) block_descriptor,
 	     error ) != 1 )
@@ -1006,7 +1011,7 @@ int libfsrefs_checkpoint_get_ministore_tree_block_descriptor_by_index(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve entry: %d from array.",
+		 "%s: unable to retrieve entry: %d from block descriptors array.",
 		 function,
 		 block_descriptor_index );
 
