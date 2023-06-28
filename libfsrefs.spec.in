@@ -1,7 +1,7 @@
 Name: libfsrefs
 Version: @VERSION@
 Release: 1
-Summary: Library to access the Windows Resiliant File System (REFS) format
+Summary: Library to access the Resiliant File System (ReFS) format
 Group: System Environment/Libraries
 License: LGPLv3+
 Source: %{name}-%{version}.tar.gz
@@ -11,10 +11,10 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires: gcc @ax_libbfio_spec_build_requires@ @ax_libcdata_spec_build_requires@ @ax_libcerror_spec_build_requires@ @ax_libcfile_spec_build_requires@ @ax_libclocale_spec_build_requires@ @ax_libcnotify_spec_build_requires@ @ax_libcpath_spec_build_requires@ @ax_libcsplit_spec_build_requires@ @ax_libcthreads_spec_build_requires@ @ax_libfcache_spec_build_requires@ @ax_libfdata_spec_build_requires@ @ax_libfdatetime_spec_build_requires@ @ax_libfguid_spec_build_requires@ @ax_libfwnt_spec_build_requires@ @ax_libuna_spec_build_requires@
 
 %description -n libfsrefs
-Library to access the Windows Resiliant File System (REFS) format
+Library to access the Resiliant File System (ReFS) format
 
 %package -n libfsrefs-static
-Summary: Library to access the Windows Resiliant File System (REFS) format
+Summary: Library to access the Resiliant File System (ReFS) format
 Group: Development/Libraries
 Requires: libfsrefs = %{version}-%{release}
 
@@ -30,13 +30,13 @@ Requires: libfsrefs = %{version}-%{release}
 Header files and libraries for developing applications for libfsrefs.
 
 %package -n libfsrefs-tools
-Summary: Several tools for reading Windows Resiliant File System (REFS) volumes
+Summary: Several tools for reading Resiliant File System (ReFS) volumes
 Group: Applications/System
 Requires: libfsrefs = %{version}-%{release} @ax_libfusn_spec_requires@
 @libfsrefs_spec_tools_build_requires@ @ax_libfusn_spec_build_requires@
 
 %description -n libfsrefs-tools
-Several tools for reading Windows Resiliant File System (REFS) volumes
+Several tools for reading Resiliant File System (ReFS) volumes
 
 %prep
 %setup -q

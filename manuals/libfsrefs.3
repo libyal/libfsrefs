@@ -1,9 +1,9 @@
-.Dd Jun 25, 2023
+.Dd June 28, 2023
 .Dt libfsrefs 3
 .Os libfsrefs
 .Sh NAME
 .Nm libfsrefs.h
-.Nd Library to access the Windows Resiliant File System (REFS) format
+.Nd Library to access the Resiliant File System (ReFS) format
 .Sh SYNOPSIS
 .In libfsrefs.h
 .Pp
@@ -61,6 +61,10 @@ Volume functions
 .Ft int
 .Fn libfsrefs_volume_close "libfsrefs_volume_t *volume" "libfsrefs_error_t **error"
 .Ft int
+.Fn libfsrefs_volume_get_bytes_per_sector "libfsrefs_volume_t *volume" "uint16_t *bytes_per_sector" "libfsrefs_error_t **error"
+.Ft int
+.Fn libfsrefs_volume_get_cluster_block_size "libfsrefs_volume_t *volume" "size32_t *cluster_block_size" "libfsrefs_error_t **error"
+.Ft int
 .Fn libfsrefs_volume_get_utf8_name_size "libfsrefs_volume_t *volume" "size_t *utf8_string_size" "libfsrefs_error_t **error"
 .Ft int
 .Fn libfsrefs_volume_get_utf8_name "libfsrefs_volume_t *volume" "uint8_t *utf8_string" "size_t utf8_string_size" "libfsrefs_error_t **error"
@@ -70,6 +74,10 @@ Volume functions
 .Fn libfsrefs_volume_get_utf16_name "libfsrefs_volume_t *volume" "uint16_t *utf16_string" "size_t utf16_string_size" "libfsrefs_error_t **error"
 .Ft int
 .Fn libfsrefs_volume_get_version "libfsrefs_volume_t *volume" "uint8_t *major_version" "uint8_t *minor_version" "libfsrefs_error_t **error"
+.Ft int
+.Fn libfsrefs_volume_get_serial_number "libfsrefs_volume_t *volume" "uint64_t *serial_number" "libfsrefs_error_t **error"
+.Ft int
+.Fn libfsrefs_volume_get_root_directory "libfsrefs_volume_t *volume" "libfsrefs_file_entry_t **file_entry" "libfsrefs_error_t **error"
 .Pp
 Available when compiled with wide character string support:
 .Ft int
@@ -78,6 +86,22 @@ Available when compiled with wide character string support:
 Available when compiled with libbfio support:
 .Ft int
 .Fn libfsrefs_volume_open_file_io_handle "libfsrefs_volume_t *volume" "libbfio_handle_t *file_io_handle" "int access_flags" "libfsrefs_error_t **error"
+.Pp
+File entry functions
+.Ft int
+.Fn libfsrefs_file_entry_free "libfsrefs_file_entry_t **file_entry" "libfsrefs_error_t **error"
+.Ft int
+.Fn libfsrefs_file_entry_get_utf8_name_size "libfsrefs_file_entry_t *file_entry" "size_t *utf8_string_size" "libfsrefs_error_t **error"
+.Ft int
+.Fn libfsrefs_file_entry_get_utf8_name "libfsrefs_file_entry_t *file_entry" "uint8_t *utf8_string" "size_t utf8_string_size" "libfsrefs_error_t **error"
+.Ft int
+.Fn libfsrefs_file_entry_get_utf16_name_size "libfsrefs_file_entry_t *file_entry" "size_t *utf16_string_size" "libfsrefs_error_t **error"
+.Ft int
+.Fn libfsrefs_file_entry_get_utf16_name "libfsrefs_file_entry_t *file_entry" "uint16_t *utf16_string" "size_t utf16_string_size" "libfsrefs_error_t **error"
+.Ft int
+.Fn libfsrefs_file_entry_get_number_of_sub_file_entries "libfsrefs_file_entry_t *file_entry" "int *number_of_sub_file_entries" "libfsrefs_error_t **error"
+.Ft int
+.Fn libfsrefs_file_entry_get_sub_file_entry_by_index "libfsrefs_file_entry_t *file_entry" "int sub_file_entry_index" "libfsrefs_file_entry_t **sub_file_entry" "libfsrefs_error_t **error"
 .Sh DESCRIPTION
 The
 .Fn libfsrefs_get_version

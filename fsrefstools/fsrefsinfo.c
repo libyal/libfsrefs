@@ -1,5 +1,5 @@
 /*
- * Shows information obtained from a Windows Resiliant File System (REFS)
+ * Shows information obtained from a Resiliant File System (ReFS)
  *
  * Copyright (C) 2012-2023, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -43,6 +43,14 @@
 #include "fsrefstools_unused.h"
 #include "info_handle.h"
 
+enum FSREFSINFO_MODES
+{
+	FSREFSINFO_MODE_FILE_ENTRY,
+	FSREFSINFO_MODE_FILE_SYSTEM_HIERARCHY,
+	FSREFSINFO_MODE_USN_CHANGE_JOURNAL,
+	FSREFSINFO_MODE_VOLUME
+};
+
 info_handle_t *fsrefsinfo_info_handle = NULL;
 int fsrefsinfo_abort                  = 0;
 
@@ -55,17 +63,15 @@ void usage_fprint(
 	{
 		return;
 	}
-	fprintf( stream, "Use fsrefsinfo to determine information about a Windows\n"
-	                 " Resiliant File System (REFS).\n\n" );
+	fprintf( stream, "Use fsrefsinfo to determine information about a Resiliant\n"
+	                 " File System (ReFS).\n\n" );
 
-	fprintf( stream, "Usage: fsrefsinfo [ -e entry_index ] [ -o offset ]\n"
-	                 "                  [ -hvV ] source\n\n" );
+	fprintf( stream, "Usage: fsrefsinfo [ -o offset ] [ -hHvV ] source\n\n" );
 
 	fprintf( stream, "\tsource: the source file or device\n\n" );
 
-	fprintf( stream, "\t-e:     show info about a specific MFT entry index\n"
-	                 "\t        (default = 5)\n" );
 	fprintf( stream, "\t-h:     shows this help\n" );
+	fprintf( stream, "\t-H:     shows the file system hierarchy\n" );
 	fprintf( stream, "\t-o:     specify the volume offset\n" );
 	fprintf( stream, "\t-v:     verbose output to stderr\n" );
 	fprintf( stream, "\t-V:     print version\n" );
@@ -124,11 +130,12 @@ int main( int argc, char * const argv[] )
 #endif
 {
 	libfsrefs_error_t *error                 = NULL;
-	system_character_t *option_entry_index   = NULL;
 	system_character_t *option_volume_offset = NULL;
 	system_character_t *source               = NULL;
 	char *program                            = "fsrefsinfo";
 	system_integer_t option                  = 0;
+	uint8_t calculate_md5                    = 0;
+	int option_mode                          = FSREFSINFO_MODE_VOLUME;
 	int verbose                              = 0;
 
 	libcnotify_stream_set(
@@ -164,7 +171,7 @@ int main( int argc, char * const argv[] )
 	while( ( option = fsrefstools_getopt(
 	                   argc,
 	                   argv,
-	                   _SYSTEM_STRING( "e:ho:vV" ) ) ) != (system_integer_t) -1 )
+	                   _SYSTEM_STRING( "hHo:vV" ) ) ) != (system_integer_t) -1 )
 	{
 		switch( option )
 		{
@@ -180,16 +187,16 @@ int main( int argc, char * const argv[] )
 
 				return( EXIT_FAILURE );
 
-			case (system_integer_t) 'e':
-				option_entry_index = optarg;
-
-				break;
-
 			case (system_integer_t) 'h':
 				usage_fprint(
 				 stdout );
 
 				return( EXIT_SUCCESS );
+
+			case (system_integer_t) 'H':
+				option_mode = FSREFSINFO_MODE_FILE_SYSTEM_HIERARCHY;
+
+				break;
 
 			case (system_integer_t) 'o':
 				option_volume_offset = optarg;
@@ -231,6 +238,7 @@ int main( int argc, char * const argv[] )
 
 	if( info_handle_initialize(
 	     &fsrefsinfo_info_handle,
+	     calculate_md5,
 	     &error ) != 1 )
 	{
 		fprintf(
@@ -238,24 +246,6 @@ int main( int argc, char * const argv[] )
 		 "Unable to initialize info handle.\n" );
 
 		goto on_error;
-	}
-	if( option_entry_index != NULL )
-	{
-		if( info_handle_set_entry_index(
-		     fsrefsinfo_info_handle,
-		     option_entry_index,
-		     &error ) != 1 )
-		{
-			libcnotify_print_error_backtrace(
-			 error );
-			libcerror_error_free(
-			 &error );
-
-			fprintf(
-			 stderr,
-			 "Unsupported entry index defaulting to: %" PRIi64 ".\n",
-			 fsrefsinfo_info_handle->entry_index );
-		}
 	}
 	if( option_volume_offset != NULL )
 	{
@@ -287,15 +277,34 @@ int main( int argc, char * const argv[] )
 
 		goto on_error;
 	}
-	if( info_handle_volume_fprint(
-	     fsrefsinfo_info_handle,
-	     &error ) != 1 )
+	switch( option_mode )
 	{
-		fprintf(
-		 stderr,
-		 "Unable to print volume information.\n" );
+		case FSREFSINFO_MODE_FILE_SYSTEM_HIERARCHY:
+			if( info_handle_file_system_hierarchy_fprint(
+			     fsrefsinfo_info_handle,
+			     &error ) != 1 )
+			{
+				fprintf(
+				 stderr,
+				 "Unable to print file system hierarchy.\n" );
 
-		goto on_error;
+				goto on_error;
+			}
+			break;
+
+		case FSREFSINFO_MODE_VOLUME:
+		default:
+			if( info_handle_volume_fprint(
+			     fsrefsinfo_info_handle,
+			     &error ) != 1 )
+			{
+				fprintf(
+				 stderr,
+				 "Unable to print volume information.\n" );
+
+				goto on_error;
+			}
+			break;
 	}
 	if( info_handle_close_input(
 	     fsrefsinfo_info_handle,

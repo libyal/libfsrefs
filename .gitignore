@@ -129,15 +129,12 @@ stamp-h[1-9]
 /tests/*.exe
 /tests/fsrefs_test_block_descriptor
 /tests/fsrefs_test_checkpoint
-/tests/fsrefs_test_directory
+/tests/fsrefs_test_directory_object
 /tests/fsrefs_test_error
 /tests/fsrefs_test_file_entry
 /tests/fsrefs_test_file_system
 /tests/fsrefs_test_io_handle
-/tests/fsrefs_test_metadata_block
 /tests/fsrefs_test_metadata_block_header
-/tests/fsrefs_test_metadata_table
-/tests/fsrefs_test_metadata_value
 /tests/fsrefs_test_ministore_node
 /tests/fsrefs_test_node_header
 /tests/fsrefs_test_node_record
@@ -148,10 +145,9 @@ stamp-h[1-9]
 /tests/fsrefs_test_tools_info_handle
 /tests/fsrefs_test_tools_output
 /tests/fsrefs_test_tools_signal
+/tests/fsrefs_test_tree_header
 /tests/fsrefs_test_volume
 /tests/fsrefs_test_volume_header
-/tests/fsrefs_test_volume_information
-/tests/fsrefs_test_volume_name
 /tests/input
 /tests/tmp*
 

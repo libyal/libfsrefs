@@ -162,6 +162,7 @@ int fsrefstools_system_string_copy_from_64_bit_in_decimal(
  */
 int info_handle_initialize(
      info_handle_t **info_handle,
+     uint8_t calculate_md5,
      libcerror_error_t **error )
 {
 	static char *function = "info_handle_initialize";
@@ -242,7 +243,7 @@ int info_handle_initialize(
 
 		goto on_error;
 	}
-	( *info_handle )->entry_index   = 5;
+	( *info_handle )->calculate_md5 = calculate_md5;
 	( *info_handle )->notify_stream = INFO_HANDLE_NOTIFY_STREAM;
 
 	return( 1 );
@@ -362,17 +363,15 @@ int info_handle_signal_abort(
 	return( 1 );
 }
 
-/* Sets the entry index
+/* Sets the bodyfile
  * Returns 1 if successful or -1 on error
  */
-int info_handle_set_entry_index(
+int info_handle_set_bodyfile(
      info_handle_t *info_handle,
-     const system_character_t *string,
+     const system_character_t *filename,
      libcerror_error_t **error )
 {
-	static char *function = "info_handle_set_entry_index";
-	size_t string_length  = 0;
-	uint64_t value_64bit  = 0;
+	static char *function = "info_handle_set_bodyfile";
 
 	if( info_handle == NULL )
 	{
@@ -385,26 +384,48 @@ int info_handle_set_entry_index(
 
 		return( -1 );
 	}
-	string_length = system_string_length(
-	                 string );
-
-	if( fsrefstools_system_string_copy_from_64_bit_in_decimal(
-	     string,
-	     string_length + 1,
-	     &value_64bit,
-	     error ) != 1 )
+	if( info_handle->bodyfile_stream != NULL )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_COPY_FAILED,
-		 "%s: unable to copy string to 64-bit decimal.",
+		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 "%s: invalid info handle - bodyfile stream value already set.",
 		 function );
 
 		return( -1 );
 	}
-	info_handle->entry_index = value_64bit;
+	if( filename == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid filename.",
+		 function );
 
+		return( -1 );
+	}
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
+	info_handle->bodyfile_stream = file_stream_open_wide(
+	                                filename,
+	                                L"wb" );
+#else
+	info_handle->bodyfile_stream = file_stream_open(
+	                                filename,
+	                                "wb" );
+#endif
+	if( info_handle->bodyfile_stream == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_IO,
+		 LIBCERROR_IO_ERROR_OPEN_FAILED,
+		 "%s: unable to open bodyfile stream.",
+		 function );
+
+		return( -1 );
+	}
 	return( 1 );
 }
 
@@ -571,6 +592,386 @@ int info_handle_close_input(
 	return( 0 );
 }
 
+/* Prints file entry information as part of the file system hierarchy
+ * Returns 1 if successful or -1 on error
+ */
+int info_handle_file_system_hierarchy_fprint_file_entry(
+     info_handle_t *info_handle,
+     libfsrefs_file_entry_t *file_entry,
+     const system_character_t *path,
+     libcerror_error_t **error )
+{
+	libfsrefs_file_entry_t *sub_file_entry = NULL;
+	system_character_t *file_entry_name    = NULL;
+	system_character_t *sub_path           = NULL;
+	static char *function                  = "info_handle_file_system_hierarchy_fprint_file_entry";
+	size_t file_entry_name_size            = 0;
+	size_t path_length                     = 0;
+	size_t sub_path_size                   = 0;
+	int number_of_sub_file_entries         = 0;
+	int result                             = 0;
+	int sub_file_entry_index               = 0;
+
+	if( info_handle == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid info handle.",
+		 function );
+
+		return( -1 );
+	}
+	if( path == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid path.",
+		 function );
+
+		return( -1 );
+	}
+	path_length = system_string_length(
+	               path );
+
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
+	result = libfsrefs_file_entry_get_utf16_name_size(
+	          file_entry,
+	          &file_entry_name_size,
+	          error );
+#else
+	result = libfsrefs_file_entry_get_utf8_name_size(
+	          file_entry,
+	          &file_entry_name_size,
+	          error );
+#endif
+	if( result == -1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve file entry name string size.",
+		 function );
+
+		goto on_error;
+	}
+	if( ( result == 1 )
+	 && ( file_entry_name_size > 0 ) )
+	{
+		file_entry_name = system_string_allocate(
+		                   file_entry_name_size );
+
+		if( file_entry_name == NULL )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_MEMORY,
+			 LIBCERROR_MEMORY_ERROR_INSUFFICIENT,
+			 "%s: unable to create file entry name string.",
+			 function );
+
+			goto on_error;
+		}
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
+		result = libfsrefs_file_entry_get_utf16_name(
+		          file_entry,
+		          (uint16_t *) file_entry_name,
+		          file_entry_name_size,
+		          error );
+#else
+		result = libfsrefs_file_entry_get_utf8_name(
+		          file_entry,
+		          (uint8_t *) file_entry_name,
+		          file_entry_name_size,
+		          error );
+#endif
+		if( result != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve file entry name string.",
+			 function );
+
+			goto on_error;
+		}
+	}
+/* TODO implement
+	if( ( info_handle->bodyfile_stream != NULL )
+	 || ( file_entry_name != NULL ) )
+	{
+		if( info_handle_file_entry_fprint(
+		     info_handle,
+		     file_entry,
+		     path,
+		     file_entry_name,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_PRINT_FAILED,
+			 "%s: unable to print file entry.",
+			 function );
+
+			goto on_error;
+		}
+	}
+*/
+	if( libfsrefs_file_entry_get_number_of_sub_file_entries(
+	     file_entry,
+	     &number_of_sub_file_entries,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve number of sub file entries.",
+		 function );
+
+		goto on_error;
+	}
+	if( number_of_sub_file_entries > 0 )
+	{
+		sub_path_size = path_length + 1;
+
+		if( file_entry_name != NULL )
+		{
+			sub_path_size += file_entry_name_size;
+		}
+		sub_path = system_string_allocate(
+		            sub_path_size );
+
+		if( sub_path == NULL )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_MEMORY,
+			 LIBCERROR_MEMORY_ERROR_INSUFFICIENT,
+			 "%s: unable to create sub path.",
+			 function );
+
+			goto on_error;
+		}
+		if( system_string_copy(
+		     sub_path,
+		     path,
+		     path_length ) == NULL )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_MEMORY,
+			 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
+			 "%s: unable to copy path to sub path.",
+			 function );
+
+			goto on_error;
+		}
+		if( file_entry_name != NULL )
+		{
+			if( system_string_copy(
+			     &( sub_path[ path_length ] ),
+			     file_entry_name,
+			     file_entry_name_size - 1 ) == NULL )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_MEMORY,
+				 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
+				 "%s: unable to copy file entry name to sub path.",
+				 function );
+
+				goto on_error;
+			}
+			sub_path[ sub_path_size - 2 ] = (system_character_t) LIBFSREFS_SEPARATOR;
+		}
+		sub_path[ sub_path_size - 1 ] = (system_character_t) 0;
+
+		for( sub_file_entry_index = 0;
+		     sub_file_entry_index < number_of_sub_file_entries;
+		     sub_file_entry_index++ )
+		{
+			if( libfsrefs_file_entry_get_sub_file_entry_by_index(
+			     file_entry,
+			     sub_file_entry_index,
+			     &sub_file_entry,
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+				 "%s: unable to retrieve sub file entry: %d.",
+				 function,
+				 sub_file_entry_index );
+
+				goto on_error;
+			}
+			if( info_handle_file_system_hierarchy_fprint_file_entry(
+			     info_handle,
+			     sub_file_entry,
+			     sub_path,
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_PRINT_FAILED,
+				 "%s: unable to print file entry: %d information.",
+				 function,
+				 sub_file_entry_index );
+
+				goto on_error;
+			}
+			if( libfsrefs_file_entry_free(
+			     &sub_file_entry,
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+				 "%s: unable to free sub file entry: %d.",
+				 function,
+				 sub_file_entry_index );
+
+				goto on_error;
+			}
+		}
+		if( sub_path != NULL )
+		{
+			memory_free(
+			 sub_path );
+
+			sub_path = NULL;
+		}
+	}
+	if( file_entry_name != NULL )
+	{
+		memory_free(
+		 file_entry_name );
+
+		file_entry_name = NULL;
+	}
+	return( 1 );
+
+on_error:
+	if( sub_file_entry != NULL )
+	{
+		libfsrefs_file_entry_free(
+		 &sub_file_entry,
+		 NULL );
+	}
+	if( sub_path != NULL )
+	{
+		memory_free(
+		 sub_path );
+	}
+	if( file_entry_name != NULL )
+	{
+		memory_free(
+		 file_entry_name );
+	}
+	return( -1 );
+}
+
+/* Prints the file system hierarchy information
+ * Returns 1 if successful or -1 on error
+ */
+int info_handle_file_system_hierarchy_fprint(
+     info_handle_t *info_handle,
+     libcerror_error_t **error )
+{
+	libfsrefs_file_entry_t *file_entry = NULL;
+	static char *function              = "info_handle_file_system_hierarchy_fprint";
+
+	if( info_handle == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid info handle.",
+		 function );
+
+		return( -1 );
+	}
+	if( info_handle->bodyfile_stream == NULL )
+	{
+		fprintf(
+		 info_handle->notify_stream,
+		 "Resiliant File System (ReFS) information:\n\n" );
+
+		fprintf(
+		 info_handle->notify_stream,
+		 "File system hierarchy:\n" );
+	}
+	if( libfsrefs_volume_get_root_directory(
+	     info_handle->input_volume,
+	     &file_entry,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve root directory file entry.",
+		 function );
+
+		goto on_error;
+	}
+	if( info_handle_file_system_hierarchy_fprint_file_entry(
+	     info_handle,
+	     file_entry,
+	     _SYSTEM_STRING( "\\" ),
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_PRINT_FAILED,
+		 "%s: unable to print root directory file entry information.",
+		 function );
+
+		goto on_error;
+	}
+	if( libfsrefs_file_entry_free(
+	     &file_entry,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+		 "%s: unable to free file entry.",
+		 function );
+
+		goto on_error;
+	}
+	if( info_handle->bodyfile_stream == NULL )
+	{
+		fprintf(
+		 info_handle->notify_stream,
+		 "\n" );
+	}
+	return( 1 );
+
+on_error:
+	if( file_entry != NULL )
+	{
+		libfsrefs_file_entry_free(
+		 &file_entry,
+		 NULL );
+	}
+	return( -1 );
+}
+
 /* Prints the volume information
  * Returns 1 if successful or -1 on error
  */
@@ -580,7 +981,10 @@ int info_handle_volume_fprint(
 {
 	system_character_t *volume_name = NULL;
 	static char *function           = "info_handle_volume_fprint";
+	size32_t cluster_block_size     = 0;
 	size_t volume_name_size         = 0;
+	uint64_t serial_number          = 0;
+	uint16_t bytes_per_sector       = 0;
 	uint8_t major_version           = 0;
 	uint8_t minor_version           = 0;
 	int result                      = 0;
@@ -598,7 +1002,7 @@ int info_handle_volume_fprint(
 	}
 	fprintf(
 	 info_handle->notify_stream,
-	 "Windows Resiliant File System (REFS) information:\n" );
+	 "Resiliant File System (ReFS) information:\n\n" );
 
 	fprintf(
 	 info_handle->notify_stream,
@@ -715,6 +1119,63 @@ int info_handle_volume_fprint(
 	fprintf(
 	 info_handle->notify_stream,
 	 "\n" );
+
+	if( libfsrefs_volume_get_serial_number(
+	     info_handle->input_volume,
+	     &serial_number,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve serial number.",
+		 function );
+
+		return( -1 );
+	}
+	fprintf(
+	 info_handle->notify_stream,
+	 "\tSerial number\t\t\t: %08" PRIx64 "\n",
+	 serial_number );
+
+	if( libfsrefs_volume_get_bytes_per_sector(
+	     info_handle->input_volume,
+	     &bytes_per_sector,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve bytes per sector.",
+		 function );
+
+		return( -1 );
+	}
+	fprintf(
+	 info_handle->notify_stream,
+	 "\tBytes per sector\t\t: %" PRIu16 "\n",
+	 bytes_per_sector );
+
+	if( libfsrefs_volume_get_cluster_block_size(
+	     info_handle->input_volume,
+	     &cluster_block_size,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve cluster block size.",
+		 function );
+
+		return( -1 );
+	}
+	fprintf(
+	 info_handle->notify_stream,
+	 "\tCluster block size\t\t: %" PRIu32 "\n",
+	 cluster_block_size );
 
 /* TODO */
 

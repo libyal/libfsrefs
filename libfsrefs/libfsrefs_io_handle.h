@@ -53,9 +53,9 @@ struct libfsrefs_io_handle
 	 */
 	uint8_t minor_format_version;
 
-	/* The block size
+	/* The cluster block size
 	 */
-	size32_t block_size;
+	size32_t cluster_block_size;
 
 	/* The metadata block size
 	 */

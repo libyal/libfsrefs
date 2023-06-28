@@ -1,5 +1,5 @@
 /*
- * Library file_entry type testing program
+ * Library file_entry type test program
  *
  * Copyright (C) 2012-2023, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -33,6 +33,50 @@
 #include "fsrefs_test_memory.h"
 #include "fsrefs_test_unused.h"
 
+#include "../libfsrefs/libfsrefs_file_entry.h"
+
+#if defined( __GNUC__ ) && !defined( LIBFSREFS_DLL_IMPORT )
+
+/* Tests the libfsrefs_file_entry_free function
+ * Returns 1 if successful or 0 if not
+ */
+int fsrefs_test_file_entry_free(
+     void )
+{
+	libcerror_error_t *error = NULL;
+	int result               = 0;
+
+	/* Test error cases
+	 */
+	result = libfsrefs_file_entry_free(
+	          NULL,
+	          &error );
+
+	FSREFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	FSREFS_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	return( 1 );
+
+on_error:
+	if( error != NULL )
+	{
+		libcerror_error_free(
+		 &error );
+	}
+	return( 0 );
+}
+
+#endif /* defined( __GNUC__ ) && !defined( LIBFSREFS_DLL_IMPORT ) */
+
 /* The main program
  */
 #if defined( HAVE_WIDE_SYSTEM_CHARACTER )
@@ -48,9 +92,23 @@ int main(
 	FSREFS_TEST_UNREFERENCED_PARAMETER( argc )
 	FSREFS_TEST_UNREFERENCED_PARAMETER( argv )
 
+#if defined( __GNUC__ ) && !defined( LIBFSREFS_DLL_IMPORT )
+
+	/* TODO add test for libfsrefs_file_entry_initialize */
+
+	FSREFS_TEST_RUN(
+	 "libfsrefs_file_entry_free",
+	 fsrefs_test_file_entry_free );
+
+#endif /* defined( __GNUC__ ) && !defined( LIBFSREFS_DLL_IMPORT ) */
+
 	return( EXIT_SUCCESS );
+
+#if defined( __GNUC__ ) && !defined( LIBFSREFS_DLL_IMPORT )
 
 on_error:
 	return( EXIT_FAILURE );
+
+#endif /* defined( __GNUC__ ) && !defined( LIBFSREFS_DLL_IMPORT ) */
 }
 

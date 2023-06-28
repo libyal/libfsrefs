@@ -50,6 +50,10 @@ enum LIBFSREFS_ACCESS_FLAGS
 /* Reserved: not supported yet */
 #define LIBFSREFS_OPEN_READ_WRITE				( LIBFSREFS_ACCESS_FLAG_READ | LIBFSREFS_ACCESS_FLAG_WRITE )
 
+/* The path segment separator
+ */
+#define LIBFSREFS_SEPARATOR					'\\'
+
 /* The file attribute flags
  */
 enum LIBFSREFS_FILE_ATTRIBUTE_FLAGS

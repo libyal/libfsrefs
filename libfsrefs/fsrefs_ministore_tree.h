@@ -29,6 +29,56 @@
 extern "C" {
 #endif
 
+typedef struct fsrefs_ministore_tree_header fsrefs_ministore_tree_header_t;
+
+struct fsrefs_ministore_tree_header
+{
+	/* Table data offset
+	 * Consists of 2 bytes
+	 */
+	uint8_t table_data_offset[ 2 ];
+
+	/* Unknown
+	 * Consists of 2 bytes
+	 */
+	uint8_t unknown1[ 2 ];
+
+	/* Unknown
+	 * Consists of 4 bytes
+	 */
+	uint8_t unknown2[ 4 ];
+
+	/* Unknown
+	 * Consists of 4 bytes
+	 */
+	uint8_t unknown3[ 4 ];
+
+	/* Unknown
+	 * Consists of 4 bytes
+	 */
+	uint8_t unknown4[ 4 ];
+
+	/* Unknown
+	 * Consists of 4 bytes
+	 */
+	uint8_t unknown5[ 4 ];
+
+	/* Unknown
+	 * Consists of 4 bytes
+	 */
+	uint8_t unknown6[ 4 ];
+
+	/* Unknown
+	 * Consists of 4 bytes
+	 */
+	uint8_t unknown7[ 4 ];
+
+	/* Unknown
+	 * Consists of 4 bytes
+	 */
+	uint8_t unknown8[ 4 ];
+};
+
 typedef struct fsrefs_ministore_tree_node_header fsrefs_ministore_tree_node_header_t;
 
 struct fsrefs_ministore_tree_node_header

@@ -233,7 +233,7 @@ on_error:
 	return( -1 );
 }
 
-/* Retrieves the Ministore tree of a specific identifier
+/* Retrieves the ministore tree of a specific identifier
  * Returns 1 if successful, 0 if not available or -1 on error
  */
 int libfsrefs_objects_get_ministore_tree_by_identifier(
@@ -250,7 +250,6 @@ int libfsrefs_objects_get_ministore_tree_by_identifier(
 	libfsrefs_ministore_node_t *safe_root_node     = NULL;
 	libfsrefs_node_record_t *node_record           = NULL;
 	static char *function                          = "libfsrefs_objects_get_ministore_tree_by_identifier";
-	off64_t root_node_offset                       = 0;
 	int result                                     = 0;
 
 	if( objects_tree == NULL )
@@ -351,38 +350,21 @@ int libfsrefs_objects_get_ministore_tree_by_identifier(
 
 			goto on_error;
 		}
-/* TODO move this into file system */
-		if( libfsrefs_ministore_node_initialize(
-		     &safe_root_node,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-			 "%s: unable to create volume information ministore tree root node.",
-			 function );
-
-			goto on_error;
-		}
-		root_node_offset = block_descriptor->block_number1 * io_handle->metadata_block_size;
-
-		if( libfsrefs_ministore_node_read_file_io_handle(
-		     safe_root_node,
+		if( libfsrefs_file_system_read_ministore_node(
+		     objects_tree->file_system,
 		     io_handle,
 		     file_io_handle,
-		     root_node_offset,
+		     block_descriptor,
+		     &safe_root_node,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_IO,
 			 LIBCERROR_IO_ERROR_READ_FAILED,
-			 "%s: unable to read volume information ministore tree root node block: %" PRIu64 " at offset: %" PRIi64 " (0x%08" PRIx64 ").",
+			 "%s: unable to read object: 0x%08" PRIx64 " ministore tree root node.",
 			 function,
-			 block_descriptor->block_number1,
-			 root_node_offset,
-			 root_node_offset );
+			 object_identifier );
 
 			goto on_error;
 		}

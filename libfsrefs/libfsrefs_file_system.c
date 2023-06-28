@@ -523,6 +523,125 @@ on_error:
 	return( -1 );
 }
 
+/* Reads a ministore node
+ * Returns 1 if successful or -1 on error
+ */
+int libfsrefs_file_system_read_ministore_node(
+     libfsrefs_file_system_t *file_system,
+     libfsrefs_io_handle_t *io_handle,
+     libbfio_handle_t *file_io_handle,
+     libfsrefs_block_descriptor_t *block_descriptor,
+     libfsrefs_ministore_node_t **node,
+     libcerror_error_t **error )
+{
+	libfsrefs_ministore_node_t *safe_node = NULL;
+	static char *function                 = "libfsrefs_file_system_read_ministore_node";
+	off64_t node_offset                   = 0;
+	uint64_t block_number                 = 0;
+	uint64_t container_identifier         = 0;
+
+	if( file_system == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid file system.",
+		 function );
+
+		return( -1 );
+	}
+	if( io_handle == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid IO handle.",
+		 function );
+
+		return( -1 );
+	}
+	if( block_descriptor == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid block descriptor.",
+		 function );
+
+		return( -1 );
+	}
+	if( node == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid node.",
+		 function );
+
+		return( -1 );
+	}
+	if( libfsrefs_ministore_node_initialize(
+	     &safe_node,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to create ministore tree node.",
+		 function );
+
+		goto on_error;
+	}
+	block_number = block_descriptor->block_number1;
+
+	if( ( io_handle->container_size != 0 )
+	 && ( block_descriptor->block_number1 > io_handle->container_size ) )
+	{
+		container_identifier = block_number / io_handle->container_size;
+		block_number        %= io_handle->container_size;
+
+/* TODO look up container block range */
+	}
+	node_offset = block_number * io_handle->metadata_block_size;
+
+	if( libfsrefs_ministore_node_read_file_io_handle(
+	     safe_node,
+	     io_handle,
+	     file_io_handle,
+	     node_offset,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_IO,
+		 LIBCERROR_IO_ERROR_READ_FAILED,
+		 "%s: unable to read ministore tree node block: %" PRIu64 " at offset: %" PRIi64 " (0x%08" PRIx64 ").",
+		 function,
+		 block_descriptor->block_number1,
+		 node_offset,
+		 node_offset );
+
+		goto on_error;
+	}
+	*node = safe_node;
+
+	return( 1 );
+
+on_error:
+	if( safe_node != NULL )
+	{
+		libfsrefs_ministore_node_free(
+		 &safe_node,
+		 NULL );
+	}
+	return( 1 );
+}
+
 /* Retrieves the number of ministore trees
  * Returns 1 if successful or -1 on error
  */
@@ -573,11 +692,7 @@ int libfsrefs_file_system_get_ministore_tree(
      libcerror_error_t **error )
 {
 	libfsrefs_block_descriptor_t *block_descriptor = NULL;
-	libfsrefs_ministore_node_t *safe_root_node     = NULL;
 	static char *function                          = "libfsrefs_file_system_get_ministore_tree";
-	off64_t root_node_offset                       = 0;
-	uint64_t block_number                          = 0;
-	uint64_t container_identifier                  = 0;
 
 	if( file_system == NULL )
 	{
@@ -586,28 +701,6 @@ int libfsrefs_file_system_get_ministore_tree(
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid file system.",
-		 function );
-
-		return( -1 );
-	}
-	if( io_handle == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid IO handle.",
-		 function );
-
-		return( -1 );
-	}
-	if( root_node == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid root node.",
 		 function );
 
 		return( -1 );
@@ -626,77 +719,26 @@ int libfsrefs_file_system_get_ministore_tree(
 		 function,
 		 ministore_tree_index );
 
-		goto on_error;
+		return( -1 );
 	}
-	if( block_descriptor == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-		 "%s: missing ministore tree: %d block descriptor.",
-		 function,
-		 ministore_tree_index );
-
-		goto on_error;
-	}
-	if( libfsrefs_ministore_node_initialize(
-	     &safe_root_node,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-		 "%s: unable to create ministore tree: %d root node.",
-		 function,
-		 ministore_tree_index );
-
-		goto on_error;
-	}
-	block_number = block_descriptor->block_number1;
-
-	if( ( io_handle->container_size != 0 )
-	 && ( block_descriptor->block_number1 > io_handle->container_size ) )
-	{
-		container_identifier = block_number / io_handle->container_size;
-		block_number        %= io_handle->container_size;
-
-/* TODO look up range block range */
-	}
-	root_node_offset = block_number * io_handle->metadata_block_size;
-
-	if( libfsrefs_ministore_node_read_file_io_handle(
-	     safe_root_node,
+	if( libfsrefs_file_system_read_ministore_node(
+	     file_system,
 	     io_handle,
 	     file_io_handle,
-	     root_node_offset,
+	     block_descriptor,
+	     root_node,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_IO,
 		 LIBCERROR_IO_ERROR_READ_FAILED,
-		 "%s: unable to read ministore tree: %d root node block: %" PRIu64 " at offset: %" PRIi64 " (0x%08" PRIx64 ").",
+		 "%s: unable to create ministore tree: %d root node.",
 		 function,
-		 ministore_tree_index,
-		 block_descriptor->block_number1,
-		 root_node_offset,
-		 root_node_offset );
+		 ministore_tree_index );
 
-		goto on_error;
+		return( -1 );
 	}
-	*root_node = safe_root_node;
-
 	return( 1 );
-
-on_error:
-	if( safe_root_node != NULL )
-	{
-		libfsrefs_ministore_node_free(
-		 &safe_root_node,
-		 NULL );
-	}
-	return( -1 );
 }
 

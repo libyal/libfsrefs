@@ -1,5 +1,5 @@
 /*
- * Library to access the Windows Resiliant File System (REFS) format
+ * Library to access the Resiliant File System (ReFS) format
  *
  * Copyright (C) 2012-2023, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -260,6 +260,24 @@ int libfsrefs_volume_close(
      libfsrefs_volume_t *volume,
      libfsrefs_error_t **error );
 
+/* Retrieves the bytes per sector
+ * Returns 1 if successful or -1 on error
+ */
+LIBFSREFS_EXTERN \
+int libfsrefs_volume_get_bytes_per_sector(
+     libfsrefs_volume_t *volume,
+     uint16_t *bytes_per_sector,
+     libfsrefs_error_t **error );
+
+/* Retrieves the cluster block size
+ * Returns 1 if successful or -1 on error
+ */
+LIBFSREFS_EXTERN \
+int libfsrefs_volume_get_cluster_block_size(
+     libfsrefs_volume_t *volume,
+     size32_t *cluster_block_size,
+     libfsrefs_error_t **error );
+
 /* Retrieves the size of the UTF-8 encoded name
  * The returned size includes the end of string character
  * Returns 1 if successful or -1 on error
@@ -310,6 +328,97 @@ int libfsrefs_volume_get_version(
      libfsrefs_volume_t *volume,
      uint8_t *major_version,
      uint8_t *minor_version,
+     libfsrefs_error_t **error );
+
+/* Retrieves the serial number
+ * Returns 1 if successful or -1 on error
+ */
+LIBFSREFS_EXTERN \
+int libfsrefs_volume_get_serial_number(
+     libfsrefs_volume_t *volume,
+     uint64_t *serial_number,
+     libfsrefs_error_t **error );
+
+/* Retrieves the root directory file entry
+ * Returns 1 if successful or -1 on error
+ */
+LIBFSREFS_EXTERN \
+int libfsrefs_volume_get_root_directory(
+     libfsrefs_volume_t *volume,
+     libfsrefs_file_entry_t **file_entry,
+     libfsrefs_error_t **error );
+
+/* -------------------------------------------------------------------------
+ * File entry functions
+ * ------------------------------------------------------------------------- */
+
+/* Frees a file entry
+ * Returns 1 if successful or -1 on error
+ */
+LIBFSREFS_EXTERN \
+int libfsrefs_file_entry_free(
+     libfsrefs_file_entry_t **file_entry,
+     libfsrefs_error_t **error );
+
+/* Retrieves the size of the UTF-8 encoded name
+ * The returned size includes the end of string character
+ * Returns 1 if successful, 0 if not available or -1 on error
+ */
+LIBFSREFS_EXTERN \
+int libfsrefs_file_entry_get_utf8_name_size(
+     libfsrefs_file_entry_t *file_entry,
+     size_t *utf8_string_size,
+     libfsrefs_error_t **error );
+
+/* Retrieves the UTF-8 encoded name
+ * The size should include the end of string character
+ * Returns 1 if successful, 0 if not available or -1 on error
+ */
+LIBFSREFS_EXTERN \
+int libfsrefs_file_entry_get_utf8_name(
+     libfsrefs_file_entry_t *file_entry,
+     uint8_t *utf8_string,
+     size_t utf8_string_size,
+     libfsrefs_error_t **error );
+
+/* Retrieves the size of the UTF-16 encoded name
+ * The returned size includes the end of string character
+ * Returns 1 if successful, 0 if not available or -1 on error
+ */
+LIBFSREFS_EXTERN \
+int libfsrefs_file_entry_get_utf16_name_size(
+     libfsrefs_file_entry_t *file_entry,
+     size_t *utf16_string_size,
+     libfsrefs_error_t **error );
+
+/* Retrieves the UTF-16 encoded name
+ * The size should include the end of string character
+ * Returns 1 if successful, 0 if not available or -1 on error
+ */
+LIBFSREFS_EXTERN \
+int libfsrefs_file_entry_get_utf16_name(
+     libfsrefs_file_entry_t *file_entry,
+     uint16_t *utf16_string,
+     size_t utf16_string_size,
+     libfsrefs_error_t **error );
+
+/* Retrieves the number of sub file entries
+ * Returns 1 if successful or -1 on error
+ */
+LIBFSREFS_EXTERN \
+int libfsrefs_file_entry_get_number_of_sub_file_entries(
+     libfsrefs_file_entry_t *file_entry,
+     int *number_of_sub_file_entries,
+     libfsrefs_error_t **error );
+
+/* Retrieves the sub file entry for the specific index
+ * Returns 1 if successful or -1 on error
+ */
+LIBFSREFS_EXTERN \
+int libfsrefs_file_entry_get_sub_file_entry_by_index(
+     libfsrefs_file_entry_t *file_entry,
+     int sub_file_entry_index,
+     libfsrefs_file_entry_t **sub_file_entry,
      libfsrefs_error_t **error );
 
 #if defined( __cplusplus )

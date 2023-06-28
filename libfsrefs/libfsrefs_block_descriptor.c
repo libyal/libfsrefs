@@ -126,11 +126,6 @@ int libfsrefs_block_descriptor_free(
 	}
 	if( *block_descriptor != NULL )
 	{
-		if( ( *block_descriptor )->identifier_data != NULL )
-		{
-			memory_free(
-			 ( *block_descriptor )->identifier_data );
-		}
 		memory_free(
 		 *block_descriptor );
 
@@ -417,81 +412,5 @@ int libfsrefs_block_descriptor_read_data(
 #endif
 */
 	return( 1 );
-}
-
-/* Sets the identifier
- * Returns 1 if successful or -1 on error
- */
-int libfsrefs_block_descriptor_set_identifier(
-     libfsrefs_block_descriptor_t *block_descriptor,
-     const uint8_t *identifier_data,
-     uint16_t identifier_data_size,
-     libcerror_error_t **error )
-{
-	static char *function = "libfsrefs_block_descriptor_set_identifier";
-
-	if( block_descriptor == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid block descriptor.",
-		 function );
-
-		return( -1 );
-	}
-	if( block_descriptor->identifier_data != NULL )
-	{
-		memory_free(
-		 block_descriptor->identifier_data );
-	}
-	if( ( identifier_data != NULL )
-	 && ( identifier_data_size > 0 ) )
-	{
-		block_descriptor->identifier_data = (uint8_t *) memory_allocate(
-		                                                 sizeof( uint8_t ) * identifier_data_size );
-
-		if( block_descriptor->identifier_data == NULL )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_MEMORY,
-			 LIBCERROR_MEMORY_ERROR_INSUFFICIENT,
-			 "%s: unable to create identifier data.",
-			 function );
-
-			goto on_error;
-		}
-		block_descriptor->identifier_data_size = identifier_data_size;
-
-		if( memory_copy(
-		     block_descriptor->identifier_data,
-		     identifier_data,
-		     sizeof( uint8_t ) * identifier_data_size ) == NULL )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_MEMORY,
-			 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
-			 "%s: unable to copy identifier data.",
-			 function );
-
-			goto on_error;
-		}
-	}
-	return( 1 );
-
-on_error:
-	if( block_descriptor->identifier_data != NULL )
-	{
-		memory_free(
-		 block_descriptor->identifier_data );
-
-		block_descriptor->identifier_data = NULL;
-	}
-	block_descriptor->identifier_data_size = 0;
-
-	return( -1 );
 }
 

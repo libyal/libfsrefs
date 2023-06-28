@@ -36,14 +36,6 @@ typedef struct libfsrefs_block_descriptor libfsrefs_block_descriptor_t;
 
 struct libfsrefs_block_descriptor
 {
-	/* The identifier data
-	 */
-	uint8_t *identifier_data;
-
-	/* The identifier data size
-	 */
-	uint16_t identifier_data_size;
-
 	/* The first block number
 	 */
 	uint64_t block_number1;
@@ -78,12 +70,6 @@ int libfsrefs_block_descriptor_read_data(
      libfsrefs_io_handle_t *io_handle,
      const uint8_t *data,
      size_t data_size,
-     libcerror_error_t **error );
-
-int libfsrefs_block_descriptor_set_identifier(
-     libfsrefs_block_descriptor_t *block_descriptor,
-     const uint8_t *identifier_data,
-     uint16_t identifier_data_size,
      libcerror_error_t **error );
 
 #if defined( __cplusplus )

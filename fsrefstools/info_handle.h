@@ -38,10 +38,6 @@ typedef struct info_handle info_handle_t;
 
 struct info_handle
 {
-	/* The MFT entry index
-	 */
-	uint64_t entry_index;
-
 	/* The volume offset
 	 */
 	off64_t volume_offset;
@@ -53,6 +49,14 @@ struct info_handle
 	/* The libfsrefs input volume
 	 */
 	libfsrefs_volume_t *input_volume;
+
+	/* Value to indicate if the MD5 hash should be calculated
+	 */
+	uint8_t calculate_md5;
+
+	/* The bodyfile output stream
+	 */
+	FILE *bodyfile_stream;
 
 	/* The notification output stream
 	 */
@@ -71,6 +75,7 @@ int fsrefstools_system_string_copy_from_64_bit_in_decimal(
 
 int info_handle_initialize(
      info_handle_t **info_handle,
+     uint8_t calculate_md5,
      libcerror_error_t **error );
 
 int info_handle_free(
@@ -81,9 +86,9 @@ int info_handle_signal_abort(
      info_handle_t *info_handle,
      libcerror_error_t **error );
 
-int info_handle_set_entry_index(
+int info_handle_set_bodyfile(
      info_handle_t *info_handle,
-     const system_character_t *string,
+     const system_character_t *filename,
      libcerror_error_t **error );
 
 int info_handle_set_volume_offset(
@@ -97,6 +102,16 @@ int info_handle_open_input(
      libcerror_error_t **error );
 
 int info_handle_close_input(
+     info_handle_t *info_handle,
+     libcerror_error_t **error );
+
+int info_handle_file_system_hierarchy_fprint_file_entry(
+     info_handle_t *info_handle,
+     libfsrefs_file_entry_t *file_entry,
+     const system_character_t *path,
+     libcerror_error_t **error );
+
+int info_handle_file_system_hierarchy_fprint(
      info_handle_t *info_handle,
      libcerror_error_t **error );
 

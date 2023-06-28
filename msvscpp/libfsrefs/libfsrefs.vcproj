@@ -186,11 +186,15 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\libfsrefs\libfsrefs_directory.c"
+				RelativePath="..\..\libfsrefs\libfsrefs_directory_object.c"
 				>
 			</File>
 			<File
 				RelativePath="..\..\libfsrefs\libfsrefs_error.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfsrefs\libfsrefs_file_entry.c"
 				>
 			</File>
 			<File
@@ -202,19 +206,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\libfsrefs\libfsrefs_metadata_block.c"
-				>
-			</File>
-			<File
 				RelativePath="..\..\libfsrefs\libfsrefs_metadata_block_header.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libfsrefs\libfsrefs_metadata_table.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libfsrefs\libfsrefs_metadata_value.c"
 				>
 			</File>
 			<File
@@ -246,19 +238,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\libfsrefs\libfsrefs_tree_header.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\libfsrefs\libfsrefs_volume.c"
 				>
 			</File>
 			<File
 				RelativePath="..\..\libfsrefs\libfsrefs_volume_header.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libfsrefs\libfsrefs_volume_information.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libfsrefs\libfsrefs_volume_name.c"
 				>
 			</File>
 		</Filter>
@@ -288,10 +276,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\libfsrefs\fsrefs_volume_information.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\libfsrefs\libfsrefs_block_descriptor.h"
 				>
 			</File>
@@ -308,7 +292,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\libfsrefs\libfsrefs_directory.h"
+				RelativePath="..\..\libfsrefs\libfsrefs_directory_object.h"
 				>
 			</File>
 			<File
@@ -317,6 +301,10 @@
 			</File>
 			<File
 				RelativePath="..\..\libfsrefs\libfsrefs_extern.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfsrefs\libfsrefs_file_entry.h"
 				>
 			</File>
 			<File
@@ -376,19 +364,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\libfsrefs\libfsrefs_metadata_block.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\libfsrefs\libfsrefs_metadata_block_header.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libfsrefs\libfsrefs_metadata_table.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libfsrefs\libfsrefs_metadata_value.h"
 				>
 			</File>
 			<File
@@ -420,6 +396,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\libfsrefs\libfsrefs_tree_header.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\libfsrefs\libfsrefs_types.h"
 				>
 			</File>
@@ -433,14 +413,6 @@
 			</File>
 			<File
 				RelativePath="..\..\libfsrefs\libfsrefs_volume_header.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libfsrefs\libfsrefs_volume_information.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libfsrefs\libfsrefs_volume_name.h"
 				>
 			</File>
 		</Filter>

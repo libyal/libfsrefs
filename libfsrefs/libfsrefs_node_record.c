@@ -24,6 +24,7 @@
 #include <memory.h>
 #include <types.h>
 
+#include "libfsrefs_debug.h"
 #include "libfsrefs_libcerror.h"
 #include "libfsrefs_libcnotify.h"
 #include "libfsrefs_node_record.h"
@@ -241,6 +242,10 @@ int libfsrefs_node_record_read_data(
 		 "%s: flags\t\t\t\t\t: 0x%04" PRIx16 "\n",
 		 function,
 		 node_record->flags );
+		libfsrefs_debug_print_node_record_flags(
+		 node_record->flags );
+		libcnotify_printf(
+		 "\n" );
 
 		libcnotify_printf(
 		 "%s: value data offset\t\t\t: 0x%04" PRIx16 "\n",

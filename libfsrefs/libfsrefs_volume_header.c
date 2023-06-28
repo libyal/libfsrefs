@@ -398,18 +398,18 @@ int libfsrefs_volume_header_read_data(
 
 		return( -1 );
 	}
-	volume_header->block_size = (size32_t) sectors_per_block * volume_header->bytes_per_sector;
+	volume_header->cluster_block_size = (size32_t) sectors_per_block * volume_header->bytes_per_sector;
 
-	if( ( volume_header->block_size != 4096 )
-	 && ( volume_header->block_size != 65536 ) )
+	if( ( volume_header->cluster_block_size != 4096 )
+	 && ( volume_header->cluster_block_size != 65536 ) )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
-		 "%s: unsupported block size: %" PRIu32 ".",
+		 "%s: unsupported cluster block size: %" PRIu32 ".",
 		 function,
-		 volume_header->block_size );
+		 volume_header->cluster_block_size );
 
 		return( -1 );
 	}
@@ -433,7 +433,7 @@ int libfsrefs_volume_header_read_data(
 	}
 	else if( volume_header->major_format_version == 3 )
 	{
-		volume_header->metadata_block_size = volume_header->block_size;
+		volume_header->metadata_block_size = volume_header->cluster_block_size;
 
 		if( volume_header->container_size == 0 )
 		{
@@ -441,16 +441,16 @@ int libfsrefs_volume_header_read_data(
 		}
 		else
 		{
-			volume_header->container_size /= volume_header->block_size;
+			volume_header->container_size /= volume_header->cluster_block_size;
 		}
 	}
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )
 	{
 		libcnotify_printf(
-		 "%s: block size\t\t\t\t: %" PRIu32 "\n",
+		 "%s: cluster block size\t\t\t: %" PRIu32 "\n",
 		 function,
-		 volume_header->block_size );
+		 volume_header->cluster_block_size );
 
 		libcnotify_printf(
 		 "%s: metadata block size\t\t\t: %" PRIu32 "\n",
@@ -543,6 +543,80 @@ int libfsrefs_volume_header_read_file_io_handle(
 	return( 1 );
 }
 
+/* Retrieves the bytes per sector
+ * Returns 1 if successful or -1 on error
+ */
+int libfsrefs_volume_header_get_bytes_per_sector(
+     libfsrefs_volume_header_t *volume_header,
+     uint16_t *bytes_per_sector,
+     libcerror_error_t **error )
+{
+	static char *function = "libfsrefs_volume_header_get_bytes_per_sector";
+
+	if( volume_header == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid volume header.",
+		 function );
+
+		return( -1 );
+	}
+	if( bytes_per_sector == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid bytes per sector.",
+		 function );
+
+		return( -1 );
+	}
+	*bytes_per_sector = volume_header->bytes_per_sector;
+
+	return( 1 );
+}
+
+/* Retrieves the cluster block size
+ * Returns 1 if successful or -1 on error
+ */
+int libfsrefs_volume_header_get_cluster_block_size(
+     libfsrefs_volume_header_t *volume_header,
+     size32_t *cluster_block_size,
+     libcerror_error_t **error )
+{
+	static char *function = "libfsrefs_volume_header_get_cluster_block_size";
+
+	if( volume_header == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid volume header.",
+		 function );
+
+		return( -1 );
+	}
+	if( cluster_block_size == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid cluster block size.",
+		 function );
+
+		return( -1 );
+	}
+	*cluster_block_size = volume_header->cluster_block_size;
+
+	return( 1 );
+}
+
 /* Retrieves the volume size
  * Returns 1 if successful or -1 on error
  */
@@ -576,6 +650,43 @@ int libfsrefs_volume_header_get_volume_size(
 		return( -1 );
 	}
 	*volume_size = volume_header->volume_size;
+
+	return( 1 );
+}
+
+/* Retrieves the volume serial number
+ * Returns 1 if successful or -1 on error
+ */
+int libfsrefs_volume_header_get_volume_serial_number(
+     libfsrefs_volume_header_t *volume_header,
+     uint64_t *volume_serial_number,
+     libcerror_error_t **error )
+{
+	static char *function = "libfsrefs_volume_header_get_volume_serial_number";
+
+	if( volume_header == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid volume header.",
+		 function );
+
+		return( -1 );
+	}
+	if( volume_serial_number == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid volume serial number.",
+		 function );
+
+		return( -1 );
+	}
+	*volume_serial_number = volume_header->volume_serial_number;
 
 	return( 1 );
 }

@@ -37,6 +37,7 @@
 #include "libfsrefs_node_record.h"
 #include "libfsrefs_objects_tree.h"
 #include "libfsrefs_types.h"
+#include "libfsrefs_volume_header.h"
 
 #if defined( __cplusplus )
 extern "C" {
@@ -46,6 +47,10 @@ typedef struct libfsrefs_internal_volume libfsrefs_internal_volume_t;
 
 struct libfsrefs_internal_volume
 {
+	/* The volume header
+	 */
+	libfsrefs_volume_header_t *volume_header;
+
 	/* The file system
 	 */
 	libfsrefs_file_system_t *file_system;
@@ -140,6 +145,18 @@ int libfsrefs_internal_volume_get_volume_name_record(
      libcerror_error_t **error );
 
 LIBFSREFS_EXTERN \
+int libfsrefs_volume_get_bytes_per_sector(
+     libfsrefs_volume_t *volume,
+     uint16_t *bytes_per_sector,
+     libcerror_error_t **error );
+
+LIBFSREFS_EXTERN \
+int libfsrefs_volume_get_cluster_block_size(
+     libfsrefs_volume_t *volume,
+     size32_t *cluster_block_size,
+     libcerror_error_t **error );
+
+LIBFSREFS_EXTERN \
 int libfsrefs_volume_get_utf8_name_size(
      libfsrefs_volume_t *volume,
      size_t *utf8_string_size,
@@ -170,6 +187,18 @@ int libfsrefs_volume_get_version(
      libfsrefs_volume_t *volume,
      uint8_t *major_version,
      uint8_t *minor_version,
+     libcerror_error_t **error );
+
+LIBFSREFS_EXTERN \
+int libfsrefs_volume_get_serial_number(
+     libfsrefs_volume_t *volume,
+     uint64_t *serial_number,
+     libcerror_error_t **error );
+
+LIBFSREFS_EXTERN \
+int libfsrefs_volume_get_root_directory(
+     libfsrefs_volume_t *volume,
+     libfsrefs_file_entry_t **file_entry,
      libcerror_error_t **error );
 
 #if defined( __cplusplus )

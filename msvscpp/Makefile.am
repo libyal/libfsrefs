@@ -1,14 +1,12 @@
 MSVSCPP_FILES = \
 	fsrefs_test_block_descriptor/fsrefs_test_block_descriptor.vcproj \
 	fsrefs_test_checkpoint/fsrefs_test_checkpoint.vcproj \
-	fsrefs_test_directory/fsrefs_test_directory.vcproj \
+	fsrefs_test_directory_object/fsrefs_test_directory_object.vcproj \
 	fsrefs_test_error/fsrefs_test_error.vcproj \
+	fsrefs_test_file_entry/fsrefs_test_file_entry.vcproj \
 	fsrefs_test_file_system/fsrefs_test_file_system.vcproj \
 	fsrefs_test_io_handle/fsrefs_test_io_handle.vcproj \
-	fsrefs_test_metadata_block/fsrefs_test_metadata_block.vcproj \
 	fsrefs_test_metadata_block_header/fsrefs_test_metadata_block_header.vcproj \
-	fsrefs_test_metadata_table/fsrefs_test_metadata_table.vcproj \
-	fsrefs_test_metadata_value/fsrefs_test_metadata_value.vcproj \
 	fsrefs_test_ministore_node/fsrefs_test_ministore_node.vcproj \
 	fsrefs_test_node_header/fsrefs_test_node_header.vcproj \
 	fsrefs_test_node_record/fsrefs_test_node_record.vcproj \
@@ -19,10 +17,9 @@ MSVSCPP_FILES = \
 	fsrefs_test_tools_info_handle/fsrefs_test_tools_info_handle.vcproj \
 	fsrefs_test_tools_output/fsrefs_test_tools_output.vcproj \
 	fsrefs_test_tools_signal/fsrefs_test_tools_signal.vcproj \
+	fsrefs_test_tree_header/fsrefs_test_tree_header.vcproj \
 	fsrefs_test_volume/fsrefs_test_volume.vcproj \
 	fsrefs_test_volume_header/fsrefs_test_volume_header.vcproj \
-	fsrefs_test_volume_information/fsrefs_test_volume_information.vcproj \
-	fsrefs_test_volume_name/fsrefs_test_volume_name.vcproj \
 	fsrefsinfo/fsrefsinfo.vcproj \
 	libbfio/libbfio.vcproj \
 	libcdata/libcdata.vcproj \

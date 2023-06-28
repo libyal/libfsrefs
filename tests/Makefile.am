@@ -4,6 +4,7 @@ AM_CPPFLAGS = \
 	-I$(top_srcdir)/include \
 	-I$(top_srcdir)/common \
 	@LIBCERROR_CPPFLAGS@ \
+	@LIBCTHREADS_CPPFLAGS@ \
 	@LIBCDATA_CPPFLAGS@ \
 	@LIBCLOCALE_CPPFLAGS@ \
 	@LIBCNOTIFY_CPPFLAGS@ \
@@ -36,14 +37,12 @@ EXTRA_DIST = \
 check_PROGRAMS = \
 	fsrefs_test_block_descriptor \
 	fsrefs_test_checkpoint \
-	fsrefs_test_directory \
+	fsrefs_test_directory_object \
 	fsrefs_test_error \
+	fsrefs_test_file_entry \
 	fsrefs_test_file_system \
 	fsrefs_test_io_handle \
-	fsrefs_test_metadata_block \
 	fsrefs_test_metadata_block_header \
-	fsrefs_test_metadata_table \
-	fsrefs_test_metadata_value \
 	fsrefs_test_ministore_node \
 	fsrefs_test_node_header \
 	fsrefs_test_node_record \
@@ -54,10 +53,9 @@ check_PROGRAMS = \
 	fsrefs_test_tools_info_handle \
 	fsrefs_test_tools_output \
 	fsrefs_test_tools_signal \
+	fsrefs_test_tree_header \
 	fsrefs_test_volume \
-	fsrefs_test_volume_header \
-	fsrefs_test_volume_information \
-	fsrefs_test_volume_name
+	fsrefs_test_volume_header
 
 fsrefs_test_block_descriptor_SOURCES = \
 	fsrefs_test_block_descriptor.c \
@@ -93,15 +91,15 @@ fsrefs_test_checkpoint_LDADD = \
 	../libfsrefs/libfsrefs.la \
 	@LIBCERROR_LIBADD@
 
-fsrefs_test_directory_SOURCES = \
-	fsrefs_test_directory.c \
+fsrefs_test_directory_object_SOURCES = \
+	fsrefs_test_directory_object.c \
 	fsrefs_test_libcerror.h \
 	fsrefs_test_libfsrefs.h \
 	fsrefs_test_macros.h \
 	fsrefs_test_memory.c fsrefs_test_memory.h \
 	fsrefs_test_unused.h
 
-fsrefs_test_directory_LDADD = \
+fsrefs_test_directory_object_LDADD = \
 	../libfsrefs/libfsrefs.la \
 	@LIBCERROR_LIBADD@
 
@@ -114,17 +112,18 @@ fsrefs_test_error_SOURCES = \
 fsrefs_test_error_LDADD = \
 	../libfsrefs/libfsrefs.la
 
-fsrefs_test_io_handle_SOURCES = \
-	fsrefs_test_io_handle.c \
+fsrefs_test_file_entry_SOURCES = \
+	fsrefs_test_file_entry.c \
 	fsrefs_test_libcerror.h \
 	fsrefs_test_libfsrefs.h \
 	fsrefs_test_macros.h \
 	fsrefs_test_memory.c fsrefs_test_memory.h \
 	fsrefs_test_unused.h
 
-fsrefs_test_io_handle_LDADD = \
+fsrefs_test_file_entry_LDADD = \
 	../libfsrefs/libfsrefs.la \
-	@LIBCERROR_LIBADD@
+	@LIBCERROR_LIBADD@ \
+	@PTHREAD_LIBADD@
 
 fsrefs_test_file_system_SOURCES = \
 	fsrefs_test_file_system.c \
@@ -138,25 +137,15 @@ fsrefs_test_file_system_LDADD = \
 	../libfsrefs/libfsrefs.la \
 	@LIBCERROR_LIBADD@
 
-fsrefs_test_metadata_block_SOURCES = \
-	fsrefs_test_functions.c fsrefs_test_functions.h \
-	fsrefs_test_libbfio.h \
+fsrefs_test_io_handle_SOURCES = \
+	fsrefs_test_io_handle.c \
 	fsrefs_test_libcerror.h \
 	fsrefs_test_libfsrefs.h \
 	fsrefs_test_macros.h \
 	fsrefs_test_memory.c fsrefs_test_memory.h \
-	fsrefs_test_metadata_block.c \
 	fsrefs_test_unused.h
 
-fsrefs_test_metadata_block_LDADD = \
-	@LIBBFIO_LIBADD@ \
-	@LIBCPATH_LIBADD@ \
-	@LIBCFILE_LIBADD@ \
-	@LIBUNA_LIBADD@ \
-	@LIBCSPLIT_LIBADD@ \
-	@LIBCNOTIFY_LIBADD@ \
-	@LIBCLOCALE_LIBADD@ \
-	@LIBCDATA_LIBADD@ \
+fsrefs_test_io_handle_LDADD = \
 	../libfsrefs/libfsrefs.la \
 	@LIBCERROR_LIBADD@
 
@@ -179,30 +168,6 @@ fsrefs_test_metadata_block_header_LDADD = \
 	@LIBCNOTIFY_LIBADD@ \
 	@LIBCLOCALE_LIBADD@ \
 	@LIBCDATA_LIBADD@ \
-	../libfsrefs/libfsrefs.la \
-	@LIBCERROR_LIBADD@
-
-fsrefs_test_metadata_table_SOURCES = \
-	fsrefs_test_libcerror.h \
-	fsrefs_test_libfsrefs.h \
-	fsrefs_test_macros.h \
-	fsrefs_test_memory.c fsrefs_test_memory.h \
-	fsrefs_test_metadata_table.c \
-	fsrefs_test_unused.h
-
-fsrefs_test_metadata_table_LDADD = \
-	../libfsrefs/libfsrefs.la \
-	@LIBCERROR_LIBADD@
-
-fsrefs_test_metadata_value_SOURCES = \
-	fsrefs_test_libcerror.h \
-	fsrefs_test_libfsrefs.h \
-	fsrefs_test_macros.h \
-	fsrefs_test_memory.c fsrefs_test_memory.h \
-	fsrefs_test_metadata_value.c \
-	fsrefs_test_unused.h
-
-fsrefs_test_metadata_value_LDADD = \
 	../libfsrefs/libfsrefs.la \
 	@LIBCERROR_LIBADD@
 
@@ -365,6 +330,18 @@ fsrefs_test_tools_signal_LDADD = \
 	../libfsrefs/libfsrefs.la \
 	@LIBCERROR_LIBADD@
 
+fsrefs_test_tree_header_SOURCES = \
+	fsrefs_test_libcerror.h \
+	fsrefs_test_libfsrefs.h \
+	fsrefs_test_macros.h \
+	fsrefs_test_memory.c fsrefs_test_memory.h \
+	fsrefs_test_tree_header.c \
+	fsrefs_test_unused.h
+
+fsrefs_test_tree_header_LDADD = \
+	../libfsrefs/libfsrefs.la \
+	@LIBCERROR_LIBADD@
+
 fsrefs_test_volume_SOURCES = \
 	fsrefs_test_functions.c fsrefs_test_functions.h \
 	fsrefs_test_getopt.c fsrefs_test_getopt.h \
@@ -412,30 +389,6 @@ fsrefs_test_volume_header_LDADD = \
 	@LIBCNOTIFY_LIBADD@ \
 	@LIBCLOCALE_LIBADD@ \
 	@LIBCDATA_LIBADD@ \
-	../libfsrefs/libfsrefs.la \
-	@LIBCERROR_LIBADD@
-
-fsrefs_test_volume_information_SOURCES = \
-	fsrefs_test_libcerror.h \
-	fsrefs_test_libfsrefs.h \
-	fsrefs_test_macros.h \
-	fsrefs_test_memory.c fsrefs_test_memory.h \
-	fsrefs_test_unused.h \
-	fsrefs_test_volume_information.c
-
-fsrefs_test_volume_information_LDADD = \
-	../libfsrefs/libfsrefs.la \
-	@LIBCERROR_LIBADD@
-
-fsrefs_test_volume_name_SOURCES = \
-	fsrefs_test_libcerror.h \
-	fsrefs_test_libfsrefs.h \
-	fsrefs_test_macros.h \
-	fsrefs_test_memory.c fsrefs_test_memory.h \
-	fsrefs_test_unused.h \
-	fsrefs_test_volume_name.c
-
-fsrefs_test_volume_name_LDADD = \
 	../libfsrefs/libfsrefs.la \
 	@LIBCERROR_LIBADD@
 

@@ -2,21 +2,13 @@ TODO
 
 Format support
 * Move checkpoint into file system
-* Get volume information from object identifiers table
 * Get root directory from object identifiers table
 * For version 3.x map block number to container
 * For version 3.x use descriptor to read metadata block
+* Add block tree for traversing ministore nodes
 
-Clean up
-* remove metadata table
-
-* API
-  - complete volume name functions
-* directory
-  - complete first approach to directory handling code
-  - sub parse directory entry - type file tables
-* do not print full block data in:
-  libfsrefs_metadata_block_read: metadata block data:
+API
+* add function to retrieve container size
 
 20141011
 * see `git log' for more recent change log

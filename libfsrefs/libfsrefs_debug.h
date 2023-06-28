@@ -34,23 +34,11 @@ extern "C" {
 
 #if defined( HAVE_DEBUG_OUTPUT )
 
-void libfsrefs_debug_print_mft_attribute_data_flags(
-      uint16_t mft_attribute_data_flags );
-
 void libfsrefs_debug_print_file_attribute_flags(
       uint32_t file_attribute_flags );
 
-void libfsrefs_debug_print_index_node_flags(
-      uint32_t index_node_flags );
-
-void libfsrefs_debug_print_index_value_flags(
-      uint32_t index_value_flags );
-
-const char *libfsrefs_debug_print_attribute_type(
-             uint32_t attribute_type );
-
-const char *libfsrefs_debug_print_file_name_attribute_namespace(
-             uint8_t name_namespace );
+void libfsrefs_debug_print_node_record_flags(
+      uint16_t node_record_flags );
 
 int libfsrefs_debug_print_guid_value(
      const char *function_name,

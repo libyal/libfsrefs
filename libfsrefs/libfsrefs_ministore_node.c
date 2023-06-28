@@ -29,12 +29,11 @@
 #include "libfsrefs_libbfio.h"
 #include "libfsrefs_libcerror.h"
 #include "libfsrefs_libcnotify.h"
-#include "libfsrefs_metadata_block.h"
 #include "libfsrefs_metadata_block_header.h"
-#include "libfsrefs_metadata_value.h"
 #include "libfsrefs_ministore_node.h"
 #include "libfsrefs_node_header.h"
 #include "libfsrefs_node_record.h"
+#include "libfsrefs_tree_header.h"
 
 #include "fsrefs_metadata_block.h"
 #include "fsrefs_ministore_tree.h"
@@ -193,11 +192,11 @@ int libfsrefs_ministore_node_read_data(
 {
 	libfsrefs_node_header_t *node_header = NULL;
 	libfsrefs_node_record_t *node_record = NULL;
+	libfsrefs_tree_header_t *tree_header = NULL;
 	static char *function                = "libfsrefs_ministore_node_read_data";
 	size_t data_offset                   = 0;
-	size_t node_header_data_offset       = 0;
 	size_t record_offsets_data_offset    = 0;
-	uint32_t information_entry_size      = 0;
+	uint32_t node_header_offset          = 0;
 	uint32_t record_data_offset          = 0;
 	uint32_t record_data_size            = 0;
 	uint32_t record_offsets_index        = 0;
@@ -254,7 +253,8 @@ int libfsrefs_ministore_node_read_data(
 
 		return( -1 );
 	}
-	if( data_size > (size_t) SSIZE_MAX )
+	if( ( data_size < 4 )
+	 || ( data_size > (size_t) SSIZE_MAX ) )
 	{
 		libcerror_error_set(
 		 error,
@@ -265,58 +265,92 @@ int libfsrefs_ministore_node_read_data(
 
 		return( -1 );
 	}
-	if( ( data_size - data_offset ) < 4 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
-		 "%s: invalid tree information entry size data size value out of bounds.",
-		 function );
-
-		goto on_error;
-	}
 	byte_stream_copy_to_uint32_little_endian(
-	 &( data[ data_offset ] ),
-	 information_entry_size );
+	 data,
+	 node_header_offset );
 
-	data_offset += 4;
-
-	if( ( information_entry_size < 4 )
-	 || ( ( data_size - data_offset ) < information_entry_size ) )
+	if( ( node_header_offset < 4 )
+	 || ( node_header_offset >= ( data_size - 4 ) ) )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
-		 "%s: invalid tree information entry size value out of bounds.",
+		 "%s: invalid node header offset value out of bounds.",
 		 function );
 
 		goto on_error;
 	}
-	information_entry_size -= 4;
+	data_offset = 4;
 
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )
 	{
 		libcnotify_printf(
-		 "%s: tree information entry size\t: %" PRIu32 "\n",
+		 "%s: node header offset\t\t\t: 0x%08" PRIx32 "\n",
 		 function,
-		 information_entry_size + 4 );
-
-		libcnotify_printf(
-		 "%s: tree information entry data:\n",
-		 function );
-		libcnotify_print_data(
-		 &( data[ data_offset ] ),
-		 information_entry_size,
-		 LIBCNOTIFY_PRINT_DATA_FLAG_GROUP_DATA );
+		 node_header_offset );
 	}
-#endif /* defined( HAVE_DEBUG_OUTPUT ) */
+#endif
+	if( node_header_offset >= ( data_offset + sizeof( fsrefs_ministore_tree_header_t ) ) )
+	{
+		if( libfsrefs_tree_header_initialize(
+		     &tree_header,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+			 "%s: unable to create tree header.",
+			 function );
 
-	data_offset += information_entry_size;
+			goto on_error;
+		}
+		if( libfsrefs_tree_header_read_data(
+		     tree_header,
+		     &( data[ data_offset ] ),
+		     data_size - data_offset,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_IO,
+			 LIBCERROR_IO_ERROR_READ_FAILED,
+			 "%s: unable to read tree header.",
+			 function );
 
-	node_header_data_offset = data_offset;
+			goto on_error;
+		}
+		if( libfsrefs_tree_header_free(
+		     &tree_header,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable to free tree header.",
+			 function );
+
+			goto on_error;
+		}
+		data_offset += sizeof( fsrefs_ministore_tree_header_t );
+
+#if defined( HAVE_DEBUG_OUTPUT )
+		if( libcnotify_verbose != 0 )
+		{
+			libcnotify_printf(
+			 "%s: unknown data:\n",
+			 function );
+			libcnotify_print_data(
+			 &( data[ data_offset ] ),
+			 node_header_offset - data_offset,
+			 LIBCNOTIFY_PRINT_DATA_FLAG_GROUP_DATA );
+		}
+#endif
+	}
+	data_offset = node_header_offset;
 
 	if( libfsrefs_node_header_initialize(
 	     &node_header,
@@ -349,7 +383,7 @@ int libfsrefs_ministore_node_read_data(
 	data_offset += sizeof( fsrefs_ministore_tree_node_header_t );
 
 	if( ( node_header->data_area_start_offset < sizeof( fsrefs_ministore_tree_node_header_t ) )
-	 || ( node_header->data_area_start_offset > ( data_size - node_header_data_offset ) ) )
+	 || ( node_header->data_area_start_offset > ( data_size - node_header_offset ) ) )
 	{
 		libcerror_error_set(
 		 error,
@@ -363,7 +397,7 @@ int libfsrefs_ministore_node_read_data(
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )
 	{
-		data_area_start_offset = node_header_data_offset + node_header->data_area_start_offset;
+		data_area_start_offset = node_header_offset + node_header->data_area_start_offset;
 
 		if( data_offset < data_area_start_offset )
 		{
@@ -378,7 +412,7 @@ int libfsrefs_ministore_node_read_data(
 	}
 #endif
 	if( ( node_header->data_area_end_offset < sizeof( fsrefs_ministore_tree_node_header_t ) )
-	 || ( node_header->data_area_end_offset > ( data_size - node_header_data_offset ) ) )
+	 || ( node_header->data_area_end_offset > ( data_size - node_header_offset ) ) )
 	{
 		libcerror_error_set(
 		 error,
@@ -390,7 +424,7 @@ int libfsrefs_ministore_node_read_data(
 		goto on_error;
 	}
 	if( ( node_header->record_offsets_start_offset < sizeof( fsrefs_ministore_tree_node_header_t ) )
-	 || ( node_header->record_offsets_start_offset > ( data_size - node_header_data_offset ) ) )
+	 || ( node_header->record_offsets_start_offset > ( data_size - node_header_offset ) ) )
 	{
 		libcerror_error_set(
 		 error,
@@ -401,7 +435,7 @@ int libfsrefs_ministore_node_read_data(
 
 		goto on_error;
 	}
-	if( node_header->number_of_record_offsets > ( ( data_size - node_header_data_offset - node_header->record_offsets_start_offset ) / 4 ) )
+	if( node_header->number_of_record_offsets > ( ( data_size - node_header_offset - node_header->record_offsets_start_offset ) / 4 ) )
 	{
 		libcerror_error_set(
 		 error,
@@ -414,7 +448,7 @@ int libfsrefs_ministore_node_read_data(
 	}
 	if( ( node_header->record_offsets_end_offset != 0 )
 	 && ( ( node_header->record_offsets_end_offset < sizeof( fsrefs_ministore_tree_node_header_t ) )
-	  ||  ( node_header->record_offsets_end_offset > ( data_size - node_header_data_offset ) ) ) )
+	  ||  ( node_header->record_offsets_end_offset > ( data_size - node_header_offset ) ) ) )
 	{
 		libcerror_error_set(
 		 error,
@@ -432,12 +466,12 @@ int libfsrefs_ministore_node_read_data(
 		 "%s: ministore node data:\n",
 		 function );
 		libcnotify_print_data(
-		 &( data[ node_header_data_offset ] ),
-		 data_size - node_header_data_offset,
+		 &( data[ node_header_offset ] ),
+		 data_size - node_header_offset,
 		 LIBCNOTIFY_PRINT_DATA_FLAG_GROUP_DATA );
 	}
 #endif
-	record_offsets_data_offset = node_header_data_offset + node_header->record_offsets_start_offset;
+	record_offsets_data_offset = node_header_offset + node_header->record_offsets_start_offset;
 
 	for( record_offsets_index = 0;
 	     record_offsets_index < node_header->number_of_record_offsets;
@@ -488,7 +522,7 @@ int libfsrefs_ministore_node_read_data(
 
 			goto on_error;
 		}
-		record_data_offset += node_header_data_offset;
+		record_data_offset += node_header_offset;
 
 		byte_stream_copy_to_uint32_little_endian(
 		 &( data[ record_data_offset ] ),
@@ -929,6 +963,18 @@ int libfsrefs_ministore_node_get_record(
 
 		return( -1 );
 	}
+#if defined( HAVE_DEBUG_OUTPUT )
+	if( libcnotify_verbose != 0 )
+	{
+		libcnotify_printf(
+		 "%s: requested key data:\n",
+		 function );
+		libcnotify_print_data(
+		 key_data,
+		 key_data_size,
+		 0 );
+	}
+#endif
 /* TODO add support for branch nodes */
 
 	for( record_index = 0;
@@ -975,6 +1021,19 @@ int libfsrefs_ministore_node_get_record(
 
 			return( -1 );
 		}
+#if defined( HAVE_DEBUG_OUTPUT )
+		if( libcnotify_verbose != 0 )
+		{
+			libcnotify_printf(
+			 "%s: record: %d key data:\n",
+			 function,
+			 record_index );
+			libcnotify_print_data(
+			 safe_node_record->key_data,
+			 safe_node_record->key_data_size,
+			 0 );
+		}
+#endif
 		if( key_data_size != safe_node_record->key_data_size )
 		{
 			libcerror_error_set(
@@ -989,26 +1048,6 @@ int libfsrefs_ministore_node_get_record(
 		}
 		key_data_offset = key_data_size;
 
-#if defined( HAVE_DEBUG_OUTPUT )
-	if( libcnotify_verbose != 0 )
-	{
-		libcnotify_printf(
-		 "%s: key data:\n",
-		 function );
-		libcnotify_print_data(
-		 key_data,
-		 key_data_size,
-		 0 );
-
-		libcnotify_printf(
-		 "%s: node key data:\n",
-		 function );
-		libcnotify_print_data(
-		 safe_node_record->key_data,
-		 key_data_size,
-		 0 );
-	}
-#endif
 		do
 		{
 			key_data_offset--;
@@ -1021,8 +1060,6 @@ int libfsrefs_ministore_node_get_record(
 			}
 		}
 		while( key_data_offset > 0 );
-
-fprintf( stderr, "X: %zd, %d\n", key_data_offset, result );
 
 		if( result == 0 )
 		{

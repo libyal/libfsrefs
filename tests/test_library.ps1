@@ -6,7 +6,7 @@ $ExitSuccess = 0
 $ExitFailure = 1
 $ExitIgnore = 77
 
-$LibraryTests = "block_descriptor checkpoint directory error file_system io_handle metadata_block metadata_block_header metadata_table metadata_value ministore_node node_header node_record notify objects_tree superblock volume_header volume_information volume_name"
+$LibraryTests = "block_descriptor checkpoint directory_object error file_entry file_system io_handle metadata_block_header ministore_node node_header node_record notify objects_tree superblock tree_header volume_header"
 $LibraryTestsWithInput = "support volume"
 $OptionSets = "offset"
 

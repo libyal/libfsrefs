@@ -56,9 +56,9 @@ struct libfsrefs_volume_header
 	 */
 	uint64_t volume_serial_number;
 
-	/* The block size
+	/* The cluster block size
 	 */
-	size32_t block_size;
+	size32_t cluster_block_size;
 
 	/* The metadata block size
 	 */
@@ -89,9 +89,24 @@ int libfsrefs_volume_header_read_file_io_handle(
      off64_t file_offset,
      libcerror_error_t **error );
 
+int libfsrefs_volume_header_get_bytes_per_sector(
+     libfsrefs_volume_header_t *volume_header,
+     uint16_t *bytes_per_sector,
+     libcerror_error_t **error );
+
+int libfsrefs_volume_header_get_cluster_block_size(
+     libfsrefs_volume_header_t *volume_header,
+     size32_t *cluster_block_size,
+     libcerror_error_t **error );
+
 int libfsrefs_volume_header_get_volume_size(
      libfsrefs_volume_header_t *volume_header,
      size64_t *volume_size,
+     libcerror_error_t **error );
+
+int libfsrefs_volume_header_get_volume_serial_number(
+     libfsrefs_volume_header_t *volume_header,
+     uint64_t *volume_serial_number,
      libcerror_error_t **error );
 
 #if defined( __cplusplus )

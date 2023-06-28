@@ -1,5 +1,5 @@
 /*
- * Library to access the Windows Resiliant File System (REFS) format
+ * Library to access the Resiliant File System (ReFS) format
  *
  * Copyright (C) 2012-2023, Joachim Metz <joachim.metz@gmail.com>
  *

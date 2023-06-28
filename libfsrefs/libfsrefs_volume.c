@@ -28,6 +28,7 @@
 #include "libfsrefs_block_descriptor.h"
 #include "libfsrefs_debug.h"
 #include "libfsrefs_definitions.h"
+#include "libfsrefs_file_entry.h"
 #include "libfsrefs_file_system.h"
 #include "libfsrefs_io_handle.h"
 #include "libfsrefs_libbfio.h"
@@ -37,13 +38,11 @@
 #include "libfsrefs_libfcache.h"
 #include "libfsrefs_libfdata.h"
 #include "libfsrefs_libuna.h"
-#include "libfsrefs_metadata_block.h"
 #include "libfsrefs_ministore_node.h"
 #include "libfsrefs_node_record.h"
 #include "libfsrefs_objects_tree.h"
 #include "libfsrefs_volume.h"
 #include "libfsrefs_volume_header.h"
-#include "libfsrefs_volume_name.h"
 
 /* Creates a volume
  * Make sure the value volume is referencing, is set to NULL
@@ -904,6 +903,22 @@ int libfsrefs_volume_close(
 
 		result = -1;
 	}
+	if( internal_volume->volume_header != NULL )
+	{
+		if( libfsrefs_volume_header_free(
+		     &( internal_volume->volume_header ),
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable to free volume header.",
+			 function );
+
+			result = -1;
+		}
+	}
 	if( internal_volume->file_system != NULL )
 	{
 		if( libfsrefs_file_system_free(
@@ -979,10 +994,9 @@ int libfsrefs_internal_volume_open_read(
      libbfio_handle_t *file_io_handle,
      libcerror_error_t **error )
 {
-	libfsrefs_volume_header_t *volume_header = NULL;
-	static char *function                    = "libfsrefs_internal_volume_open_read";
-	off64_t superblock_offset                = 0;
-	int number_of_ministore_trees            = 0;
+	static char *function         = "libfsrefs_internal_volume_open_read";
+	off64_t superblock_offset     = 0;
+	int number_of_ministore_trees = 0;
 
 	if( internal_volume == NULL )
 	{
@@ -1028,6 +1042,17 @@ int libfsrefs_internal_volume_open_read(
 
 		return( -1 );
 	}
+	if( internal_volume->volume_header != NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 "%s: invalid volume - volume header value already set.",
+		 function );
+
+		return( -1 );
+	}
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )
 	{
@@ -1036,7 +1061,7 @@ int libfsrefs_internal_volume_open_read(
 	}
 #endif
 	if( libfsrefs_volume_header_initialize(
-	     &volume_header,
+	     &( internal_volume->volume_header ),
 	     error ) != 1 )
 	{
 		libcerror_error_set(
@@ -1049,7 +1074,7 @@ int libfsrefs_internal_volume_open_read(
 		goto on_error;
 	}
 	if( libfsrefs_volume_header_read_file_io_handle(
-	     volume_header,
+	     internal_volume->volume_header,
 	     file_io_handle,
 	     0,
 	     error ) != 1 )
@@ -1063,13 +1088,13 @@ int libfsrefs_internal_volume_open_read(
 
 		goto on_error;
 	}
-	internal_volume->io_handle->bytes_per_sector     = volume_header->bytes_per_sector;
-	internal_volume->io_handle->volume_size          = volume_header->volume_size;
-	internal_volume->io_handle->major_format_version = volume_header->major_format_version;
-	internal_volume->io_handle->minor_format_version = volume_header->minor_format_version;
-	internal_volume->io_handle->block_size           = volume_header->block_size;
-	internal_volume->io_handle->metadata_block_size  = volume_header->metadata_block_size;
-	internal_volume->io_handle->container_size       = volume_header->container_size;
+	internal_volume->io_handle->bytes_per_sector     = internal_volume->volume_header->bytes_per_sector;
+	internal_volume->io_handle->volume_size          = internal_volume->volume_header->volume_size;
+	internal_volume->io_handle->major_format_version = internal_volume->volume_header->major_format_version;
+	internal_volume->io_handle->minor_format_version = internal_volume->volume_header->minor_format_version;
+	internal_volume->io_handle->cluster_block_size   = internal_volume->volume_header->cluster_block_size;
+	internal_volume->io_handle->metadata_block_size  = internal_volume->volume_header->metadata_block_size;
+	internal_volume->io_handle->container_size       = internal_volume->volume_header->container_size;
 
 	if( libfsrefs_file_system_initialize(
 	     &( internal_volume->file_system ),
@@ -1246,7 +1271,7 @@ int libfsrefs_internal_volume_open_read(
 	return( 1 );
 
 on_error:
-	if( internal_volume != NULL )
+	if( internal_volume->volume_information_object != NULL )
 	{
 		libfsrefs_ministore_node_free(
 		 &( internal_volume->volume_information_object ),
@@ -1264,13 +1289,157 @@ on_error:
 		 &( internal_volume->file_system ),
 		 NULL );
 	}
-	if( volume_header != NULL )
+	if( internal_volume->volume_header != NULL )
 	{
 		libfsrefs_volume_header_free(
-		 &volume_header,
+		 &( internal_volume->volume_header ),
 		 NULL );
 	}
 	return( -1 );
+}
+
+/* Retrieves the bytes per sector
+ * Returns 1 if successful or -1 on error
+ */
+int libfsrefs_volume_get_bytes_per_sector(
+     libfsrefs_volume_t *volume,
+     uint16_t *bytes_per_sector,
+     libcerror_error_t **error )
+{
+	libfsrefs_internal_volume_t *internal_volume = NULL;
+	static char *function                        = "libfsrefs_volume_get_bytes_per_sector";
+	int result                                   = 1;
+
+	if( volume == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid volume.",
+		 function );
+
+		return( -1 );
+	}
+	internal_volume = (libfsrefs_internal_volume_t *) volume;
+
+#if defined( HAVE_LIBFSREFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_grab_for_read(
+	     internal_volume->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to grab read/write lock for reading.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	if( libfsrefs_volume_header_get_bytes_per_sector(
+	     internal_volume->volume_header,
+	     bytes_per_sector,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve bytes per sector.",
+		 function );
+
+		result = -1;
+	}
+#if defined( HAVE_LIBFSREFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_release_for_read(
+	     internal_volume->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to release read/write lock for reading.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	return( result );
+}
+
+/* Retrieves the cluster block size
+ * Returns 1 if successful or -1 on error
+ */
+int libfsrefs_volume_get_cluster_block_size(
+     libfsrefs_volume_t *volume,
+     size32_t *cluster_block_size,
+     libcerror_error_t **error )
+{
+	libfsrefs_internal_volume_t *internal_volume = NULL;
+	static char *function                        = "libfsrefs_volume_get_cluster_block_size";
+	int result                                   = 1;
+
+	if( volume == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid volume.",
+		 function );
+
+		return( -1 );
+	}
+	internal_volume = (libfsrefs_internal_volume_t *) volume;
+
+#if defined( HAVE_LIBFSREFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_grab_for_read(
+	     internal_volume->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to grab read/write lock for reading.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	if( libfsrefs_volume_header_get_cluster_block_size(
+	     internal_volume->volume_header,
+	     cluster_block_size,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve cluster block size.",
+		 function );
+
+		result = -1;
+	}
+#if defined( HAVE_LIBFSREFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_release_for_read(
+	     internal_volume->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to release read/write lock for reading.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	return( result );
 }
 
 /* Retrieves the volume name record
@@ -1292,17 +1461,6 @@ int libfsrefs_internal_volume_get_volume_name_record(
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid volume.",
-		 function );
-
-		return( -1 );
-	}
-	if( internal_volume->volume_information_object == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-		 "%s: invalid volume - missing volume information object.",
 		 function );
 
 		return( -1 );
@@ -1846,5 +2004,174 @@ int libfsrefs_volume_get_version(
 	}
 #endif
 	return( 1 );
+}
+
+/* Retrieves the serial number
+ * Returns 1 if successful or -1 on error
+ */
+int libfsrefs_volume_get_serial_number(
+     libfsrefs_volume_t *volume,
+     uint64_t *serial_number,
+     libcerror_error_t **error )
+{
+	libfsrefs_internal_volume_t *internal_volume = NULL;
+	static char *function                        = "libfsrefs_volume_get_serial_number";
+	int result                                   = 1;
+
+	if( volume == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid volume.",
+		 function );
+
+		return( -1 );
+	}
+	internal_volume = (libfsrefs_internal_volume_t *) volume;
+
+#if defined( HAVE_LIBFSREFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_grab_for_read(
+	     internal_volume->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to grab read/write lock for reading.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	if( libfsrefs_volume_header_get_volume_serial_number(
+	     internal_volume->volume_header,
+	     serial_number,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve volume serial number.",
+		 function );
+
+		result = -1;
+	}
+#if defined( HAVE_LIBFSREFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_release_for_read(
+	     internal_volume->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to release read/write lock for reading.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	return( result );
+}
+
+/* Retrieves the root directory file entry
+ * Returns 1 if successful or -1 on error
+ */
+int libfsrefs_volume_get_root_directory(
+     libfsrefs_volume_t *volume,
+     libfsrefs_file_entry_t **file_entry,
+     libcerror_error_t **error )
+{
+	libfsrefs_internal_volume_t *internal_volume = NULL;
+	static char *function                        = "libfsrefs_volume_get_root_directory";
+	int result                                   = 1;
+
+	if( volume == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid volume.",
+		 function );
+
+		return( -1 );
+	}
+	internal_volume = (libfsrefs_internal_volume_t *) volume;
+
+	if( file_entry == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid file entry.",
+		 function );
+
+		return( -1 );
+	}
+	if( *file_entry != NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 "%s: invalid file entry value already set.",
+		 function );
+
+		return( -1 );
+	}
+#if defined( HAVE_LIBFSREFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_grab_for_write(
+	     internal_volume->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to grab read/write lock for writing.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	if( libfsrefs_file_entry_initialize(
+	     file_entry,
+	     internal_volume->io_handle,
+	     internal_volume->file_io_handle,
+	     internal_volume->objects_tree,
+	     NULL,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to create root directory file entry.",
+		 function );
+
+		result = -1;
+	}
+#if defined( HAVE_LIBFSREFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_release_for_write(
+	     internal_volume->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to release read/write lock for writing.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	return( result );
 }
 

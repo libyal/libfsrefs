@@ -1,5 +1,5 @@
 /*
- * Metadata block functions
+ * Directory object functions
  *
  * Copyright (C) 2012-2023, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -19,8 +19,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if !defined( _LIBFSREFS_METADATA_BLOCK_H )
-#define _LIBFSREFS_METADATA_BLOCK_H
+#if !defined( _LIBFSREFS_DIRECTORY_OBJECT_H )
+#define _LIBFSREFS_DIRECTORY_OBJECT_H
 
 #include <common.h>
 #include <types.h>
@@ -28,54 +28,45 @@
 #include "libfsrefs_io_handle.h"
 #include "libfsrefs_libbfio.h"
 #include "libfsrefs_libcerror.h"
+#include "libfsrefs_ministore_node.h"
+#include "libfsrefs_objects_tree.h"
 
 #if defined( __cplusplus )
 extern "C" {
 #endif
 
-typedef struct libfsrefs_metadata_block libfsrefs_metadata_block_t;
+typedef struct libfsrefs_directory_object libfsrefs_directory_object_t;
 
-struct libfsrefs_metadata_block
+struct libfsrefs_directory_object
 {
-	/* The metadata block data
+	/* Objects tree
 	 */
-	uint8_t *data;
+	libfsrefs_objects_tree_t *objects_tree;
 
-	/* The metadata block data size
+	/* Ministore root node
 	 */
-	size_t data_size;
-
-	/* The sequence number
-	 */
-	uint64_t sequence_number;
+	libfsrefs_ministore_node_t *root_node;
 };
 
-int libfsrefs_metadata_block_initialize(
-     libfsrefs_metadata_block_t **metadata_block,
+int libfsrefs_directory_object_initialize(
+     libfsrefs_directory_object_t **directory_object,
+     libfsrefs_objects_tree_t *objects_tree,
      libcerror_error_t **error );
 
-int libfsrefs_metadata_block_free(
-     libfsrefs_metadata_block_t **metadata_block,
+int libfsrefs_directory_object_free(
+     libfsrefs_directory_object_t **directory_object,
      libcerror_error_t **error );
 
-int libfsrefs_metadata_block_read_data(
-     libfsrefs_metadata_block_t *metadata_block,
-     libfsrefs_io_handle_t *io_handle,
-     const uint8_t *data,
-     size_t data_size,
-     libcerror_error_t **error );
-
-int libfsrefs_metadata_block_read_file_io_handle(
-     libfsrefs_metadata_block_t *metadata_block,
+int libfsrefs_directory_object_read(
+     libfsrefs_directory_object_t *directory_object,
      libfsrefs_io_handle_t *io_handle,
      libbfio_handle_t *file_io_handle,
-     off64_t file_offset,
-     int level,
+     uint64_t object_identifier,
      libcerror_error_t **error );
 
 #if defined( __cplusplus )
 }
 #endif
 
-#endif /* !defined( _LIBFSREFS_METADATA_BLOCK_H ) */
+#endif /* !defined( _LIBFSREFS_DIRECTORY_OBJECT_H ) */
 

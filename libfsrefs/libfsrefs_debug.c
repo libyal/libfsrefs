@@ -32,29 +32,6 @@
 
 #if defined( HAVE_DEBUG_OUTPUT )
 
-/* Prints the MFT attribute data flags
- */
-void libfsrefs_debug_print_mft_attribute_data_flags(
-      uint16_t mft_attribute_data_flags )
-{
-	if( ( mft_attribute_data_flags & 0x0001 ) != 0 )
-	{
-		libcnotify_printf(
-		 "\tIs compressed\n" );
-	}
-
-	if( ( mft_attribute_data_flags & 0x4000 ) != 0 )
-	{
-		libcnotify_printf(
-		 "\tIs encrypted\n" );
-	}
-	if( ( mft_attribute_data_flags & 0x8000 ) != 0 )
-	{
-		libcnotify_printf(
-		 "\tIs sparse\n" );
-	}
-}
-
 /* Prints the file attribute flags
  */
 void libfsrefs_debug_print_file_attribute_flags(
@@ -150,116 +127,16 @@ void libfsrefs_debug_print_file_attribute_flags(
 	}
 }
 
-/* Prints the index node flags
+/* Prints the node record flags
  */
-void libfsrefs_debug_print_index_node_flags(
-      uint32_t index_node_flags )
+void libfsrefs_debug_print_node_record_flags(
+      uint16_t node_record_flags )
 {
-	if( ( index_node_flags & 0x00000001UL ) != 0 )
+	if( ( node_record_flags & 0x0008 ) != 0 )
 	{
 		libcnotify_printf(
-		 "\tHas index allocation\n" );
+		 "\tHas embedded Ministore node (0x0008)\n" );
 	}
-}
-
-/* Prints the index value flags
- */
-void libfsrefs_debug_print_index_value_flags(
-      uint32_t index_value_flags )
-{
-	if( ( index_value_flags & LIBFSREFS_INDEX_VALUE_FLAG_HAS_SUB_NODE ) != 0 )
-	{
-		libcnotify_printf(
-		 "\tHas sub node\n" );
-	}
-	if( ( index_value_flags & LIBFSREFS_INDEX_VALUE_FLAG_IS_LAST ) != 0 )
-	{
-		libcnotify_printf(
-		 "\tIs last\n" );
-	}
-}
-
-/* Prints the attribute type
- */
-const char *libfsrefs_debug_print_attribute_type(
-             uint32_t attribute_type )
-{
-	switch( attribute_type )
-	{
-		case 0x00000000UL:
-			return( "" );
-
-		case LIBFSREFS_ATTRIBUTE_TYPE_STANDARD_INFORMATION:
-			return( "$STANDARD_INFORMATION" );
-
-		case LIBFSREFS_ATTRIBUTE_TYPE_ATTRIBUTE_LIST:
-			return( "$ATTRIBUTE_LIST" );
-
-		case LIBFSREFS_ATTRIBUTE_TYPE_FILE_NAME:
-			return( "$FILE_NAME" );
-
-		case LIBFSREFS_ATTRIBUTE_TYPE_OBJECT_IDENTIFIER:
-			return( "$OBJECT_ID" );
-
-		case LIBFSREFS_ATTRIBUTE_TYPE_SECURITY_DESCRIPTOR:
-			return( "$SECURITY_DESCRIPTOR" );
-
-		case LIBFSREFS_ATTRIBUTE_TYPE_VOLUME_NAME:
-			return( "$VOLUME_NAME" );
-
-		case LIBFSREFS_ATTRIBUTE_TYPE_VOLUME_INFORMATION:
-			return( "$VOLUME_INFORMATION" );
-
-		case LIBFSREFS_ATTRIBUTE_TYPE_DATA:
-			return( "$DATA" );
-
-		case LIBFSREFS_ATTRIBUTE_TYPE_INDEX_ROOT:
-			return( "$INDEX_ROOT" );
-
-		case LIBFSREFS_ATTRIBUTE_TYPE_INDEX_ALLOCATION:
-			return( "$INDEX_ALLOCATION" );
-
-		case LIBFSREFS_ATTRIBUTE_TYPE_BITMAP:
-			return( "$BITMAP" );
-
-		case LIBFSREFS_ATTRIBUTE_TYPE_REPARSE_POINT:
-			return( "$REPARSE_POINT" );
-
-		case LIBFSREFS_ATTRIBUTE_TYPE_EXTENDED_INFORMATION:
-			return( "$EA_INFORMATION" );
-
-		case LIBFSREFS_ATTRIBUTE_TYPE_EXTENDED:
-			return( "$EA" );
-
-		case LIBFSREFS_ATTRIBUTE_TYPE_PROPERTY_SET:
-			return( "$PROPERTY_SET" );
-
-		case LIBFSREFS_ATTRIBUTE_TYPE_LOGGED_UTILITY_STREAM:
-			return( "$LOGGED_UTILITY_STREAM" );
-	}
-	return( "_UNKNOWN_" );
-}
-
-/* Prints the file name attribute namespace
- */
-const char *libfsrefs_debug_print_file_name_attribute_namespace(
-             uint8_t name_namespace )
-{
-	switch( name_namespace )
-	{
-		case LIBFSREFS_FILE_NAME_NAMESPACE_POSIX:
-			return( "POSIX" );
-
-		case LIBFSREFS_FILE_NAME_NAMESPACE_WINDOWS:
-			return( "Windows" );
-
-		case LIBFSREFS_FILE_NAME_NAMESPACE_DOS:
-			return( "DOS" );
-
-		case LIBFSREFS_FILE_NAME_NAMESPACE_DOS_WINDOWS:
-			return( "DOS and Windows" );
-	}
-	return( "_UNKNOWN_" );
 }
 
 /* Prints a GUID/UUID value

@@ -1,5 +1,5 @@
 /*
- * Directory functions
+ * Ministore tree header functions
  *
  * Copyright (C) 2012-2023, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -19,48 +19,44 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if !defined( _LIBFSREFS_DIRECTORY_H )
-#define _LIBFSREFS_DIRECTORY_H
+#if !defined( _LIBFSREFS_TREE_HEADER_H )
+#define _LIBFSREFS_TREE_HEADER_H
 
 #include <common.h>
 #include <types.h>
 
-#include "libfsrefs_io_handle.h"
-#include "libfsrefs_libbfio.h"
 #include "libfsrefs_libcerror.h"
 
 #if defined( __cplusplus )
 extern "C" {
 #endif
 
-typedef struct libfsrefs_directory libfsrefs_directory_t;
+typedef struct libfsrefs_tree_header libfsrefs_tree_header_t;
 
-struct libfsrefs_directory
+struct libfsrefs_tree_header
 {
-	/* Dummy
+	/* The table data offset
 	 */
-	int dummy;
+	uint16_t table_data_offset;
 };
 
-int libfsrefs_directory_initialize(
-     libfsrefs_directory_t **directory,
+int libfsrefs_tree_header_initialize(
+     libfsrefs_tree_header_t **tree_header,
      libcerror_error_t **error );
 
-int libfsrefs_directory_free(
-     libfsrefs_directory_t **directory,
+int libfsrefs_tree_header_free(
+     libfsrefs_tree_header_t **tree_header,
      libcerror_error_t **error );
 
-int libfsrefs_directory_read(
-     libfsrefs_directory_t *directory,
-     libfsrefs_io_handle_t *io_handle,
-     libbfio_handle_t *file_io_handle,
-     off64_t file_offset,
-     int level,
+int libfsrefs_tree_header_read_data(
+     libfsrefs_tree_header_t *tree_header,
+     const uint8_t *data,
+     size_t data_size,
      libcerror_error_t **error );
 
 #if defined( __cplusplus )
 }
 #endif
 
-#endif /* !defined( _LIBFSREFS_DIRECTORY_H ) */
+#endif /* !defined( _LIBFSREFS_TREE_HEADER_H ) */
 

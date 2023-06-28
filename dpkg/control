@@ -13,8 +13,8 @@ Depends: ${shlibs:Depends}, ${misc:Depends}
 Conflicts: libfsrefs1
 Replaces: libfsrefs1
 Suggests: libfsrefs-dbg
-Description: Library to access the Windows Resiliant File System (REFS) format
- libfsrefs is a library to access the Windows Resiliant File System (REFS) format.
+Description: Library to access the Resiliant File System (ReFS) format
+ libfsrefs is a library to access the Resiliant File System (ReFS) format.
 
 Package: libfsrefs-dbg
 Architecture: any
@@ -36,8 +36,8 @@ Architecture: any
 Depends: libfsrefs (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
 Conflicts: libfsrefs-utils
 Replaces: libfsrefs-utils
-Description: Several tools for reading Windows Resiliant File System (REFS) volumes
- Several tools for reading Windows Resiliant File System (REFS) volumes.
+Description: Several tools for reading Resiliant File System (ReFS) volumes
+ Several tools for reading Resiliant File System (ReFS) volumes.
 
 Package: libfsrefs-tools-dbg
 Section: debug

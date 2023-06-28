@@ -27,15 +27,15 @@ libfsrefs_la_SOURCES = \
 	fsrefs_ministore_tree.h \
 	fsrefs_superblock.h \
 	fsrefs_volume_header.h \
-	fsrefs_volume_information.h \
 	libfsrefs.c \
+	libfsrefs_block_descriptor.c libfsrefs_block_descriptor.h \
 	libfsrefs_checkpoint.c libfsrefs_checkpoint.h \
 	libfsrefs_debug.c libfsrefs_debug.h \
 	libfsrefs_definitions.h \
-	libfsrefs_directory.c libfsrefs_directory.h \
-	libfsrefs_block_descriptor.c libfsrefs_block_descriptor.h \
+	libfsrefs_directory_object.c libfsrefs_directory_object.h \
 	libfsrefs_error.c libfsrefs_error.h \
 	libfsrefs_extern.h \
+	libfsrefs_file_entry.c libfsrefs_file_entry.h \
 	libfsrefs_file_system.c libfsrefs_file_system.h \
 	libfsrefs_io_handle.c libfsrefs_io_handle.h \
 	libfsrefs_libbfio.h \
@@ -50,10 +50,7 @@ libfsrefs_la_SOURCES = \
 	libfsrefs_libfguid.h \
 	libfsrefs_libfwnt.h \
 	libfsrefs_libuna.h \
-	libfsrefs_metadata_block.c libfsrefs_metadata_block.h \
 	libfsrefs_metadata_block_header.c libfsrefs_metadata_block_header.h \
-	libfsrefs_metadata_table.c libfsrefs_metadata_table.h \
-	libfsrefs_metadata_value.c libfsrefs_metadata_value.h \
 	libfsrefs_ministore_node.c libfsrefs_ministore_node.h \
 	libfsrefs_node_header.c libfsrefs_node_header.h \
 	libfsrefs_node_record.c libfsrefs_node_record.h \
@@ -61,12 +58,11 @@ libfsrefs_la_SOURCES = \
 	libfsrefs_objects_tree.c libfsrefs_objects_tree.h \
 	libfsrefs_superblock.c libfsrefs_superblock.h \
 	libfsrefs_support.c libfsrefs_support.h \
+	libfsrefs_tree_header.c libfsrefs_tree_header.h \
 	libfsrefs_types.h \
 	libfsrefs_unused.h \
 	libfsrefs_volume.c libfsrefs_volume.h \
-	libfsrefs_volume_header.c libfsrefs_volume_header.h \
-	libfsrefs_volume_information.c libfsrefs_volume_information.h \
-	libfsrefs_volume_name.c libfsrefs_volume_name.h
+	libfsrefs_volume_header.c libfsrefs_volume_header.h
 
 libfsrefs_la_LIBADD = \
 	@LIBCERROR_LIBADD@ \
