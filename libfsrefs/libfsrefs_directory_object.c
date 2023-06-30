@@ -525,26 +525,24 @@ int libfsrefs_directory_object_read_node(
 
 			return( -1 );
 		}
-		if( node_record->key_data_size <= 4 )
+		if( node_record->key_data_size >= 2 )
 		{
-			continue;
-		}
-		byte_stream_copy_to_uint16_little_endian(
-		 node_record->key_data,
-		 record_type );
+			byte_stream_copy_to_uint16_little_endian(
+			 node_record->key_data,
+			 record_type );
 
-		if( record_type != 0x0030 )
-		{
-			continue;
+			if( record_type != 0x0030 )
+			{
+				continue;
+			}
 		}
 #if defined( HAVE_DEBUG_OUTPUT )
 		if( libcnotify_verbose != 0 )
 		{
 			libcnotify_printf(
-			 "%s: record: %d key data (%d):\n",
+			 "%s: record: %d key data:\n",
 			 function,
-			 record_index,
-			 node_record->key_data_size );
+			 record_index );
 			libcnotify_print_data(
 			 node_record->key_data,
 			 node_record->key_data_size,
@@ -568,6 +566,7 @@ int libfsrefs_directory_object_read_node(
 			}
 			if( libfsrefs_directory_entry_read_node_record(
 			     directory_entry,
+			     io_handle,
 			     node_record,
 			     error ) != 1 )
 			{

@@ -360,6 +360,51 @@ int libfsrefs_file_entry_free(
      libfsrefs_file_entry_t **file_entry,
      libfsrefs_error_t **error );
 
+/* Retrieves the creation date and time
+ * Returns 1 if successful, 0 if not available or -1 on error
+ */
+LIBFSREFS_EXTERN \
+int libfsrefs_file_entry_get_creation_time(
+     libfsrefs_file_entry_t *file_entry,
+     uint64_t *filetime,
+     libfsrefs_error_t **error );
+
+/* Retrieves the modification date and time
+ * Returns 1 if successful, 0 if not available or -1 on error
+ */
+LIBFSREFS_EXTERN \
+int libfsrefs_file_entry_get_modification_time(
+     libfsrefs_file_entry_t *file_entry,
+     uint64_t *filetime,
+     libfsrefs_error_t **error );
+
+/* Retrieves the access date and time
+ * Returns 1 if successful, 0 if not available or -1 on error
+ */
+LIBFSREFS_EXTERN \
+int libfsrefs_file_entry_get_access_time(
+     libfsrefs_file_entry_t *file_entry,
+     uint64_t *filetime,
+     libfsrefs_error_t **error );
+
+/* Retrieves the entry modification date and time
+ * Returns 1 if successful, 0 if not available or -1 on error
+ */
+LIBFSREFS_EXTERN \
+int libfsrefs_file_entry_get_entry_modification_time(
+     libfsrefs_file_entry_t *file_entry,
+     uint64_t *filetime,
+     libfsrefs_error_t **error );
+
+/* Retrieves the file attribute flags
+ * Returns 1 if successful, 0 if not available or -1 on error
+ */
+LIBFSREFS_EXTERN \
+int libfsrefs_file_entry_get_file_attribute_flags(
+     libfsrefs_file_entry_t *file_entry,
+     uint32_t *file_attribute_flags,
+     libfsrefs_error_t **error );
+
 /* Retrieves the size of the UTF-8 encoded name
  * The returned size includes the end of string character
  * Returns 1 if successful, 0 if not available or -1 on error
@@ -419,6 +464,15 @@ int libfsrefs_file_entry_get_sub_file_entry_by_index(
      libfsrefs_file_entry_t *file_entry,
      int sub_file_entry_index,
      libfsrefs_file_entry_t **sub_file_entry,
+     libfsrefs_error_t **error );
+
+/* Retrieves the size of the default data stream (nameless $DATA attribute)
+ * Returns 1 if successful or -1 on error
+ */
+LIBFSREFS_EXTERN \
+int libfsrefs_file_entry_get_size(
+     libfsrefs_file_entry_t *file_entry,
+     size64_t *size,
      libfsrefs_error_t **error );
 
 #if defined( __cplusplus )

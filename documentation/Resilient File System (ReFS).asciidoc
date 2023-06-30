@@ -394,7 +394,7 @@ The ministore tree metadata consists of:
 * <<metadata_block_header,Metadata block header>>
 * Node header offset
 * Optional tree header
-* Optional [yellow-background]*unknown data (remnant data?)*
+* Optional header data
 * Node header
 * Node records
 * Unused
@@ -422,17 +422,17 @@ The tree header is 36 bytes in size and consists of:
 [cols="1,1,1,5",options="header"]
 |===
 | Offset | Size | Value | Description
-| 0 | 2 | 40 | [yellow-background]*Unknown (unknown data offset)* +
+| 0 | 2 | 40 | Header data offset +
 The offset is relative to the start of the node header offset
-| 2 | 2 | | [yellow-background]*Unknown*
-| 4 | 4 | | [yellow-background]*Unknown*
+| 2 | 2 | | [yellow-background]*Unknown (seen: 0 or 1)*
+| 4 | 4 | | [yellow-background]*Unknown (seen: 0)*
 | 8 | 4 | | [yellow-background]*Unknown*
 | 12 | 4 | | [yellow-background]*Unknown*
-| 16 | 4 | | [yellow-background]*Unknown*
-| 20 | 4 | | [yellow-background]*Unknown*
+| 16 | 4 | | [yellow-background]*Unknown (seen: 2)*
+| 20 | 4 | | [yellow-background]*Unknown (number of branch nodes?)*
 | 24 | 4 | | [yellow-background]*Unknown*
-| 28 | 4 | | [yellow-background]*Unknown*
-| 32 | 4 | | Number of leaf values
+| 28 | 4 | | [yellow-background]*Unknown (number of leaf values?)*
+| 32 | 4 | | [yellow-background]*Unknown*
 |===
 
 === Node header
@@ -447,7 +447,7 @@ The offset is relative to the start of the node header
 | 4 | 4 | | Data area end offset +
 The offset is relative to the start of the node header
 | 8 | 4 | | Unused data size
-| 12 | 1 | | Node level, where 0 is the root level
+| 12 | 1 | | Node level, where 0 is the level of the leaf values
 | 13 | 1 | | Node type flags
 | 14 | 2 | | [yellow-background]*Unknown (empty values)*
 | 16 | 4 | | Record offsets start offset +
@@ -501,7 +501,8 @@ The offset is relative to the start of the node record
 
 ==== Branch node record
 
-The key of a branch node contains key of the largest value of the corresponding sub node.
+The key of a branch node contains key of the largest value of the corresponding
+branch. Note that the key of the last branch node can be empty.
 
 The value of a branch node contains a <<metadata_block_reference,metadata block reference>>
 of the corresponding sub node.
@@ -525,10 +526,12 @@ The object record key is 16 bytes in size and consists of:
 [cols="1,1,1,5",options="header"]
 |===
 | Offset | Size | Value | Description
-| 0 | 8 | | [yellow-background]*Unknown (empty values)*
-| 8 | 8 | | Object identifier +
-See section: <<object_identifiers,object identifiers>>
+| 0 | 8 | | Record key (upper 64-bits), which contains 0-byte values
+| 8 | 8 | | Record key (lower 64-bits), which contains an <<object_identifiers,object identifier>>
 |===
+
+[NOTE]
+Note that the record key corresponds to the file system identifier.
 
 ==== Object record value - format version 1
 
@@ -597,7 +600,7 @@ Introduced in format version 3?
 | 0x00000600 | REFS_ROOT_DIRECTORY_ID | <<directory_object,Root directory object>>
 | | |
 | 0x00000701 | REFS_OBJECT_UNKNOWN_3 | <<directory_object,Directory object>> +
-Values 0x00000700 and above are used for sub directories.
+Values 0x00000701 and above are used for sub directories.
 |===
 
 == Container tree
@@ -650,6 +653,11 @@ multiple directory records.
 The format of the directory record value is dependent on the record type in
 the directory record key.
 
+A ReFS file system identifier consists of:
+
+* 64-bit file identifier or 0 for the directory
+* 64-bit directory object identifier
+
 === Directory record key
 
 The directory record key is variable in size and consists of:
@@ -666,36 +674,50 @@ The directory record key is variable in size and consists of:
 [cols="1,1,5",options="header"]
 |===
 | Value | Identifier | Description
-| 0x0010 | |
-| 0x0020 | |
-| 0x0030 | | Directory entry
+| 0x0010 | | Base record
+| 0x0020 | | Name record
+| 0x0030 | | Entry record
 |===
 
-==== Directory record key (record type: 0x0010)
+==== Base record (record type: 0x0010)
+
+The directory object base record key is 4 bytes in size and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
 | Offset | Size | Value | Description
 | 0 | 2 | 0x0010 | Record type
-| 2 | 2 | 0x0000 |
+| 2 | 2 | | [yellow-background]*Unknown (seen: 0x0000)*
 |===
 
-==== Directory record key (record type: 0x0020)
+==== Name record (record type: 0x0020)
+
+The directory object name record key is 24 bytes in size and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
 | Offset | Size | Value | Description
 | 0 | 2 | 0x0020 | Record type
-| 2 | 2 | 0x8000 |
+| 2 | 2 | | [yellow-background]*Unknown (seen: 0x8000)*
 | 4 | 4 | | [yellow-background]*Unknown (empty values?)*
-| 8 | 8 | | Object identifier +
-See section: <<object_identifiers,object identifiers>>
-| 16 | 8 | | [yellow-background]*Unknown*
+| 8 | 8 | | File system identifier (lower 64-bits)
+| 16 | 8 | | File system identifier (upper 64-bits)
 |===
 
-==== Directory entry record key (record type: 0x0030)
+The directory object name record value is variable in size and consists of:
 
-The directory entry record key is variable in size and consists of:
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 8 | | [yellow-background]*Unknown (empty values?)*
+| 8 | 2 | | [yellow-background]*Unknown (seen: 0x0c)*
+| 10 | ... | | Name +
+Contains an UTF-16 little-endian without end-of-string character
+|===
+
+==== Entry record (record type: 0x0030)
+
+The directory object entry record key is variable in size and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
@@ -706,6 +728,9 @@ See section: <<directory_entry_types,Directory entry types>>
 | 4 | ... | | Name +
 Contains an UTF-16 little-endian without end-of-string character
 |===
+
+The format of the directory object entry record value is dependent on
+the directory entry type.
 
 ==== [[directory_entry_types]]Directory entry types
 
@@ -735,7 +760,7 @@ Contains a FILETIME
 | 24 | 8 | | Last modification date and time +
 (Also referred to as last written date and time) +
 Contains a FILETIME
-| 32 | 8 | | Metadata last modification date and time +
+| 32 | 8 | | Entry (or metadata) last modification date and time +
 Contains a FILETIME
 | 40 | 8 | | Last access date and time +
 Contains a FILETIME
@@ -747,8 +772,10 @@ Contains a FILETIME
 === [[directory_entry_record_value_file]]Directory entry record value - file
 
 The file type directory entry record value is variable in size and consists of
-and embedded Ministore node. The variable data of the tree header is TODO bytes
-in size and consists of:
+an embedded Ministore node.
+
+The header data of the embedded Ministore node is 128 bytes in size and consists
+of:
 
 [cols="1,1,1,5",options="header"]
 |===
@@ -758,18 +785,21 @@ Contains a FILETIME
 | 8 | 8 | | Last modification date and time +
 (Also referred to as last written date and time) +
 Contains a FILETIME
-| 16 | 8 | | Metadata last modification date and time +
+| 16 | 8 | | Entry (or metadata) last modification date and time +
 Contains a FILETIME
 | 24 | 8 | | Last access date and time +
 Contains a FILETIME
 | 32 | 4 | | File attribute flags
 | 36 | 4 | | [yellow-background]*Unknown*
-| 52 | 4 | | Security descriptor identifier
+| 40 | 8 | | File system identifier (lower 64-bits)
+| 48 | 8 | | File system identifier (upper 64-bits)
 | 56 | 4 | | [yellow-background]*Unknown*
 | 60 | 4 | | [yellow-background]*Unknown*
-| 64 | 4 | | [yellow-background]*Unknown*
-| 68 | 4 | | [yellow-background]*Unknown*
-| 72 | ... | | [yellow-background]*Unknown*
+| 64 | 8 | | File size
+| 72 | 8 | | Allocated (or reserved) file size
+| 80 | 32 | | [yellow-background]*Unknown*
+| 112 | 8 | | [yellow-background]*Unknown*
+| 120 | 8 | | [yellow-background]*Unknown*
 |===
 
 == [[file_system_information_object]]File system information object

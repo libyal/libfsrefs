@@ -1,5 +1,5 @@
 /*
- * The ReFS checkpoint metadata definition
+ * The ReFS checkpoint definition
  *
  * Copyright (C) 2012-2023, Joachim Metz <joachim.metz@gmail.com>
  *

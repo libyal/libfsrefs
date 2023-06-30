@@ -1,5 +1,5 @@
 /*
- * The ReFS ministore tree metadata definition
+ * The ReFS ministore tree definitions
  *
  * Copyright (C) 2012-2023, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -77,6 +77,11 @@ struct fsrefs_ministore_tree_header
 	 * Consists of 4 bytes
 	 */
 	uint8_t unknown8[ 4 ];
+
+	/* Unknown
+	 * Consists of 4 bytes
+	 */
+	uint8_t unknown9[ 4 ];
 };
 
 typedef struct fsrefs_ministore_tree_node_header fsrefs_ministore_tree_node_header_t;

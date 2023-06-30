@@ -333,7 +333,7 @@ int libfsrefs_block_reference_read_data(
 		 checksum_data_offset );
 
 		libcnotify_printf(
-		 "%s: checksum data size\t\t: %" PRIu16 "\n",
+		 "%s: checksum data size\t\t\t: %" PRIu16 "\n",
 		 function,
 		 checksum_data_size );
 

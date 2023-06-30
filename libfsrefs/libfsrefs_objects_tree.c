@@ -233,6 +233,17 @@ int libfsrefs_objects_tree_read(
 
 		goto on_error;
 	}
+	if( ( objects_tree->root_node->node_type_flags & 0x03 ) != 0x02 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
+		 "%s: invalid ministore tree: 0 (objects) root node - unsupported node type flags.",
+		 function );
+
+		goto on_error;
+	}
 	return( 1 );
 
 on_error:

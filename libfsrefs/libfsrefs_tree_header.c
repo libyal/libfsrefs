@@ -267,7 +267,15 @@ int libfsrefs_tree_header_read_data(
 		 ( (fsrefs_ministore_tree_header_t *) data )->unknown8,
 		 value_32bit );
 		libcnotify_printf(
-		 "%s: number of leaf values\t\t\t: %" PRIu32 "\n",
+		 "%s: unknown8\t\t\t\t: 0x%08" PRIx32 "\n",
+		 function,
+		 value_32bit );
+
+		byte_stream_copy_to_uint32_little_endian(
+		 ( (fsrefs_ministore_tree_header_t *) data )->unknown9,
+		 value_32bit );
+		libcnotify_printf(
+		 "%s: unknown9\t\t\t\t: 0x%08" PRIx32 "\n",
 		 function,
 		 value_32bit );
 

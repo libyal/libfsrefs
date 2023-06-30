@@ -23,6 +23,7 @@ lib_LTLIBRARIES = libfsrefs.la
 
 libfsrefs_la_SOURCES = \
 	fsrefs_checkpoint.h \
+	fsrefs_directory_object.h \
 	fsrefs_metadata_block.h \
 	fsrefs_ministore_tree.h \
 	fsrefs_superblock.h \

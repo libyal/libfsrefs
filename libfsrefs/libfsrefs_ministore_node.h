@@ -48,6 +48,14 @@ struct libfsrefs_ministore_node
 	 */
 	size_t data_size;
 
+	/* The header data
+	 */
+	const uint8_t *header_data;
+
+	/* The header data size
+	 */
+	size_t header_data_size;
+
 	/* The records array
 	 */
 	libcdata_array_t *records_array;

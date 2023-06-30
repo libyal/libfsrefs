@@ -1,4 +1,4 @@
-.Dd June 28, 2023
+.Dd June 30, 2023
 .Dt libfsrefs 3
 .Os libfsrefs
 .Sh NAME
@@ -91,6 +91,16 @@ File entry functions
 .Ft int
 .Fn libfsrefs_file_entry_free "libfsrefs_file_entry_t **file_entry" "libfsrefs_error_t **error"
 .Ft int
+.Fn libfsrefs_file_entry_get_creation_time "libfsrefs_file_entry_t *file_entry" "uint64_t *filetime" "libfsrefs_error_t **error"
+.Ft int
+.Fn libfsrefs_file_entry_get_modification_time "libfsrefs_file_entry_t *file_entry" "uint64_t *filetime" "libfsrefs_error_t **error"
+.Ft int
+.Fn libfsrefs_file_entry_get_access_time "libfsrefs_file_entry_t *file_entry" "uint64_t *filetime" "libfsrefs_error_t **error"
+.Ft int
+.Fn libfsrefs_file_entry_get_entry_modification_time "libfsrefs_file_entry_t *file_entry" "uint64_t *filetime" "libfsrefs_error_t **error"
+.Ft int
+.Fn libfsrefs_file_entry_get_file_attribute_flags "libfsrefs_file_entry_t *file_entry" "uint32_t *file_attribute_flags" "libfsrefs_error_t **error"
+.Ft int
 .Fn libfsrefs_file_entry_get_utf8_name_size "libfsrefs_file_entry_t *file_entry" "size_t *utf8_string_size" "libfsrefs_error_t **error"
 .Ft int
 .Fn libfsrefs_file_entry_get_utf8_name "libfsrefs_file_entry_t *file_entry" "uint8_t *utf8_string" "size_t utf8_string_size" "libfsrefs_error_t **error"
@@ -102,6 +112,8 @@ File entry functions
 .Fn libfsrefs_file_entry_get_number_of_sub_file_entries "libfsrefs_file_entry_t *file_entry" "int *number_of_sub_file_entries" "libfsrefs_error_t **error"
 .Ft int
 .Fn libfsrefs_file_entry_get_sub_file_entry_by_index "libfsrefs_file_entry_t *file_entry" "int sub_file_entry_index" "libfsrefs_file_entry_t **sub_file_entry" "libfsrefs_error_t **error"
+.Ft int
+.Fn libfsrefs_file_entry_get_size "libfsrefs_file_entry_t *file_entry" "size64_t *size" "libfsrefs_error_t **error"
 .Sh DESCRIPTION
 The
 .Fn libfsrefs_get_version

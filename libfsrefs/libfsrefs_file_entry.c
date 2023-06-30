@@ -323,6 +323,391 @@ on_error:
 	return( -1 );
 }
 
+/* Retrieves the creation date and time
+ * Returns 1 if successful, 0 if not available or -1 on error
+ */
+int libfsrefs_file_entry_get_creation_time(
+     libfsrefs_file_entry_t *file_entry,
+     uint64_t *filetime,
+     libcerror_error_t **error )
+{
+	libfsrefs_internal_file_entry_t *internal_file_entry = NULL;
+	static char *function                                = "libfsrefs_file_entry_get_creation_time";
+	int result                                           = 0;
+
+	if( file_entry == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid file entry.",
+		 function );
+
+		return( -1 );
+	}
+	internal_file_entry = (libfsrefs_internal_file_entry_t *) file_entry;
+
+#if defined( HAVE_LIBFSREFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_grab_for_read(
+	     internal_file_entry->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to grab read/write lock for reading.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	if( internal_file_entry->directory_entry != NULL )
+	{
+		result = libfsrefs_directory_entry_get_creation_time(
+		          internal_file_entry->directory_entry,
+		          filetime,
+		          error );
+
+		if( result != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve creation time from directory entry.",
+			 function );
+
+			result = -1;
+		}
+	}
+#if defined( HAVE_LIBFSREFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_release_for_read(
+	     internal_file_entry->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to release read/write lock for reading.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	return( result );
+}
+
+/* Retrieves the (file) modification (last written) date and time
+ * Returns 1 if successful, 0 if not available or -1 on error
+ */
+int libfsrefs_file_entry_get_modification_time(
+     libfsrefs_file_entry_t *file_entry,
+     uint64_t *filetime,
+     libcerror_error_t **error )
+{
+	libfsrefs_internal_file_entry_t *internal_file_entry = NULL;
+	static char *function                                = "libfsrefs_file_entry_get_modification_time";
+	int result                                           = 0;
+
+	if( file_entry == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid file entry.",
+		 function );
+
+		return( -1 );
+	}
+	internal_file_entry = (libfsrefs_internal_file_entry_t *) file_entry;
+
+#if defined( HAVE_LIBFSREFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_grab_for_read(
+	     internal_file_entry->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to grab read/write lock for reading.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	if( internal_file_entry->directory_entry != NULL )
+	{
+		result = libfsrefs_directory_entry_get_modification_time(
+		          internal_file_entry->directory_entry,
+		          filetime,
+		          error );
+
+		if( result != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve modification time from directory entry.",
+			 function );
+
+			result = -1;
+		}
+	}
+#if defined( HAVE_LIBFSREFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_release_for_read(
+	     internal_file_entry->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to release read/write lock for reading.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	return( result );
+}
+
+/* Retrieves the access date and time
+ * Returns 1 if successful, 0 if not available or -1 on error
+ */
+int libfsrefs_file_entry_get_access_time(
+     libfsrefs_file_entry_t *file_entry,
+     uint64_t *filetime,
+     libcerror_error_t **error )
+{
+	libfsrefs_internal_file_entry_t *internal_file_entry = NULL;
+	static char *function                                = "libfsrefs_file_entry_get_access_time";
+	int result                                           = 0;
+
+	if( file_entry == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid file entry.",
+		 function );
+
+		return( -1 );
+	}
+	internal_file_entry = (libfsrefs_internal_file_entry_t *) file_entry;
+
+#if defined( HAVE_LIBFSREFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_grab_for_read(
+	     internal_file_entry->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to grab read/write lock for reading.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	if( internal_file_entry->directory_entry != NULL )
+	{
+		result = libfsrefs_directory_entry_get_access_time(
+		          internal_file_entry->directory_entry,
+		          filetime,
+		          error );
+
+		if( result != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve access time from directory entry.",
+			 function );
+
+			result = -1;
+		}
+	}
+#if defined( HAVE_LIBFSREFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_release_for_read(
+	     internal_file_entry->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to release read/write lock for reading.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	return( result );
+}
+
+/* Retrieves the (file system entry) modification date and time
+ * Returns 1 if successful, 0 if not available or -1 on error
+ */
+int libfsrefs_file_entry_get_entry_modification_time(
+     libfsrefs_file_entry_t *file_entry,
+     uint64_t *filetime,
+     libcerror_error_t **error )
+{
+	libfsrefs_internal_file_entry_t *internal_file_entry = NULL;
+	static char *function                                = "libfsrefs_file_entry_get_entry_modification_time";
+	int result                                           = 0;
+
+	if( file_entry == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid file entry.",
+		 function );
+
+		return( -1 );
+	}
+	internal_file_entry = (libfsrefs_internal_file_entry_t *) file_entry;
+
+#if defined( HAVE_LIBFSREFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_grab_for_read(
+	     internal_file_entry->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to grab read/write lock for reading.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	if( internal_file_entry->directory_entry != NULL )
+	{
+		result = libfsrefs_directory_entry_get_entry_modification_time(
+		          internal_file_entry->directory_entry,
+		          filetime,
+		          error );
+
+		if( result != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve entry modification time from directory entry.",
+			 function );
+
+			result = -1;
+		}
+	}
+#if defined( HAVE_LIBFSREFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_release_for_read(
+	     internal_file_entry->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to release read/write lock for reading.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	return( result );
+}
+
+/* Retrieves the file attribute flags
+ * Returns 1 if successful, 0 if not available or -1 on error
+ */
+int libfsrefs_file_entry_get_file_attribute_flags(
+     libfsrefs_file_entry_t *file_entry,
+     uint32_t *file_attribute_flags,
+     libcerror_error_t **error )
+{
+	libfsrefs_internal_file_entry_t *internal_file_entry = NULL;
+	static char *function                                = "libfsrefs_file_entry_get_file_attribute_flags";
+	int result                                           = 0;
+
+	if( file_entry == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid file entry.",
+		 function );
+
+		return( -1 );
+	}
+	internal_file_entry = (libfsrefs_internal_file_entry_t *) file_entry;
+
+#if defined( HAVE_LIBFSREFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_grab_for_read(
+	     internal_file_entry->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to grab read/write lock for reading.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	if( internal_file_entry->directory_entry != NULL )
+	{
+		result = libfsrefs_directory_entry_get_file_attribute_flags(
+		          internal_file_entry->directory_entry,
+		          file_attribute_flags,
+		          error );
+
+		if( result != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve file attribute flags from directory entry.",
+			 function );
+
+			result = -1;
+		}
+	}
+#if defined( HAVE_LIBFSREFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_release_for_read(
+	     internal_file_entry->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to release read/write lock for reading.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	return( result );
+}
+
 /* Retrieves the size of the UTF-8 encoded name
  * The returned size includes the end of string character
  * Returns 1 if successful, 0 if not available or -1 on error

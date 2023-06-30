@@ -1,5 +1,5 @@
 /*
- * The ReFS superblock metadata definition
+ * The ReFS superblock definition
  *
  * Copyright (C) 2012-2023, Joachim Metz <joachim.metz@gmail.com>
  *

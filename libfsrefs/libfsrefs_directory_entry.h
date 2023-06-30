@@ -25,6 +25,7 @@
 #include <common.h>
 #include <types.h>
 
+#include "libfsrefs_io_handle.h"
 #include "libfsrefs_libcerror.h"
 #include "libfsrefs_node_record.h"
 
@@ -51,6 +52,26 @@ struct libfsrefs_directory_entry
 	/* The name data size
 	 */
 	size_t name_data_size;
+
+	/* The creation time
+	 */
+	uint64_t creation_time;
+
+	/* The modification time
+	 */
+	uint64_t modification_time;
+
+	/* The access time
+	 */
+	uint64_t access_time;
+
+	/* The entry modification time
+	 */
+	uint64_t entry_modification_time;
+
+	/* The file attribute flags
+	 */
+	uint32_t file_attribute_flags;
 };
 
 int libfsrefs_directory_entry_initialize(
@@ -63,6 +84,13 @@ int libfsrefs_directory_entry_free(
 
 int libfsrefs_directory_entry_read_node_record(
      libfsrefs_directory_entry_t *directory_entry,
+     libfsrefs_io_handle_t *io_handle,
+     libfsrefs_node_record_t *node_record,
+     libcerror_error_t **error );
+
+int libfsrefs_directory_entry_read_node_record_file_values(
+     libfsrefs_directory_entry_t *directory_entry,
+     libfsrefs_io_handle_t *io_handle,
      libfsrefs_node_record_t *node_record,
      libcerror_error_t **error );
 
@@ -91,6 +119,31 @@ int libfsrefs_directory_entry_get_utf16_name(
      libfsrefs_directory_entry_t *directory_entry,
      uint16_t *utf16_string,
      size_t utf16_string_size,
+     libcerror_error_t **error );
+
+int libfsrefs_directory_entry_get_creation_time(
+     libfsrefs_directory_entry_t *directory_entry,
+     uint64_t *filetime,
+     libcerror_error_t **error );
+
+int libfsrefs_directory_entry_get_modification_time(
+     libfsrefs_directory_entry_t *directory_entry,
+     uint64_t *filetime,
+     libcerror_error_t **error );
+
+int libfsrefs_directory_entry_get_access_time(
+     libfsrefs_directory_entry_t *directory_entry,
+     uint64_t *filetime,
+     libcerror_error_t **error );
+
+int libfsrefs_directory_entry_get_entry_modification_time(
+     libfsrefs_directory_entry_t *directory_entry,
+     uint64_t *filetime,
+     libcerror_error_t **error );
+
+int libfsrefs_directory_entry_get_file_attribute_flags(
+     libfsrefs_directory_entry_t *directory_entry,
+     uint32_t *file_attribute_flags,
      libcerror_error_t **error );
 
 #if defined( __cplusplus )

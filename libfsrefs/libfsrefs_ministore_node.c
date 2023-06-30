@@ -337,15 +337,18 @@ int libfsrefs_ministore_node_read_data(
 		}
 		data_offset += sizeof( fsrefs_ministore_tree_header_t );
 
+		ministore_node->header_data      = &( data[ data_offset ] );
+		ministore_node->header_data_size = node_header_offset - data_offset;
+
 #if defined( HAVE_DEBUG_OUTPUT )
 		if( libcnotify_verbose != 0 )
 		{
 			libcnotify_printf(
-			 "%s: unknown data:\n",
+			 "%s: header data:\n",
 			 function );
 			libcnotify_print_data(
-			 &( data[ data_offset ] ),
-			 node_header_offset - data_offset,
+			 ministore_node->header_data,
+			 ministore_node->header_data_size,
 			 LIBCNOTIFY_PRINT_DATA_FLAG_GROUP_DATA );
 		}
 #endif
@@ -852,7 +855,7 @@ int libfsrefs_ministore_node_read_file_io_handle(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_IO,
 		 LIBCERROR_IO_ERROR_READ_FAILED,
-		 "%s: unable to read ministore node metadata.",
+		 "%s: unable to read ministore node.",
 		 function );
 
 		goto on_error;

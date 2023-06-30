@@ -96,6 +96,36 @@ int libfsrefs_internal_file_entry_get_directory_object(
      libcerror_error_t **error );
 
 LIBFSREFS_EXTERN \
+int libfsrefs_file_entry_get_creation_time(
+     libfsrefs_file_entry_t *file_entry,
+     uint64_t *filetime,
+     libcerror_error_t **error );
+
+LIBFSREFS_EXTERN \
+int libfsrefs_file_entry_get_modification_time(
+     libfsrefs_file_entry_t *file_entry,
+     uint64_t *filetime,
+     libcerror_error_t **error );
+
+LIBFSREFS_EXTERN \
+int libfsrefs_file_entry_get_access_time(
+     libfsrefs_file_entry_t *file_entry,
+     uint64_t *filetime,
+     libcerror_error_t **error );
+
+LIBFSREFS_EXTERN \
+int libfsrefs_file_entry_get_entry_modification_time(
+     libfsrefs_file_entry_t *file_entry,
+     uint64_t *filetime,
+     libcerror_error_t **error );
+
+LIBFSREFS_EXTERN \
+int libfsrefs_file_entry_get_file_attribute_flags(
+     libfsrefs_file_entry_t *file_entry,
+     uint32_t *file_attribute_flags,
+     libcerror_error_t **error );
+
+LIBFSREFS_EXTERN \
 int libfsrefs_file_entry_get_utf8_name_size(
      libfsrefs_file_entry_t *file_entry,
      size_t *utf8_string_size,
@@ -132,6 +162,12 @@ int libfsrefs_file_entry_get_sub_file_entry_by_index(
      libfsrefs_file_entry_t *file_entry,
      int sub_file_entry_index,
      libfsrefs_file_entry_t **sub_file_entry,
+     libcerror_error_t **error );
+
+LIBFSREFS_EXTERN \
+int libfsrefs_file_entry_get_size(
+     libfsrefs_file_entry_t *file_entry,
+     size64_t *size,
      libcerror_error_t **error );
 
 #if defined( __cplusplus )
