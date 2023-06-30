@@ -1251,7 +1251,7 @@ int libfsrefs_internal_volume_open_read(
 		 "Reading volume information object\n" );
 	}
 #endif
-	if( libfsrefs_objects_get_ministore_tree_by_identifier(
+	if( libfsrefs_objects_tree_get_ministore_tree_by_identifier(
 	     internal_volume->objects_tree,
 	     internal_volume->io_handle,
 	     file_io_handle,
@@ -1480,7 +1480,7 @@ int libfsrefs_internal_volume_get_volume_name_record(
 	 key_data,
 	 object_identifier );
 
-	if( libfsrefs_ministore_node_get_record(
+	if( libfsrefs_ministore_node_get_record_by_key(
 	     internal_volume->volume_information_object,
 	     key_data,
 	     8,

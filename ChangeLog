@@ -1,11 +1,8 @@
 TODO
 
 Format support
-* Move checkpoint into file system
-* Get root directory from object identifiers table
-* For version 3.x map block number to container
-* For version 3.x use descriptor to read metadata block
-* Add block tree for traversing ministore nodes
+* Use checkpoint in determining block offsets
+* Rename metadata block header to block header ?
 
 API
 * add function to retrieve container size

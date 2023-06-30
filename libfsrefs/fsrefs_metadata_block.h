@@ -124,9 +124,9 @@ struct fsrefs_metadata_block_header_v3
 	uint8_t unknown7[ 8 ];
 };
 
-typedef struct fsrefs_metadata_block_descriptor_v1 fsrefs_metadata_block_descriptor_v1_t;
+typedef struct fsrefs_metadata_block_reference_v1 fsrefs_metadata_block_reference_v1_t;
 
-struct fsrefs_metadata_block_descriptor_v1
+struct fsrefs_metadata_block_reference_v1
 {
 	/* The metadata block number
 	 * Consists of 8 bytes
@@ -159,9 +159,9 @@ struct fsrefs_metadata_block_descriptor_v1
 	uint8_t unknown2[ 2 ];
 };
 
-typedef struct fsrefs_metadata_block_descriptor_v3 fsrefs_metadata_block_descriptor_v3_t;
+typedef struct fsrefs_metadata_block_reference_v3 fsrefs_metadata_block_reference_v3_t;
 
-struct fsrefs_metadata_block_descriptor_v3
+struct fsrefs_metadata_block_reference_v3
 {
 	/* The first metadata block number
 	 * Consists of 8 bytes

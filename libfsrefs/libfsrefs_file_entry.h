@@ -25,6 +25,7 @@
 #include <common.h>
 #include <types.h>
 
+#include "libfsrefs_directory_entry.h"
 #include "libfsrefs_directory_object.h"
 #include "libfsrefs_extern.h"
 #include "libfsrefs_io_handle.h"
@@ -32,7 +33,6 @@
 #include "libfsrefs_libcerror.h"
 #include "libfsrefs_libcthreads.h"
 #include "libfsrefs_objects_tree.h"
-#include "libfsrefs_node_record.h"
 #include "libfsrefs_types.h"
 
 #if defined( __cplusplus )
@@ -55,6 +55,10 @@ struct libfsrefs_internal_file_entry
 	 */
 	libfsrefs_objects_tree_t *objects_tree;
 
+	/* The directory entry
+	 */
+	libfsrefs_directory_entry_t *directory_entry;
+
 	/* The directory object
 	 */
 	libfsrefs_directory_object_t *directory_object;
@@ -62,14 +66,6 @@ struct libfsrefs_internal_file_entry
 	/* The (file) entry type
 	 */
 	uint16_t entry_type;
-
-	/* The name data
-	 */
-	uint8_t *name_data;
-
-	/* The name data size
-	 */
-	size_t name_data_size;
 
 #if defined( HAVE_LIBFSREFS_MULTI_THREAD_SUPPORT )
 	/* The read/write lock
@@ -83,7 +79,7 @@ int libfsrefs_file_entry_initialize(
      libfsrefs_io_handle_t *io_handle,
      libbfio_handle_t *file_io_handle,
      libfsrefs_objects_tree_t *objects_tree,
-     libfsrefs_node_record_t *node_record,
+     libfsrefs_directory_entry_t *directory_entry,
      libcerror_error_t **error );
 
 LIBFSREFS_EXTERN \
@@ -93,6 +89,10 @@ int libfsrefs_file_entry_free(
 
 int libfsrefs_internal_file_entry_get_directory_object(
      libfsrefs_internal_file_entry_t *internal_file_entry,
+     libfsrefs_io_handle_t *io_handle,
+     libbfio_handle_t *file_io_handle,
+     libfsrefs_objects_tree_t *objects_tree,
+     libfsrefs_directory_entry_t *directory_entry,
      libcerror_error_t **error );
 
 LIBFSREFS_EXTERN \

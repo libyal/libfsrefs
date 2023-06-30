@@ -25,7 +25,7 @@
 #include <common.h>
 #include <types.h>
 
-#include "libfsrefs_block_descriptor.h"
+#include "libfsrefs_block_reference.h"
 #include "libfsrefs_checkpoint.h"
 #include "libfsrefs_io_handle.h"
 #include "libfsrefs_libcerror.h"
@@ -80,12 +80,10 @@ int libfsrefs_file_system_read_container_trees(
      libbfio_handle_t *file_io_handle,
      libcerror_error_t **error );
 
-int libfsrefs_file_system_read_ministore_node(
+int libfsrefs_file_system_get_block_offsets(
      libfsrefs_file_system_t *file_system,
      libfsrefs_io_handle_t *io_handle,
-     libbfio_handle_t *file_io_handle,
-     libfsrefs_block_descriptor_t *block_descriptor,
-     libfsrefs_ministore_node_t **node,
+     libfsrefs_block_reference_t *block_reference,
      libcerror_error_t **error );
 
 int libfsrefs_file_system_get_number_of_ministore_trees(

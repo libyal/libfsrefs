@@ -210,11 +210,11 @@ The format version 3 metadata block header is 80 bytes of size and consists of:
 [NOTE]
 In format version 3 the metadata can span multiple metadata blocks.
 
-=== [[metadata_block_descriptor]]Metadata block descriptor
+=== [[metadata_block_reference]]Metadata block reference
 
-==== Metadata block descriptor - format version 1
+==== Metadata block reference - format version 1
 
-The format version 1 metadata block descriptor is 24 bytes of size and
+The format version 1 metadata block reference is 24 bytes of size and
 consists of:
 
 [cols="1,1,1,5",options="header"]
@@ -231,9 +231,9 @@ The offset is relative to the start of the checksum descriptor
 | 16 | 8 | | Checksum data
 |===
 
-==== Metadata block descriptor - format version 3
+==== Metadata block reference - format version 3
 
-The format version 3 metadata block descriptor is 48 bytes of size and
+The format version 3 metadata block reference is 48 bytes of size and
 consists of:
 
 [cols="1,1,1,5",options="header"]
@@ -270,7 +270,7 @@ The superblock metadata consists of:
 * <<metadata_block_header,Metadata block header>>
 * Superblock
 * Checkpoint references data
-* Self <<metadata_block_descriptor,metadata block descriptor>>
+* Self <<metadata_block_reference,metadata block reference>>
 
 === Superblock
 
@@ -285,9 +285,9 @@ The superblock is 48 bytes of size and consists of:
 | 32 | 4 | | Checkpoint references data offset +
 The offset is relative to the start of the metadata block
 | 36 | 4 | 2 | [yellow-background]*Unknown (number of checkpoint metadata block numbers?)*
-| 40 | 4 | | Self descriptor data offset +
+| 40 | 4 | | Self (block) reference data offset +
 The offset is relative to the start of the metadata block
-| 44 | 4 | | Self descriptor data size
+| 44 | 4 | | Self (block) reference data size
 |===
 
 === Checkpoint references data
@@ -308,8 +308,8 @@ The checkpoint metadata consists of:
 * Superblock
 * Checkpoint header
 * Checkpoint trailer
-* Self <<metadata_block_descriptor,metadata block descriptor>
-* Ministore tree <<metadata_block_descriptor,metadata block descriptors>>
+* Self <<metadata_block_reference,metadata block reference>
+* Ministore tree <<metadata_block_reference,metadata block references>>
 
 === Checkpoint header
 
@@ -321,9 +321,9 @@ The checkpoint header is 16 bytes of size and consists of:
 | 0 | 4 | 0x00 | [yellow-background]*Unknown (empty values)*
 | 4 | 2 | | Major format version
 | 6 | 2 | | Minor format version
-| 8 | 4 | | Self descriptor data offset +
+| 8 | 4 | | Self (block) reference data offset +
 The offset is relative to the start of the metadata block
-| 12 | 4 | | Self descriptor data size
+| 12 | 4 | | Self (block) reference data size
 |===
 
 === Checkpoint trailer
@@ -366,7 +366,7 @@ The offset is relative to the start of the metadata block
 | ... | ... | 0x00 | [yellow-background]*Unknown (empty values)*
 |===
 
-=== Ministore tree block descriptors
+=== Ministore tree block references
 
 [cols="1,1,5",options="header"]
 |===
@@ -499,6 +499,13 @@ The offset is relative to the start of the node record
 | 0x0040 | | [yellow-background]*Unknown (Is stream record?)*
 |===
 
+==== Branch node record
+
+The key of a branch node contains key of the largest value of the corresponding sub node.
+
+The value of a branch node contains a <<metadata_block_reference,metadata block reference>>
+of the corresponding sub node.
+
 == Objects tree
 
 The objects tree is a <<ministore_tree,Ministore B+-tree>> that contains
@@ -509,7 +516,7 @@ object records.
 An object record consists of:
 
 * key, containing an <<object_identifiers,object identifier>>
-* value, containing a <<metadata_block_descriptor,metadata block descriptor>> that reference the corresponding object <<ministore_tree,Ministore B+-tree>>
+* value, containing a <<metadata_block_reference,metadata block reference>> that reference the corresponding object <<ministore_tree,Ministore B+-tree>>
 
 ==== Object record key
 
@@ -530,8 +537,8 @@ The format version 1 object record value is 48 bytes in size and consists of:
 [cols="1,1,1,5",options="header"]
 |===
 | Offset | Size | Value | Description
-| 0 | 24 | | Block descriptor +
-See section: <<metadata_block_descriptor,metadata block descriptor>>
+| 0 | 24 | | Block reference +
+See section: <<metadata_block_reference,metadata block reference>>
 | 24 | 8 | | [yellow-background]*Unknown*
 | 32 | 4 | | [yellow-background]*Unknown*
 | 36 | 4 | | [yellow-background]*Unknown*
@@ -547,13 +554,13 @@ The format version 3 object record value is variable in size and consists of:
 | Offset | Size | Value | Description
 | 0 | 8 | | [yellow-background]*Unknown*
 | 8 | 4 | | [yellow-background]*Unknown*
-| 12 | 4 | | [yellow-background]*Unknown (size of block descriptor data?)*
+| 12 | 4 | | [yellow-background]*Unknown (size of block reference data?)*
 | 16 | 4 | | [yellow-background]*Unknown (size of used record data?)*
 | 20 | 4 | | [yellow-background]*Unknown*
 | 24 | 4 | | [yellow-background]*Unknown*
 | 28 | 4 | | [yellow-background]*Unknown*
-| 32 | 48 | | Block descriptor +
-See section: <<metadata_block_descriptor,metadata block descriptor>>
+| 32 | 48 | | Block reference +
+See section: <<metadata_block_reference,metadata block reference>>
 | ... | ... | | [yellow-background]*Unknown (remnant data?)*
 |===
 

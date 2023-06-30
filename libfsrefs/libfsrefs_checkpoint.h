@@ -25,7 +25,7 @@
 #include <common.h>
 #include <types.h>
 
-#include "libfsrefs_block_descriptor.h"
+#include "libfsrefs_block_reference.h"
 #include "libfsrefs_io_handle.h"
 #include "libfsrefs_libbfio.h"
 #include "libfsrefs_libcdata.h"
@@ -43,9 +43,9 @@ struct libfsrefs_checkpoint
 	 */
 	uint64_t sequence_number;
 
-	/* The (ministore tree) block descriptors array
+	/* The (ministore tree) block references array
 	 */
-	libcdata_array_t *block_descriptors_array;
+	libcdata_array_t *block_references_array;
 };
 
 int libfsrefs_checkpoint_initialize(
@@ -70,15 +70,15 @@ int libfsrefs_checkpoint_read_file_io_handle(
      off64_t file_offset,
      libcerror_error_t **error );
 
-int libfsrefs_checkpoint_get_number_of_ministore_tree_block_descriptors(
+int libfsrefs_checkpoint_get_number_of_ministore_tree_block_references(
      libfsrefs_checkpoint_t *checkpoint,
-     int *number_of_block_descriptors,
+     int *number_of_block_references,
      libcerror_error_t **error );
 
-int libfsrefs_checkpoint_get_ministore_tree_block_descriptor_by_index(
+int libfsrefs_checkpoint_get_ministore_tree_block_reference_by_index(
      libfsrefs_checkpoint_t *checkpoint,
-     int block_descriptor_index,
-     libfsrefs_block_descriptor_t **block_descriptor,
+     int block_reference_index,
+     libfsrefs_block_reference_t **block_reference,
      libcerror_error_t **error );
 
 #if defined( __cplusplus )

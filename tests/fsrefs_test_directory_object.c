@@ -35,6 +35,7 @@
 
 #include "../libfsrefs/libfsrefs_directory_object.h"
 #include "../libfsrefs/libfsrefs_file_system.h"
+#include "../libfsrefs/libfsrefs_io_handle.h"
 #include "../libfsrefs/libfsrefs_objects_tree.h"
 
 #if defined( __GNUC__ ) && !defined( LIBFSREFS_DLL_IMPORT )
@@ -48,6 +49,7 @@ int fsrefs_test_directory_object_initialize(
 	libcerror_error_t *error                       = NULL;
 	libfsrefs_directory_object_t *directory_object = NULL;
 	libfsrefs_file_system_t *file_system           = NULL;
+	libfsrefs_io_handle_t *io_handle               = NULL;
 	libfsrefs_objects_tree_t *objects_tree         = NULL;
 	int result                                     = 0;
 
@@ -59,6 +61,23 @@ int fsrefs_test_directory_object_initialize(
 
 	/* Initialize test
 	 */
+	result = libfsrefs_io_handle_initialize(
+	          &io_handle,
+	          &error );
+
+	FSREFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	FSREFS_TEST_ASSERT_IS_NOT_NULL(
+	 "io_handle",
+	 io_handle );
+
+	io_handle->metadata_block_size  = 16384;
+	io_handle->major_format_version = 1;
+	io_handle->volume_size          = 2080374784;
+
 	result = libfsrefs_file_system_initialize(
 	          &file_system,
 	          &error );
@@ -98,7 +117,9 @@ int fsrefs_test_directory_object_initialize(
 	 */
 	result = libfsrefs_directory_object_initialize(
 	          &directory_object,
+	          io_handle,
 	          objects_tree,
+	          (uint64_t) 0x00000701UL,
 	          &error );
 
 	FSREFS_TEST_ASSERT_EQUAL_INT(
@@ -135,7 +156,9 @@ int fsrefs_test_directory_object_initialize(
 	 */
 	result = libfsrefs_directory_object_initialize(
 	          NULL,
+	          io_handle,
 	          objects_tree,
+	          (uint64_t) 0x00000701UL,
 	          &error );
 
 	FSREFS_TEST_ASSERT_EQUAL_INT(
@@ -154,7 +177,9 @@ int fsrefs_test_directory_object_initialize(
 
 	result = libfsrefs_directory_object_initialize(
 	          &directory_object,
+	          io_handle,
 	          objects_tree,
+	          (uint64_t) 0x00000701UL,
 	          &error );
 
 	FSREFS_TEST_ASSERT_EQUAL_INT(
@@ -174,6 +199,27 @@ int fsrefs_test_directory_object_initialize(
 	result = libfsrefs_directory_object_initialize(
 	          &directory_object,
 	          NULL,
+	          objects_tree,
+	          (uint64_t) 0x00000701UL,
+	          &error );
+
+	FSREFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	FSREFS_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	result = libfsrefs_directory_object_initialize(
+	          &directory_object,
+	          io_handle,
+	          NULL,
+	          (uint64_t) 0x00000701UL,
 	          &error );
 
 	FSREFS_TEST_ASSERT_EQUAL_INT(
@@ -200,7 +246,9 @@ int fsrefs_test_directory_object_initialize(
 
 		result = libfsrefs_directory_object_initialize(
 		          &directory_object,
+		          io_handle,
 		          objects_tree,
+		          (uint64_t) 0x00000701UL,
 		          &error );
 
 		if( fsrefs_test_malloc_attempts_before_fail != -1 )
@@ -243,7 +291,9 @@ int fsrefs_test_directory_object_initialize(
 
 		result = libfsrefs_directory_object_initialize(
 		          &directory_object,
+		          io_handle,
 		          objects_tree,
+		          (uint64_t) 0x00000701UL,
 		          &error );
 
 		if( fsrefs_test_memset_attempts_before_fail != -1 )
@@ -314,6 +364,23 @@ int fsrefs_test_directory_object_initialize(
 	 "error",
 	 error );
 
+	result = libfsrefs_io_handle_free(
+	          &io_handle,
+	          &error );
+
+	FSREFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	FSREFS_TEST_ASSERT_IS_NULL(
+	 "io_handle",
+	 io_handle );
+
+	FSREFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
 	return( 1 );
 
 on_error:
@@ -338,6 +405,12 @@ on_error:
 	{
 		libfsrefs_file_system_free(
 		 &file_system,
+		 NULL );
+	}
+	if( io_handle != NULL )
+	{
+		libfsrefs_io_handle_free(
+		 &io_handle,
 		 NULL );
 	}
 	return( 0 );

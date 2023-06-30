@@ -105,6 +105,19 @@ int info_handle_close_input(
      info_handle_t *info_handle,
      libcerror_error_t **error );
 
+int info_handle_name_value_fprint(
+     info_handle_t *info_handle,
+     const system_character_t *value_string,
+     size_t value_string_length,
+     libcerror_error_t **error );
+
+int info_handle_file_entry_fprint(
+     info_handle_t *info_handle,
+     libfsrefs_file_entry_t *file_entry,
+     const system_character_t *path,
+     const system_character_t *file_entry_name,
+     libcerror_error_t **error );
+
 int info_handle_file_system_hierarchy_fprint_file_entry(
      info_handle_t *info_handle,
      libfsrefs_file_entry_t *file_entry,

@@ -36,6 +36,7 @@
 #include "fsrefs_test_memory.h"
 #include "fsrefs_test_unused.h"
 
+#include "../libfsrefs/libfsrefs_io_handle.h"
 #include "../libfsrefs/libfsrefs_superblock.h"
 
 uint8_t fsrefs_test_superblock_data1[ 16384 ] = {

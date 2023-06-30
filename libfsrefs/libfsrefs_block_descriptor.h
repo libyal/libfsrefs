@@ -25,7 +25,6 @@
 #include <common.h>
 #include <types.h>
 
-#include "libfsrefs_io_handle.h"
 #include "libfsrefs_libcerror.h"
 
 #if defined( __cplusplus )
@@ -36,25 +35,9 @@ typedef struct libfsrefs_block_descriptor libfsrefs_block_descriptor_t;
 
 struct libfsrefs_block_descriptor
 {
-	/* The first block number
+	/* The block number
 	 */
-	uint64_t block_number1;
-
-	/* The second block number
-	 */
-	uint64_t block_number2;
-
-	/* The third block number
-	 */
-	uint64_t block_number3;
-
-	/* The fourth block number
-	 */
-	uint64_t block_number4;
-
-	/* The checksum
-	 */
-	uint64_t checksum;
+	uint64_t block_number;
 };
 
 int libfsrefs_block_descriptor_initialize(
@@ -63,13 +46,6 @@ int libfsrefs_block_descriptor_initialize(
 
 int libfsrefs_block_descriptor_free(
      libfsrefs_block_descriptor_t **block_descriptor,
-     libcerror_error_t **error );
-
-int libfsrefs_block_descriptor_read_data(
-     libfsrefs_block_descriptor_t *block_descriptor,
-     libfsrefs_io_handle_t *io_handle,
-     const uint8_t *data,
-     size_t data_size,
      libcerror_error_t **error );
 
 #if defined( __cplusplus )

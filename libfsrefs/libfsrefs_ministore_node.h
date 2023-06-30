@@ -1,5 +1,5 @@
 /*
- * Ministore node (or level 2 metadata) functions
+ * Ministore node (or level 2+ metadata) functions
  *
  * Copyright (C) 2012-2023, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -25,6 +25,7 @@
 #include <common.h>
 #include <types.h>
 
+#include "libfsrefs_block_reference.h"
 #include "libfsrefs_io_handle.h"
 #include "libfsrefs_libbfio.h"
 #include "libfsrefs_libcdata.h"
@@ -50,6 +51,10 @@ struct libfsrefs_ministore_node
 	/* The records array
 	 */
 	libcdata_array_t *records_array;
+
+	/* The node type flags
+	 */
+	uint8_t node_type_flags;
 };
 
 int libfsrefs_ministore_node_initialize(
@@ -71,10 +76,21 @@ int libfsrefs_ministore_node_read_file_io_handle(
      libfsrefs_ministore_node_t *ministore_node,
      libfsrefs_io_handle_t *io_handle,
      libbfio_handle_t *file_io_handle,
-     off64_t file_offset,
+     libfsrefs_block_reference_t *block_reference,
      libcerror_error_t **error );
 
-int libfsrefs_ministore_node_get_record(
+int libfsrefs_ministore_node_get_number_of_records(
+     libfsrefs_ministore_node_t *ministore_node,
+     int *number_of_records,
+     libcerror_error_t **error );
+
+int libfsrefs_ministore_node_get_record_by_index(
+     libfsrefs_ministore_node_t *ministore_node,
+     int record_index,
+     libfsrefs_node_record_t **node_record,
+     libcerror_error_t **error );
+
+int libfsrefs_ministore_node_get_record_by_key(
      libfsrefs_ministore_node_t *ministore_node,
      const uint8_t *key_data,
      size_t key_data_size,

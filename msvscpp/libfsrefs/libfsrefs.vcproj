@@ -178,11 +178,27 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\libfsrefs\libfsrefs_block_reference.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfsrefs\libfsrefs_block_tree.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfsrefs\libfsrefs_block_tree_node.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\libfsrefs\libfsrefs_checkpoint.c"
 				>
 			</File>
 			<File
 				RelativePath="..\..\libfsrefs\libfsrefs_debug.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfsrefs\libfsrefs_directory_entry.c"
 				>
 			</File>
 			<File
@@ -280,6 +296,18 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\libfsrefs\libfsrefs_block_reference.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfsrefs\libfsrefs_block_tree.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfsrefs\libfsrefs_block_tree_node.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\libfsrefs\libfsrefs_checkpoint.h"
 				>
 			</File>
@@ -289,6 +317,10 @@
 			</File>
 			<File
 				RelativePath="..\..\libfsrefs\libfsrefs_definitions.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfsrefs\libfsrefs_directory_entry.h"
 				>
 			</File>
 			<File

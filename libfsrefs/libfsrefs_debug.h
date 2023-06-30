@@ -40,6 +40,9 @@ void libfsrefs_debug_print_file_attribute_flags(
 void libfsrefs_debug_print_node_record_flags(
       uint16_t node_record_flags );
 
+void libfsrefs_debug_print_node_type_flags(
+      uint8_t node_type_flags );
+
 int libfsrefs_debug_print_guid_value(
      const char *function_name,
      const char *value_name,

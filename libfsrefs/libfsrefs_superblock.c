@@ -24,7 +24,7 @@
 #include <memory.h>
 #include <types.h>
 
-#include "libfsrefs_block_descriptor.h"
+#include "libfsrefs_block_reference.h"
 #include "libfsrefs_debug.h"
 #include "libfsrefs_io_handle.h"
 #include "libfsrefs_libbfio.h"
@@ -150,17 +150,17 @@ int libfsrefs_superblock_read_data(
      size_t data_size,
      libcerror_error_t **error )
 {
-	static char *function                          = "libfsrefs_superblock_read_data";
-	size_t data_offset                             = 0;
-	size_t header_size                             = 0;
-	uint32_t checkpoints_data_offset               = 0;
-	uint32_t number_of_checkpoints                 = 0;
-	uint32_t self_reference_data_offset            = 0;
-	uint32_t self_reference_data_size              = 0;
+	static char *function                        = "libfsrefs_superblock_read_data";
+	size_t data_offset                           = 0;
+	size_t header_size                           = 0;
+	uint32_t checkpoints_data_offset             = 0;
+	uint32_t number_of_checkpoints               = 0;
+	uint32_t self_reference_data_offset          = 0;
+	uint32_t self_reference_data_size            = 0;
 
 #if defined( HAVE_DEBUG_OUTPUT )
-	libfsrefs_block_descriptor_t *block_descriptor = NULL;
-	uint64_t value_64bit                           = 0;
+	libfsrefs_block_reference_t *block_reference = NULL;
+	uint64_t value_64bit                         = 0;
 #endif
 
 	if( superblock == NULL )
@@ -467,21 +467,21 @@ int libfsrefs_superblock_read_data(
 		 self_reference_data_size,
 		 LIBCNOTIFY_PRINT_DATA_FLAG_GROUP_DATA );
 
-		if( libfsrefs_block_descriptor_initialize(
-		     &block_descriptor,
+		if( libfsrefs_block_reference_initialize(
+		     &block_reference,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-			 "%s: unable to create block descriptor.",
+			 "%s: unable to create block reference.",
 			 function );
 
 			goto on_error;
 		}
-		if( libfsrefs_block_descriptor_read_data(
-		     block_descriptor,
+		if( libfsrefs_block_reference_read_data(
+		     block_reference,
 		     io_handle,
 		     &( data[ data_offset ] ),
 		     self_reference_data_size,
@@ -491,20 +491,20 @@ int libfsrefs_superblock_read_data(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_IO,
 			 LIBCERROR_IO_ERROR_READ_FAILED,
-			 "%s: unable to read block descriptor.",
+			 "%s: unable to read block reference.",
 			 function );
 
 			goto on_error;
 		}
-		if( libfsrefs_block_descriptor_free(
-		     &block_descriptor,
+		if( libfsrefs_block_reference_free(
+		     &block_reference,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-			 "%s: unable to free block descriptor.",
+			 "%s: unable to free block reference.",
 			 function );
 
 			goto on_error;
@@ -516,10 +516,10 @@ int libfsrefs_superblock_read_data(
 
 on_error:
 #if defined( HAVE_DEBUG_OUTPUT )
-	if( block_descriptor != NULL )
+	if( block_reference != NULL )
 	{
-		libfsrefs_block_descriptor_free(
-		 &block_descriptor,
+		libfsrefs_block_reference_free(
+		 &block_reference,
 		 NULL );
 	}
 #endif
@@ -680,7 +680,7 @@ int libfsrefs_superblock_read_file_io_handle(
 
 			goto on_error;
 		}
-		if( metadata_block_header->block_number2 != 0 )
+		if( metadata_block_header->block_numbers[ 1 ] != 0 )
 		{
 			libcerror_error_set(
 			 error,
@@ -691,7 +691,7 @@ int libfsrefs_superblock_read_file_io_handle(
 
 			goto on_error;
 		}
-		if( metadata_block_header->block_number3 != 0 )
+		if( metadata_block_header->block_numbers[ 2 ] != 0 )
 		{
 			libcerror_error_set(
 			 error,
@@ -702,7 +702,7 @@ int libfsrefs_superblock_read_file_io_handle(
 
 			goto on_error;
 		}
-		if( metadata_block_header->block_number4 != 0 )
+		if( metadata_block_header->block_numbers[ 3 ] != 0 )
 		{
 			libcerror_error_set(
 			 error,

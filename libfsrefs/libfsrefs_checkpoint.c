@@ -24,7 +24,7 @@
 #include <memory.h>
 #include <types.h>
 
-#include "libfsrefs_block_descriptor.h"
+#include "libfsrefs_block_reference.h"
 #include "libfsrefs_checkpoint.h"
 #include "libfsrefs_io_handle.h"
 #include "libfsrefs_libbfio.h"
@@ -102,7 +102,7 @@ int libfsrefs_checkpoint_initialize(
 		return( -1 );
 	}
 	if( libcdata_array_initialize(
-	     &( ( *checkpoint )->block_descriptors_array ),
+	     &( ( *checkpoint )->block_references_array ),
 	     0,
 	     error ) != 1 )
 	{
@@ -110,7 +110,7 @@ int libfsrefs_checkpoint_initialize(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-		 "%s: unable to create block descriptors array.",
+		 "%s: unable to create block references array.",
 		 function );
 
 		goto on_error;
@@ -152,15 +152,15 @@ int libfsrefs_checkpoint_free(
 	if( *checkpoint != NULL )
 	{
 		if( libcdata_array_free(
-		     &( ( *checkpoint )->block_descriptors_array ),
-		     (int (*)(intptr_t **, libcerror_error_t **)) &libfsrefs_block_descriptor_free,
+		     &( ( *checkpoint )->block_references_array ),
+		     (int (*)(intptr_t **, libcerror_error_t **)) &libfsrefs_block_reference_free,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-			 "%s: unable to free block descriptors array.",
+			 "%s: unable to free block references array.",
 			 function );
 
 			result = -1;
@@ -183,23 +183,23 @@ int libfsrefs_checkpoint_read_data(
      size_t data_size,
      libcerror_error_t **error )
 {
-	libfsrefs_block_descriptor_t *block_descriptor = NULL;
-	static char *function                          = "libfsrefs_checkpoint_read_data";
-	size_t data_offset                             = 0;
-	size_t header_size                             = 0;
-	size_t trailer_size                            = 0;
-	uint32_t descriptor_offset                     = 0;
-	uint32_t number_of_offsets                     = 0;
-	uint32_t offset_index                          = 0;
-	uint32_t offsets_data_offset                   = 0;
-	uint32_t self_reference_data_offset            = 0;
-	uint32_t self_reference_data_size              = 0;
-	int entry_index                                = 0;
+	libfsrefs_block_reference_t *block_reference = NULL;
+	static char *function                        = "libfsrefs_checkpoint_read_data";
+	size_t data_offset                           = 0;
+	size_t header_size                           = 0;
+	size_t trailer_size                          = 0;
+	uint32_t block_reference_offset              = 0;
+	uint32_t number_of_offsets                   = 0;
+	uint32_t offset_index                        = 0;
+	uint32_t offsets_data_offset                 = 0;
+	uint32_t self_reference_data_offset          = 0;
+	uint32_t self_reference_data_size            = 0;
+	int entry_index                              = 0;
 
 #if defined( HAVE_DEBUG_OUTPUT )
-	uint64_t value_64bit                           = 0;
-	uint32_t value_32bit                           = 0;
-	uint16_t value_16bit                           = 0;
+	uint64_t value_64bit                         = 0;
+	uint32_t value_32bit                         = 0;
+	uint16_t value_16bit                         = 0;
 #endif
 
 	if( checkpoint == NULL )
@@ -567,21 +567,21 @@ int libfsrefs_checkpoint_read_data(
 		 self_reference_data_size,
 		 LIBCNOTIFY_PRINT_DATA_FLAG_GROUP_DATA );
 
-		if( libfsrefs_block_descriptor_initialize(
-		     &block_descriptor,
+		if( libfsrefs_block_reference_initialize(
+		     &block_reference,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-			 "%s: unable to create block descriptor.",
+			 "%s: unable to create block reference.",
 			 function );
 
 			goto on_error;
 		}
-		if( libfsrefs_block_descriptor_read_data(
-		     block_descriptor,
+		if( libfsrefs_block_reference_read_data(
+		     block_reference,
 		     io_handle,
 		     &( data[ data_offset ] ),
 		     self_reference_data_size,
@@ -591,20 +591,20 @@ int libfsrefs_checkpoint_read_data(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_IO,
 			 LIBCERROR_IO_ERROR_READ_FAILED,
-			 "%s: unable to read block descriptor.",
+			 "%s: unable to read block reference.",
 			 function );
 
 			goto on_error;
 		}
-		if( libfsrefs_block_descriptor_free(
-		     &block_descriptor,
+		if( libfsrefs_block_reference_free(
+		     &block_reference,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-			 "%s: unable to free block descriptor.",
+			 "%s: unable to free block reference.",
 			 function );
 
 			goto on_error;
@@ -618,7 +618,7 @@ int libfsrefs_checkpoint_read_data(
 	{
 		byte_stream_copy_to_uint32_little_endian(
 		 &( data[ offsets_data_offset ] ),
-		 descriptor_offset );
+		 block_reference_offset );
 
 		offsets_data_offset += 4;
 
@@ -626,81 +626,86 @@ int libfsrefs_checkpoint_read_data(
 		if( libcnotify_verbose != 0 )
 		{
 			libcnotify_printf(
-			 "%s: descriptor: %02" PRIu32 " offset\t\t\t: 0x%08" PRIx32 "\n",
+			 "%s: block reference: %02" PRIu32 " offset\t\t\t: 0x%08" PRIx32 "\n",
 			 function,
 			 offset_index,
-			 descriptor_offset );
+			 block_reference_offset );
 		}
 #endif
-		if( ( descriptor_offset < ( data_offset + header_size ) )
-		 || ( descriptor_offset >= ( data_size + header_size ) ) )
+		if( ( block_reference_offset < ( data_offset + header_size ) )
+		 || ( block_reference_offset >= ( data_size + header_size ) ) )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
-			 "%s: invalid descriptor offset value out of bounds.",
+			 "%s: invalid block reference offset value out of bounds.",
 			 function );
 
 			goto on_error;
 		}
-		descriptor_offset -= header_size;
+		block_reference_offset -= header_size;
 
-		if( libfsrefs_block_descriptor_initialize(
-		     &block_descriptor,
+		if( libfsrefs_block_reference_initialize(
+		     &block_reference,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-			 "%s: unable to create block descriptor.",
+			 "%s: unable to create block reference.",
 			 function );
 
 			goto on_error;
 		}
-		if( libfsrefs_block_descriptor_read_data(
-		     block_descriptor,
+		if( libfsrefs_block_reference_read_data(
+		     block_reference,
 		     io_handle,
-		     &( data[ descriptor_offset ] ),
-		     data_size - descriptor_offset,
+		     &( data[ block_reference_offset ] ),
+		     data_size - block_reference_offset,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_IO,
 			 LIBCERROR_IO_ERROR_READ_FAILED,
-			 "%s: unable to read block descriptor.",
+			 "%s: unable to read block reference.",
 			 function );
 
 			goto on_error;
 		}
 		if( libcdata_array_append_entry(
-		     checkpoint->block_descriptors_array,
+		     checkpoint->block_references_array,
 		     &entry_index,
-		     (intptr_t *) block_descriptor,
+		     (intptr_t *) block_reference,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_APPEND_FAILED,
-			 "%s: unable to append block descriptor to array.",
+			 "%s: unable to append block reference to array.",
 			 function );
 
 			goto on_error;
 		}
-		block_descriptor = NULL;
+		block_reference = NULL;
 	}
 	return( 1 );
 
 on_error:
-	if( block_descriptor != NULL )
+	if( block_reference != NULL )
 	{
-		libfsrefs_block_descriptor_free(
-		 &block_descriptor,
+		libfsrefs_block_reference_free(
+		 &block_reference,
 		 NULL );
 	}
+	libcdata_array_empty(
+	 checkpoint->block_references_array,
+	 (int (*)(intptr_t **, libcerror_error_t **)) &libfsrefs_block_reference_free,
+	 NULL );
+
 	return( -1 );
 }
 
@@ -858,7 +863,7 @@ int libfsrefs_checkpoint_read_file_io_handle(
 
 			goto on_error;
 		}
-		if( metadata_block_header->block_number2 != 0 )
+		if( metadata_block_header->block_numbers[ 1 ] != 0 )
 		{
 			libcerror_error_set(
 			 error,
@@ -869,7 +874,7 @@ int libfsrefs_checkpoint_read_file_io_handle(
 
 			goto on_error;
 		}
-		if( metadata_block_header->block_number3 != 0 )
+		if( metadata_block_header->block_numbers[ 2 ] != 0 )
 		{
 			libcerror_error_set(
 			 error,
@@ -880,7 +885,7 @@ int libfsrefs_checkpoint_read_file_io_handle(
 
 			goto on_error;
 		}
-		if( metadata_block_header->block_number4 != 0 )
+		if( metadata_block_header->block_numbers[ 3 ] != 0 )
 		{
 			libcerror_error_set(
 			 error,
@@ -941,15 +946,15 @@ on_error:
 	return( -1 );
 }
 
-/* Retrieves the number of ministore tree block descriptors
+/* Retrieves the number of ministore tree block references
  * Returns 1 if successful or -1 on error
  */
-int libfsrefs_checkpoint_get_number_of_ministore_tree_block_descriptors(
+int libfsrefs_checkpoint_get_number_of_ministore_tree_block_references(
      libfsrefs_checkpoint_t *checkpoint,
-     int *number_of_block_descriptors,
+     int *number_of_block_references,
      libcerror_error_t **error )
 {
-	static char *function = "libfsrefs_checkpoint_get_number_of_ministore_tree_block_descriptors";
+	static char *function = "libfsrefs_checkpoint_get_number_of_ministore_tree_block_references";
 
 	if( checkpoint == NULL )
 	{
@@ -963,15 +968,15 @@ int libfsrefs_checkpoint_get_number_of_ministore_tree_block_descriptors(
 		return( -1 );
 	}
 	if( libcdata_array_get_number_of_entries(
-	     checkpoint->block_descriptors_array,
-	     number_of_block_descriptors,
+	     checkpoint->block_references_array,
+	     number_of_block_references,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve number of entries from block descriptors array.",
+		 "%s: unable to retrieve number of entries from block references array.",
 		 function );
 
 		return( -1 );
@@ -979,16 +984,16 @@ int libfsrefs_checkpoint_get_number_of_ministore_tree_block_descriptors(
 	return( 1 );
 }
 
-/* Retrieves a specific ministore tree block descriptor
+/* Retrieves a specific ministore tree block reference
  * Returns 1 if successful or -1 on error
  */
-int libfsrefs_checkpoint_get_ministore_tree_block_descriptor_by_index(
+int libfsrefs_checkpoint_get_ministore_tree_block_reference_by_index(
      libfsrefs_checkpoint_t *checkpoint,
-     int block_descriptor_index,
-     libfsrefs_block_descriptor_t **block_descriptor,
+     int block_reference_index,
+     libfsrefs_block_reference_t **block_reference,
      libcerror_error_t **error )
 {
-	static char *function = "libfsrefs_checkpoint_get_ministore_tree_block_descriptor_by_index";
+	static char *function = "libfsrefs_checkpoint_get_ministore_tree_block_reference_by_index";
 
 	if( checkpoint == NULL )
 	{
@@ -1002,18 +1007,18 @@ int libfsrefs_checkpoint_get_ministore_tree_block_descriptor_by_index(
 		return( -1 );
 	}
 	if( libcdata_array_get_entry_by_index(
-	     checkpoint->block_descriptors_array,
-	     block_descriptor_index,
-	     (intptr_t **) block_descriptor,
+	     checkpoint->block_references_array,
+	     block_reference_index,
+	     (intptr_t **) block_reference,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve entry: %d from block descriptors array.",
+		 "%s: unable to retrieve entry: %d from block references array.",
 		 function,
-		 block_descriptor_index );
+		 block_reference_index );
 
 		return( -1 );
 	}

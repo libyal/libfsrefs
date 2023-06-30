@@ -7,6 +7,15 @@ Project information:
 * Status: experimental
 * Licence: LGPLv3+
 
+Read-only supported ReFS formats:
+
+* version 1
+
+Unsupported ReFS format features:
+
+* ReFS version 2
+* ReFS version 3
+
 Planned:
 
 * Finish library

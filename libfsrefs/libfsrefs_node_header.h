@@ -54,6 +54,10 @@ struct libfsrefs_node_header
 	/* The number of record offsets
 	 */
 	uint32_t number_of_record_offsets;
+
+	/* The node type flags
+	 */
+	uint8_t node_type_flags;
 };
 
 int libfsrefs_node_header_initialize(

@@ -139,6 +139,28 @@ void libfsrefs_debug_print_node_record_flags(
 	}
 }
 
+/* Prints the node type flags
+ */
+void libfsrefs_debug_print_node_type_flags(
+      uint8_t node_type_flags )
+{
+	if( ( node_type_flags & 0x01 ) != 0 )
+	{
+		libcnotify_printf(
+		 "\tIs branch (0x01)\n" );
+	}
+	if( ( node_type_flags & 0x02 ) != 0 )
+	{
+		libcnotify_printf(
+		 "\tIs root (0x02)\n" );
+	}
+	if( ( node_type_flags & 0x04 ) != 0 )
+	{
+		libcnotify_printf(
+		 "\tIs stream (0x04)\n" );
+	}
+}
+
 /* Prints a GUID/UUID value
  * Returns 1 if successful or -1 on error
  */

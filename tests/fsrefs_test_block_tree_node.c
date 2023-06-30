@@ -1,7 +1,7 @@
 /*
- * Library block_descriptor type test program
+ * Library block_tree_node type test program
  *
- * Copyright (C) 2009-2023, Joachim Metz <joachim.metz@gmail.com>
+ * Copyright (C) 2012-2023, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *
@@ -33,30 +33,33 @@
 #include "fsrefs_test_memory.h"
 #include "fsrefs_test_unused.h"
 
-#include "../libfsrefs/libfsrefs_block_descriptor.h"
+#include "../libfsrefs/libfsrefs_block_tree_node.h"
 
 #if defined( __GNUC__ ) && !defined( LIBFSREFS_DLL_IMPORT )
 
-/* Tests the libfsrefs_block_descriptor_initialize function
+/* Tests the libfsrefs_block_tree_node_initialize function
  * Returns 1 if successful or 0 if not
  */
-int fsrefs_test_block_descriptor_initialize(
+int fsrefs_test_block_tree_node_initialize(
      void )
 {
-	libcerror_error_t *error                       = NULL;
-	libfsrefs_block_descriptor_t *block_descriptor = NULL;
-	int result                                     = 0;
+	libcerror_error_t *error                     = NULL;
+	libfsrefs_block_tree_node_t *block_tree_node = NULL;
+	int result                                   = 0;
 
 #if defined( HAVE_FSREFS_TEST_MEMORY )
-	int number_of_malloc_fail_tests                = 1;
-	int number_of_memset_fail_tests                = 1;
-	int test_number                                = 0;
+	int number_of_malloc_fail_tests              = 1;
+	int number_of_memset_fail_tests              = 1;
+	int test_number                              = 0;
 #endif
 
-	/* Test regular cases
+	/* Test block_tree_node initialization
 	 */
-	result = libfsrefs_block_descriptor_initialize(
-	          &block_descriptor,
+	result = libfsrefs_block_tree_node_initialize(
+	          &block_tree_node,
+	          0,
+	          1024,
+	          256,
 	          &error );
 
 	FSREFS_TEST_ASSERT_EQUAL_INT(
@@ -65,15 +68,16 @@ int fsrefs_test_block_descriptor_initialize(
 	 1 );
 
 	FSREFS_TEST_ASSERT_IS_NOT_NULL(
-	 "block_descriptor",
-	 block_descriptor );
+	 "block_tree_node",
+	 block_tree_node );
 
 	FSREFS_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
-	result = libfsrefs_block_descriptor_free(
-	          &block_descriptor,
+	result = libfsrefs_block_tree_node_free(
+	          &block_tree_node,
+	          NULL,
 	          &error );
 
 	FSREFS_TEST_ASSERT_EQUAL_INT(
@@ -82,8 +86,8 @@ int fsrefs_test_block_descriptor_initialize(
 	 1 );
 
 	FSREFS_TEST_ASSERT_IS_NULL(
-	 "block_descriptor",
-	 block_descriptor );
+	 "block_tree_node",
+	 block_tree_node );
 
 	FSREFS_TEST_ASSERT_IS_NULL(
 	 "error",
@@ -91,8 +95,11 @@ int fsrefs_test_block_descriptor_initialize(
 
 	/* Test error cases
 	 */
-	result = libfsrefs_block_descriptor_initialize(
+	result = libfsrefs_block_tree_node_initialize(
 	          NULL,
+	          0,
+	          1024,
+	          256,
 	          &error );
 
 	FSREFS_TEST_ASSERT_EQUAL_INT(
@@ -107,13 +114,16 @@ int fsrefs_test_block_descriptor_initialize(
 	libcerror_error_free(
 	 &error );
 
-	block_descriptor = (libfsrefs_block_descriptor_t *) 0x12345678UL;
+	block_tree_node = (libfsrefs_block_tree_node_t *) 0x12345678UL;
 
-	result = libfsrefs_block_descriptor_initialize(
-	          &block_descriptor,
+	result = libfsrefs_block_tree_node_initialize(
+	          &block_tree_node,
+	          0,
+	          1024,
+	          256,
 	          &error );
 
-	block_descriptor = NULL;
+	block_tree_node = NULL;
 
 	FSREFS_TEST_ASSERT_EQUAL_INT(
 	 "result",
@@ -133,22 +143,26 @@ int fsrefs_test_block_descriptor_initialize(
 	     test_number < number_of_malloc_fail_tests;
 	     test_number++ )
 	{
-		/* Test libfsrefs_block_descriptor_initialize with malloc failing
+		/* Test libfsrefs_block_tree_node_initialize with malloc failing
 		 */
 		fsrefs_test_malloc_attempts_before_fail = test_number;
 
-		result = libfsrefs_block_descriptor_initialize(
-		          &block_descriptor,
+		result = libfsrefs_block_tree_node_initialize(
+		          &block_tree_node,
+		          0,
+		          1024,
+		          256,
 		          &error );
 
 		if( fsrefs_test_malloc_attempts_before_fail != -1 )
 		{
 			fsrefs_test_malloc_attempts_before_fail = -1;
 
-			if( block_descriptor != NULL )
+			if( block_tree_node != NULL )
 			{
-				libfsrefs_block_descriptor_free(
-				 &block_descriptor,
+				libfsrefs_block_tree_node_free(
+				 &block_tree_node,
+				 NULL,
 				 NULL );
 			}
 		}
@@ -160,8 +174,8 @@ int fsrefs_test_block_descriptor_initialize(
 			 -1 );
 
 			FSREFS_TEST_ASSERT_IS_NULL(
-			 "block_descriptor",
-			 block_descriptor );
+			 "block_tree_node",
+			 block_tree_node );
 
 			FSREFS_TEST_ASSERT_IS_NOT_NULL(
 			 "error",
@@ -175,22 +189,26 @@ int fsrefs_test_block_descriptor_initialize(
 	     test_number < number_of_memset_fail_tests;
 	     test_number++ )
 	{
-		/* Test libfsrefs_block_descriptor_initialize with memset failing
+		/* Test libfsrefs_block_tree_node_initialize with memset failing
 		 */
 		fsrefs_test_memset_attempts_before_fail = test_number;
 
-		result = libfsrefs_block_descriptor_initialize(
-		          &block_descriptor,
+		result = libfsrefs_block_tree_node_initialize(
+		          &block_tree_node,
+		          0,
+		          1024,
+		          256,
 		          &error );
 
 		if( fsrefs_test_memset_attempts_before_fail != -1 )
 		{
 			fsrefs_test_memset_attempts_before_fail = -1;
 
-			if( block_descriptor != NULL )
+			if( block_tree_node != NULL )
 			{
-				libfsrefs_block_descriptor_free(
-				 &block_descriptor,
+				libfsrefs_block_tree_node_free(
+				 &block_tree_node,
+				 NULL,
 				 NULL );
 			}
 		}
@@ -202,8 +220,8 @@ int fsrefs_test_block_descriptor_initialize(
 			 -1 );
 
 			FSREFS_TEST_ASSERT_IS_NULL(
-			 "block_descriptor",
-			 block_descriptor );
+			 "block_tree_node",
+			 block_tree_node );
 
 			FSREFS_TEST_ASSERT_IS_NOT_NULL(
 			 "error",
@@ -223,19 +241,20 @@ on_error:
 		libcerror_error_free(
 		 &error );
 	}
-	if( block_descriptor != NULL )
+	if( block_tree_node != NULL )
 	{
-		libfsrefs_block_descriptor_free(
-		 &block_descriptor,
+		libfsrefs_block_tree_node_free(
+		 &block_tree_node,
+		 NULL,
 		 NULL );
 	}
 	return( 0 );
 }
 
-/* Tests the libfsrefs_block_descriptor_free function
+/* Tests the libfsrefs_block_tree_node_free function
  * Returns 1 if successful or 0 if not
  */
-int fsrefs_test_block_descriptor_free(
+int fsrefs_test_block_tree_node_free(
      void )
 {
 	libcerror_error_t *error = NULL;
@@ -243,7 +262,8 @@ int fsrefs_test_block_descriptor_free(
 
 	/* Test error cases
 	 */
-	result = libfsrefs_block_descriptor_free(
+	result = libfsrefs_block_tree_node_free(
+	          NULL,
 	          NULL,
 	          &error );
 
@@ -290,12 +310,12 @@ int main(
 #if defined( __GNUC__ ) && !defined( LIBFSREFS_DLL_IMPORT )
 
 	FSREFS_TEST_RUN(
-	 "libfsrefs_block_descriptor_initialize",
-	 fsrefs_test_block_descriptor_initialize );
+	 "libfsrefs_block_tree_node_initialize",
+	 fsrefs_test_block_tree_node_initialize );
 
 	FSREFS_TEST_RUN(
-	 "libfsrefs_block_descriptor_free",
-	 fsrefs_test_block_descriptor_free );
+	 "libfsrefs_block_tree_node_free",
+	 fsrefs_test_block_tree_node_free );
 
 #endif /* defined( __GNUC__ ) && !defined( LIBFSREFS_DLL_IMPORT ) */
 

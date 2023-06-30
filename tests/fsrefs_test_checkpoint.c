@@ -37,6 +37,7 @@
 #include "fsrefs_test_unused.h"
 
 #include "../libfsrefs/libfsrefs_checkpoint.h"
+#include "../libfsrefs/libfsrefs_io_handle.h"
 
 uint8_t fsrefs_test_checkpoint_data1[ 16384 ] = {
 	0x86, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0a, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -2303,21 +2304,21 @@ on_error:
 	return( 0 );
 }
 
-/* Tests the libfsrefs_checkpoint_get_number_of_ministore_tree_block_descriptors function
+/* Tests the libfsrefs_checkpoint_get_number_of_ministore_tree_block_references function
  * Returns 1 if successful or 0 if not
  */
-int fsrefs_test_checkpoint_get_number_of_ministore_tree_block_descriptors(
+int fsrefs_test_checkpoint_get_number_of_ministore_tree_block_references(
      libfsrefs_checkpoint_t *checkpoint )
 {
-	libcerror_error_t *error                       = NULL;
-	int number_of_ministore_tree_block_descriptors = 0;
-	int result                                     = 0;
+	libcerror_error_t *error                      = NULL;
+	int number_of_ministore_tree_block_references = 0;
+	int result                                    = 0;
 
 	/* Test regular cases
 	 */
-	result = libfsrefs_checkpoint_get_number_of_ministore_tree_block_descriptors(
+	result = libfsrefs_checkpoint_get_number_of_ministore_tree_block_references(
 	          checkpoint,
-	          &number_of_ministore_tree_block_descriptors,
+	          &number_of_ministore_tree_block_references,
 	          &error );
 
 	FSREFS_TEST_ASSERT_NOT_EQUAL_INT(
@@ -2331,9 +2332,9 @@ int fsrefs_test_checkpoint_get_number_of_ministore_tree_block_descriptors(
 
 	/* Test error cases
 	 */
-	result = libfsrefs_checkpoint_get_number_of_ministore_tree_block_descriptors(
+	result = libfsrefs_checkpoint_get_number_of_ministore_tree_block_references(
 	          NULL,
-	          &number_of_ministore_tree_block_descriptors,
+	          &number_of_ministore_tree_block_references,
 	          &error );
 
 	FSREFS_TEST_ASSERT_EQUAL_INT(
@@ -2348,7 +2349,7 @@ int fsrefs_test_checkpoint_get_number_of_ministore_tree_block_descriptors(
 	libcerror_error_free(
 	 &error );
 
-	result = libfsrefs_checkpoint_get_number_of_ministore_tree_block_descriptors(
+	result = libfsrefs_checkpoint_get_number_of_ministore_tree_block_references(
 	          checkpoint,
 	          NULL,
 	          &error );
@@ -2476,11 +2477,11 @@ int main(
 	/* Run tests
 	 */
 	FSREFS_TEST_RUN_WITH_ARGS(
-	 "libfsrefs_checkpoint_get_number_of_ministore_tree_block_descriptors",
-	 fsrefs_test_checkpoint_get_number_of_ministore_tree_block_descriptors,
+	 "libfsrefs_checkpoint_get_number_of_ministore_tree_block_references",
+	 fsrefs_test_checkpoint_get_number_of_ministore_tree_block_references,
 	 checkpoint );
 
-	/* TODO: add tests for libfsrefs_checkpoint_get_ministore_tree_block_descriptor_by_index */
+	/* TODO: add tests for libfsrefs_checkpoint_get_ministore_tree_block_referenceby_index */
 
 	/* Clean up
 	 */

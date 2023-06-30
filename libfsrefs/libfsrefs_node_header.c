@@ -24,6 +24,7 @@
 #include <memory.h>
 #include <types.h>
 
+#include "libfsrefs_debug.h"
 #include "libfsrefs_libcerror.h"
 #include "libfsrefs_libcnotify.h"
 #include "libfsrefs_node_header.h"
@@ -215,6 +216,8 @@ int libfsrefs_node_header_read_data(
 	 ( (fsrefs_ministore_tree_node_header_t *) data )->record_offsets_end_offset,
 	 node_header->record_offsets_end_offset );
 
+	node_header->node_type_flags = ( (fsrefs_ministore_tree_node_header_t *) data )->node_type_flags;
+
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )
 	{
@@ -242,9 +245,13 @@ int libfsrefs_node_header_read_data(
 		 ( (fsrefs_ministore_tree_node_header_t *) data )->node_level );
 
 		libcnotify_printf(
-		 "%s: node type\t\t\t\t: %" PRIu8 "\n",
+		 "%s: node type flags\t\t\t: 0x%02" PRIx8 "\n",
 		 function,
-		 ( (fsrefs_ministore_tree_node_header_t *) data )->node_type );
+		 node_header->node_type_flags );
+		libfsrefs_debug_print_node_type_flags(
+		 node_header->node_type_flags );
+		libcnotify_printf(
+		 "\n" );
 
 		byte_stream_copy_to_uint16_little_endian(
 		 ( (fsrefs_ministore_tree_node_header_t *) data )->unknown1,

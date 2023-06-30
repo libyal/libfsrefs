@@ -103,10 +103,10 @@ struct fsrefs_ministore_tree_node_header
 	 */
 	uint8_t node_level;
 
-	/* Node type
+	/* Node type flags
 	 * Consists of 1 byte
 	 */
-	uint8_t node_type;
+	uint8_t node_type_flags;
 
 	/* Unknown
 	 * Consists of 2 bytes

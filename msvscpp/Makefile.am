@@ -1,5 +1,8 @@
 MSVSCPP_FILES = \
 	fsrefs_test_block_descriptor/fsrefs_test_block_descriptor.vcproj \
+	fsrefs_test_block_reference/fsrefs_test_block_reference.vcproj \
+	fsrefs_test_block_tree/fsrefs_test_block_tree.vcproj \
+	fsrefs_test_block_tree_node/fsrefs_test_block_tree_node.vcproj \
 	fsrefs_test_checkpoint/fsrefs_test_checkpoint.vcproj \
 	fsrefs_test_directory_object/fsrefs_test_directory_object.vcproj \
 	fsrefs_test_error/fsrefs_test_error.vcproj \

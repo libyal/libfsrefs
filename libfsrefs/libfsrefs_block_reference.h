@@ -1,5 +1,5 @@
 /*
- * Objects tree functions
+ * Block reference functions
  *
  * Copyright (C) 2012-2023, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -19,62 +19,54 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if !defined( _LIBFSREFS_OBJECTS_TREE_H )
-#define _LIBFSREFS_OBJECTS_TREE_H
+#if !defined( _LIBFSREFS_BLOCK_REFRENCE_H )
+#define _LIBFSREFS_BLOCK_REFRENCE_H
 
 #include <common.h>
 #include <types.h>
 
-#include "libfsrefs_block_reference.h"
-#include "libfsrefs_file_system.h"
 #include "libfsrefs_io_handle.h"
-#include "libfsrefs_libbfio.h"
 #include "libfsrefs_libcerror.h"
-#include "libfsrefs_ministore_node.h"
 
 #if defined( __cplusplus )
 extern "C" {
 #endif
 
-typedef struct libfsrefs_objects_tree libfsrefs_objects_tree_t;
+typedef struct libfsrefs_block_reference libfsrefs_block_reference_t;
 
-struct libfsrefs_objects_tree
+struct libfsrefs_block_reference
 {
-	/* File system
+	/* The block numbers
 	 */
-	libfsrefs_file_system_t *file_system;
+	uint64_t block_numbers[ 4 ];
 
-	/* Ministore root node
+	/* The checksum
 	 */
-	libfsrefs_ministore_node_t *root_node;
+	uint64_t checksum;
+
+	/* The block offsets
+	 */
+	off64_t block_offsets[ 4 ];
 };
 
-int libfsrefs_objects_tree_initialize(
-     libfsrefs_objects_tree_t **objects_tree,
-     libfsrefs_file_system_t *file_system,
+int libfsrefs_block_reference_initialize(
+     libfsrefs_block_reference_t **block_reference,
      libcerror_error_t **error );
 
-int libfsrefs_objects_tree_free(
-     libfsrefs_objects_tree_t **objects_tree,
+int libfsrefs_block_reference_free(
+     libfsrefs_block_reference_t **block_reference,
      libcerror_error_t **error );
 
-int libfsrefs_objects_tree_read(
-     libfsrefs_objects_tree_t *objects_tree,
+int libfsrefs_block_reference_read_data(
+     libfsrefs_block_reference_t *block_reference,
      libfsrefs_io_handle_t *io_handle,
-     libbfio_handle_t *file_io_handle,
-     libcerror_error_t **error );
-
-int libfsrefs_objects_tree_get_ministore_tree_by_identifier(
-     libfsrefs_objects_tree_t *objects_tree,
-     libfsrefs_io_handle_t *io_handle,
-     libbfio_handle_t *file_io_handle,
-     uint64_t object_identifier,
-     libfsrefs_ministore_node_t **root_node,
+     const uint8_t *data,
+     size_t data_size,
      libcerror_error_t **error );
 
 #if defined( __cplusplus )
 }
 #endif
 
-#endif /* !defined( _LIBFSREFS_OBJECTS_TREE_H ) */
+#endif /* !defined( _LIBFSREFS_BLOCK_REFRENCE_H ) */
 

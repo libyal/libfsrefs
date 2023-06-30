@@ -24,6 +24,7 @@
 #include <memory.h>
 #include <types.h>
 
+#include "libfsrefs_directory_entry.h"
 #include "libfsrefs_directory_object.h"
 #include "libfsrefs_file_entry.h"
 #include "libfsrefs_io_handle.h"
@@ -42,7 +43,7 @@ int libfsrefs_file_entry_initialize(
      libfsrefs_io_handle_t *io_handle,
      libbfio_handle_t *file_io_handle,
      libfsrefs_objects_tree_t *objects_tree,
-     libfsrefs_node_record_t *node_record,
+     libfsrefs_directory_entry_t *directory_entry,
      libcerror_error_t **error )
 {
 	libfsrefs_internal_file_entry_t *internal_file_entry = NULL;
@@ -101,59 +102,22 @@ int libfsrefs_file_entry_initialize(
 
 		return( -1 );
 	}
-	if( node_record != NULL )
+	if( libfsrefs_internal_file_entry_get_directory_object(
+	     internal_file_entry,
+	     io_handle,
+	     file_io_handle,
+	     objects_tree,
+	     directory_entry,
+	     error ) != 1 )
 	{
-		if( node_record->key_data == NULL )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-			 "%s: invalid node record - missing key data.",
-			 function );
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve directory object.",
+		 function );
 
-			goto on_error;
-		}
-		if( ( node_record->key_data_size < 4 )
-		 || ( node_record->key_data_size > (uint16_t) MEMORY_MAXIMUM_ALLOCATION_SIZE + 4 ) )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
-			 "%s: invalid node record - key data size value out of bounds.",
-			 function );
-
-			goto on_error;
-		}
-		internal_file_entry->name_data = (uint8_t *) memory_allocate(
-		                                              sizeof( uint8_t ) * ( node_record->key_data_size - 4 ) );
-
-		if( internal_file_entry->name_data == NULL )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_MEMORY,
-			 LIBCERROR_MEMORY_ERROR_INSUFFICIENT,
-			 "%s: unable to create name data.",
-			 function );
-
-			goto on_error;
-		}
-		if( memory_copy(
-		     internal_file_entry->name_data,
-		     &( node_record->key_data[ 4 ] ),
-		     node_record->key_data_size - 4 ) == NULL )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_MEMORY,
-			 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
-			 "%s: unable to copy volume identifier.",
-			 function );
-
-			goto on_error;
-		}
+		goto on_error;
 	}
 #if defined( HAVE_LIBFSREFS_MULTI_THREAD_SUPPORT )
 	if( libcthreads_read_write_lock_initialize(
@@ -170,9 +134,10 @@ int libfsrefs_file_entry_initialize(
 		goto on_error;
 	}
 #endif
-	internal_file_entry->io_handle      = io_handle;
-	internal_file_entry->file_io_handle = file_io_handle;
-	internal_file_entry->objects_tree   = objects_tree;
+	internal_file_entry->io_handle       = io_handle;
+	internal_file_entry->file_io_handle  = file_io_handle;
+	internal_file_entry->objects_tree    = objects_tree;
+	internal_file_entry->directory_entry = directory_entry;
 
 	*file_entry = (libfsrefs_file_entry_t *) internal_file_entry;
 
@@ -247,11 +212,6 @@ int libfsrefs_file_entry_free(
 				result = -1;
 			}
 		}
-		if( internal_file_entry->name_data != NULL )
-		{
-			memory_free(
-			 internal_file_entry->name_data );
-		}
 		memory_free(
 		 internal_file_entry );
 	}
@@ -263,9 +223,14 @@ int libfsrefs_file_entry_free(
  */
 int libfsrefs_internal_file_entry_get_directory_object(
      libfsrefs_internal_file_entry_t *internal_file_entry,
+     libfsrefs_io_handle_t *io_handle,
+     libbfio_handle_t *file_io_handle,
+     libfsrefs_objects_tree_t *objects_tree,
+     libfsrefs_directory_entry_t *directory_entry,
      libcerror_error_t **error )
 {
-	static char *function = "libfsrefs_internal_file_entry_get_directory_object";
+	static char *function      = "libfsrefs_internal_file_entry_get_directory_object";
+	uint64_t object_identifier = 0;
 
 	if( internal_file_entry == NULL )
 	{
@@ -289,9 +254,36 @@ int libfsrefs_internal_file_entry_get_directory_object(
 
 		return( -1 );
 	}
+	if( directory_entry == NULL )
+	{
+		object_identifier = 0x00000600UL;
+	}
+	else if ( directory_entry->entry_type != 2 )
+	{
+		return( 1 );
+	}
+	else
+	{
+		if( libfsrefs_directory_entry_get_object_identifier(
+		     directory_entry,
+		     &object_identifier,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve size object identifier from directory entry.",
+			 function );
+
+			goto on_error;
+		}
+	}
 	if( libfsrefs_directory_object_initialize(
 	     &( internal_file_entry->directory_object ),
-	     internal_file_entry->objects_tree,
+	     io_handle,
+	     objects_tree,
+	     object_identifier,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
@@ -303,20 +295,19 @@ int libfsrefs_internal_file_entry_get_directory_object(
 
 		goto on_error;
 	}
-/* TODO set object identifier */
 	if( libfsrefs_directory_object_read(
 	     internal_file_entry->directory_object,
-	     internal_file_entry->io_handle,
-	     internal_file_entry->file_io_handle,
-	     (uint64_t) 0x00000600UL,
+	     io_handle,
+	     file_io_handle,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_IO,
 		 LIBCERROR_IO_ERROR_READ_FAILED,
-		 "%s: unable to read directory object.",
-		 function );
+		 "%s: unable to read directory object: 0x%08" PRIx64 ".",
+		 function,
+		 object_identifier );
 
 		goto on_error;
 	}
@@ -373,12 +364,10 @@ int libfsrefs_file_entry_get_utf8_name_size(
 		return( -1 );
 	}
 #endif
-	if( internal_file_entry->name_data != NULL )
+	if( internal_file_entry->directory_entry != NULL )
 	{
-		result = libuna_utf8_string_size_from_utf16_stream(
-		          internal_file_entry->name_data,
-		          internal_file_entry->name_data_size,
-		          LIBUNA_ENDIAN_LITTLE,
+		result = libfsrefs_directory_entry_get_utf8_name_size(
+		          internal_file_entry->directory_entry,
 		          utf8_string_size,
 		          error );
 
@@ -388,7 +377,7 @@ int libfsrefs_file_entry_get_utf8_name_size(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve size of UTF-8 name.",
+			 "%s: unable to retrieve size of UTF-8 name from directory entry.",
 			 function );
 
 			result = -1;
@@ -454,14 +443,12 @@ int libfsrefs_file_entry_get_utf8_name(
 		return( -1 );
 	}
 #endif
-	if( internal_file_entry->name_data != NULL )
+	if( internal_file_entry->directory_entry != NULL )
 	{
-		result = libuna_utf8_string_copy_from_utf16_stream(
+		result = libfsrefs_directory_entry_get_utf8_name(
+		          internal_file_entry->directory_entry,
 		          utf8_string,
 		          utf8_string_size,
-		          internal_file_entry->name_data,
-		          internal_file_entry->name_data_size,
-		          LIBUNA_ENDIAN_LITTLE,
 		          error );
 
 		if( result != 1 )
@@ -535,12 +522,10 @@ int libfsrefs_file_entry_get_utf16_name_size(
 		return( -1 );
 	}
 #endif
-	if( internal_file_entry->name_data != NULL )
+	if( internal_file_entry->directory_entry != NULL )
 	{
-		result = libuna_utf16_string_size_from_utf16_stream(
-		          internal_file_entry->name_data,
-		          internal_file_entry->name_data_size,
-		          LIBUNA_ENDIAN_LITTLE,
+		result = libfsrefs_directory_entry_get_utf16_name_size(
+		          internal_file_entry->directory_entry,
 		          utf16_string_size,
 		          error );
 
@@ -550,7 +535,7 @@ int libfsrefs_file_entry_get_utf16_name_size(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve size of UTF-16 name.",
+			 "%s: unable to retrieve size of UTF-16 name from directory.",
 			 function );
 
 			result = -1;
@@ -616,14 +601,12 @@ int libfsrefs_file_entry_get_utf16_name(
 		return( -1 );
 	}
 #endif
-	if( internal_file_entry->name_data != NULL )
+	if( internal_file_entry->directory_entry != NULL )
 	{
-		result = libuna_utf16_string_copy_from_utf16_stream(
+		result = libfsrefs_directory_entry_get_utf16_name(
+		          internal_file_entry->directory_entry,
 		          utf16_string,
 		          utf16_string_size,
-		          internal_file_entry->name_data,
-		          internal_file_entry->name_data_size,
-		          LIBUNA_ENDIAN_LITTLE,
 		          error );
 
 		if( result != 1 )
@@ -694,7 +677,7 @@ int libfsrefs_file_entry_get_number_of_sub_file_entries(
 		return( -1 );
 	}
 #if defined( HAVE_LIBFSREFS_MULTI_THREAD_SUPPORT )
-	if( libcthreads_read_write_lock_grab_for_write(
+	if( libcthreads_read_write_lock_grab_for_read(
 	     internal_file_entry->read_write_lock,
 	     error ) != 1 )
 	{
@@ -702,33 +685,16 @@ int libfsrefs_file_entry_get_number_of_sub_file_entries(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-		 "%s: unable to grab read/write lock for writing.",
+		 "%s: unable to grab read/write lock for reading.",
 		 function );
 
 		return( -1 );
 	}
 #endif
-	if( internal_file_entry->directory_object == NULL )
-	{
-		if( libfsrefs_internal_file_entry_get_directory_object(
-		     internal_file_entry,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve directory object.",
-			 function );
-
-			result = -1;
-		}
-	}
 	if( internal_file_entry->directory_object != NULL )
 	{
-/* TODO
-		if( libfsrefs_directory_entries_tree_get_number_of_entries(
-		     internal_file_entry->directory_entries_tree,
+		if( libfsrefs_directory_object_get_number_of_directory_entries(
+		     internal_file_entry->directory_object,
 		     &safe_number_of_sub_file_entries,
 		     error ) != 1 )
 		{
@@ -736,15 +702,14 @@ int libfsrefs_file_entry_get_number_of_sub_file_entries(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve number of entries from directory entries tree.",
+			 "%s: unable to retrieve number of directory entries from directory object.",
 			 function );
 
 			result = -1;
 		}
-*/
 	}
 #if defined( HAVE_LIBFSREFS_MULTI_THREAD_SUPPORT )
-	if( libcthreads_read_write_lock_release_for_write(
+	if( libcthreads_read_write_lock_release_for_read(
 	     internal_file_entry->read_write_lock,
 	     error ) != 1 )
 	{
@@ -752,7 +717,7 @@ int libfsrefs_file_entry_get_number_of_sub_file_entries(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-		 "%s: unable to release read/write lock for writing.",
+		 "%s: unable to release read/write lock for reading.",
 		 function );
 
 		return( -1 );
@@ -774,6 +739,7 @@ int libfsrefs_file_entry_get_sub_file_entry_by_index(
      libfsrefs_file_entry_t **sub_file_entry,
      libcerror_error_t **error )
 {
+	libfsrefs_directory_entry_t *sub_directory_entry     = NULL;
 	libfsrefs_internal_file_entry_t *internal_file_entry = NULL;
 	static char *function                                = "libfsrefs_file_entry_get_sub_file_entry_by_index";
 	int result                                           = 1;
@@ -828,8 +794,45 @@ int libfsrefs_file_entry_get_sub_file_entry_by_index(
 		return( -1 );
 	}
 #endif
-/* TODO implement */
+	if( internal_file_entry->directory_object != NULL )
+	{
+		if( libfsrefs_directory_object_get_directory_entry_by_index(
+		     internal_file_entry->directory_object,
+		     sub_file_entry_index,
+		     &sub_directory_entry,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve directory entry: %d from directory object.",
+			 function,
+			 sub_file_entry_index );
 
+			result = -1;
+		}
+		/* sub_file_entry takes over management of sub_directory_entry
+		 */
+		else if( libfsrefs_file_entry_initialize(
+		          sub_file_entry,
+		          internal_file_entry->io_handle,
+		          internal_file_entry->file_io_handle,
+		          internal_file_entry->objects_tree,
+		          sub_directory_entry,
+		          error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+			 "%s: unable to create sub file entry: %d.",
+			 function,
+			 sub_file_entry_index );
+
+			result = -1;
+		}
+	}
 #if defined( HAVE_LIBFSREFS_MULTI_THREAD_SUPPORT )
 	if( libcthreads_read_write_lock_release_for_read(
 	     internal_file_entry->read_write_lock,
@@ -842,7 +845,7 @@ int libfsrefs_file_entry_get_sub_file_entry_by_index(
 		 "%s: unable to release read/write lock for reading.",
 		 function );
 
-		result = -1;
+		return( -1 );
 	}
 #endif
 	return( result );

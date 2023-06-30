@@ -24,6 +24,7 @@
 #include <memory.h>
 #include <types.h>
 
+#include "libfsrefs_block_reference.h"
 #include "libfsrefs_file_system.h"
 #include "libfsrefs_libcerror.h"
 #include "libfsrefs_ministore_node.h"
@@ -216,7 +217,18 @@ int libfsrefs_objects_tree_read(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve ministore tree: 0.",
+		 "%s: unable to retrieve ministore tree: 0 (objects).",
+		 function );
+
+		goto on_error;
+	}
+	if( ( objects_tree->root_node->node_type_flags & 0x02 ) == 0 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
+		 "%s: unsupported ministore tree: 0 (objects) root node - missing is root (0x02) flag.",
 		 function );
 
 		goto on_error;
@@ -233,10 +245,10 @@ on_error:
 	return( -1 );
 }
 
-/* Retrieves the ministore tree of a specific identifier
+/* Retrieves the ministore tree of a specific object identifier
  * Returns 1 if successful, 0 if not available or -1 on error
  */
-int libfsrefs_objects_get_ministore_tree_by_identifier(
+int libfsrefs_objects_tree_get_ministore_tree_by_identifier(
      libfsrefs_objects_tree_t *objects_tree,
      libfsrefs_io_handle_t *io_handle,
      libbfio_handle_t *file_io_handle,
@@ -244,13 +256,13 @@ int libfsrefs_objects_get_ministore_tree_by_identifier(
      libfsrefs_ministore_node_t **root_node,
      libcerror_error_t **error )
 {
-	uint8_t key_data[ 16 ]                         = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+	uint8_t key_data[ 16 ]                       = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
-	libfsrefs_block_descriptor_t *block_descriptor = NULL;
-	libfsrefs_ministore_node_t *safe_root_node     = NULL;
-	libfsrefs_node_record_t *node_record           = NULL;
-	static char *function                          = "libfsrefs_objects_get_ministore_tree_by_identifier";
-	int result                                     = 0;
+	libfsrefs_block_reference_t *block_reference = NULL;
+	libfsrefs_ministore_node_t *safe_root_node   = NULL;
+	libfsrefs_node_record_t *node_record         = NULL;
+	static char *function                        = "libfsrefs_objects_tree_get_ministore_tree_by_identifier";
+	int result                                   = 0;
 
 	if( objects_tree == NULL )
 	{
@@ -289,7 +301,7 @@ int libfsrefs_objects_get_ministore_tree_by_identifier(
 	 &( key_data[ 8 ] ),
 	 object_identifier );
 
-	result = libfsrefs_ministore_node_get_record(
+	result = libfsrefs_ministore_node_get_record_by_key(
 	          objects_tree->root_node,
 	          key_data,
 	          16,
@@ -321,21 +333,21 @@ int libfsrefs_objects_get_ministore_tree_by_identifier(
 
 			return( -1 );
 		}
-		if( libfsrefs_block_descriptor_initialize(
-		     &block_descriptor,
+		if( libfsrefs_block_reference_initialize(
+		     &block_reference,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-			 "%s: unable to create block descriptor.",
+			 "%s: unable to create block reference.",
 			 function );
 
 			goto on_error;
 		}
-		if( libfsrefs_block_descriptor_read_data(
-		     block_descriptor,
+		if( libfsrefs_block_reference_read_data(
+		     block_reference,
 		     io_handle,
 		     node_record->value_data,
 		     node_record->value_data_size,
@@ -345,17 +357,45 @@ int libfsrefs_objects_get_ministore_tree_by_identifier(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_IO,
 			 LIBCERROR_IO_ERROR_READ_FAILED,
-			 "%s: unable to read block descriptor.",
+			 "%s: unable to read block reference.",
 			 function );
 
 			goto on_error;
 		}
-		if( libfsrefs_file_system_read_ministore_node(
+		if( libfsrefs_file_system_get_block_offsets(
 		     objects_tree->file_system,
 		     io_handle,
-		     file_io_handle,
-		     block_descriptor,
+		     block_reference,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve block offsets.",
+			 function );
+
+			goto on_error;
+		}
+		if( libfsrefs_ministore_node_initialize(
 		     &safe_root_node,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+			 "%s: unable to create object: 0x%08" PRIx64 " ministore tree root node.",
+			 function,
+			 object_identifier );
+
+			goto on_error;
+		}
+		if( libfsrefs_ministore_node_read_file_io_handle(
+		     safe_root_node,
+		     io_handle,
+		     file_io_handle,
+		     block_reference,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
@@ -368,15 +408,15 @@ int libfsrefs_objects_get_ministore_tree_by_identifier(
 
 			goto on_error;
 		}
-		if( libfsrefs_block_descriptor_free(
-		     &block_descriptor,
+		if( libfsrefs_block_reference_free(
+		     &block_reference,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-			 "%s: unable to free block descriptor.",
+			 "%s: unable to free block reference.",
 			 function );
 
 			goto on_error;
@@ -392,10 +432,10 @@ on_error:
 		 &safe_root_node,
 		 NULL );
 	}
-	if( block_descriptor != NULL )
+	if( block_reference != NULL )
 	{
-		libfsrefs_block_descriptor_free(
-		 &block_descriptor,
+		libfsrefs_block_reference_free(
+		 &block_reference,
 		 NULL );
 	}
 	return( 1 );

@@ -29,9 +29,13 @@ libfsrefs_la_SOURCES = \
 	fsrefs_volume_header.h \
 	libfsrefs.c \
 	libfsrefs_block_descriptor.c libfsrefs_block_descriptor.h \
+	libfsrefs_block_reference.c libfsrefs_block_reference.h \
+	libfsrefs_block_tree.c libfsrefs_block_tree.h \
+	libfsrefs_block_tree_node.c libfsrefs_block_tree_node.h \
 	libfsrefs_checkpoint.c libfsrefs_checkpoint.h \
 	libfsrefs_debug.c libfsrefs_debug.h \
 	libfsrefs_definitions.h \
+	libfsrefs_directory_entry.c libfsrefs_directory_entry.h \
 	libfsrefs_directory_object.c libfsrefs_directory_object.h \
 	libfsrefs_error.c libfsrefs_error.h \
 	libfsrefs_extern.h \
