@@ -194,6 +194,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\libfsrefs\libfsrefs_data_run.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\libfsrefs\libfsrefs_debug.c"
 				>
 			</File>
@@ -276,6 +280,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\libfsrefs\fsrefs_directory_object.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\libfsrefs\fsrefs_metadata_block.h"
 				>
 			</File>
@@ -309,6 +317,10 @@
 			</File>
 			<File
 				RelativePath="..\..\libfsrefs\libfsrefs_checkpoint.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfsrefs\libfsrefs_data_run.h"
 				>
 			</File>
 			<File

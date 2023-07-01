@@ -34,6 +34,7 @@ libfsrefs_la_SOURCES = \
 	libfsrefs_block_tree.c libfsrefs_block_tree.h \
 	libfsrefs_block_tree_node.c libfsrefs_block_tree_node.h \
 	libfsrefs_checkpoint.c libfsrefs_checkpoint.h \
+	libfsrefs_data_run.c libfsrefs_data_run.h \
 	libfsrefs_debug.c libfsrefs_debug.h \
 	libfsrefs_definitions.h \
 	libfsrefs_directory_entry.c libfsrefs_directory_entry.h \

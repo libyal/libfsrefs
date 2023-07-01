@@ -153,6 +153,8 @@ int libfsrefs_ministore_node_free(
 	}
 	if( *ministore_node != NULL )
 	{
+		/* The data reference is freed elsewhere
+		 */
 		if( libcdata_array_free(
 		     &( ( *ministore_node )->records_array ),
 		     (int (*)(intptr_t **, libcerror_error_t **)) &libfsrefs_node_record_free,
@@ -167,10 +169,10 @@ int libfsrefs_ministore_node_free(
 
 			result = -1;
 		}
-		if( ( *ministore_node )->data != NULL )
+		if( ( *ministore_node )->internal_data != NULL )
 		{
 			memory_free(
-			 ( *ministore_node )->data );
+			 ( *ministore_node )->internal_data );
 		}
 		memory_free(
 		 *ministore_node );
@@ -213,6 +215,17 @@ int libfsrefs_ministore_node_read_data(
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid ministore node.",
+		 function );
+
+		return( -1 );
+	}
+	if( ministore_node->data != NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 "%s: invalid ministore_node - data value already set.",
 		 function );
 
 		return( -1 );
@@ -614,6 +627,9 @@ int libfsrefs_ministore_node_read_data(
 
 		goto on_error;
 	}
+	ministore_node->data      = data;
+	ministore_node->data_size = data_size;
+
 	return( 1 );
 
 on_error:
@@ -665,7 +681,7 @@ int libfsrefs_ministore_node_read_file_io_handle(
 
 		return( -1 );
 	}
-	if( ministore_node->data != NULL )
+	if( ministore_node->internal_data != NULL )
 	{
 		libcerror_error_set(
 		 error,
@@ -737,10 +753,10 @@ int libfsrefs_ministore_node_read_file_io_handle(
 
 		return( -1 );
 	}
-	ministore_node->data = (uint8_t *) memory_allocate(
-	                                    read_size );
+	ministore_node->internal_data = (uint8_t *) memory_allocate(
+	                                             read_size );
 
-	if( ministore_node->data == NULL )
+	if( ministore_node->internal_data == NULL )
 	{
 		libcerror_error_set(
 		 error,
@@ -751,8 +767,6 @@ int libfsrefs_ministore_node_read_file_io_handle(
 
 		goto on_error;
 	}
-	ministore_node->data_size = read_size;
-
 	for( block_number_index = 0;
 	     block_number_index < 4;
 	     block_number_index++ )
@@ -763,7 +777,7 @@ int libfsrefs_ministore_node_read_file_io_handle(
 		}
 		read_count = libbfio_handle_read_buffer_at_offset(
 		              file_io_handle,
-		              ministore_node->data,
+		              ministore_node->internal_data,
 		              io_handle->metadata_block_size,
 		              block_reference->block_offsets[ block_number_index ],
 		              error );
@@ -799,7 +813,7 @@ int libfsrefs_ministore_node_read_file_io_handle(
 	if( libfsrefs_metadata_block_header_read_data(
 	     metadata_block_header,
 	     io_handle,
-	     ministore_node->data,
+	     ministore_node->internal_data,
 	     header_size,
 	     error ) != 1 )
 	{
@@ -847,7 +861,7 @@ int libfsrefs_ministore_node_read_file_io_handle(
 	if( libfsrefs_ministore_node_read_data(
 	     ministore_node,
 	     io_handle,
-	     &( ministore_node->data[ header_size ] ),
+	     &( ministore_node->internal_data[ header_size ] ),
 	     read_size - header_size,
 	     error ) != 1 )
 	{
@@ -869,12 +883,12 @@ on_error:
 		 &metadata_block_header,
 		 NULL );
 	}
-	if( ministore_node->data != NULL )
+	if( ministore_node->internal_data != NULL )
 	{
 		memory_free(
-		 ministore_node->data );
+		 ministore_node->internal_data );
 
-		ministore_node->data = NULL;
+		ministore_node->internal_data = NULL;
 	}
 	ministore_node->data_size = 0;
 

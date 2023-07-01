@@ -4,6 +4,8 @@ MSVSCPP_FILES = \
 	fsrefs_test_block_tree/fsrefs_test_block_tree.vcproj \
 	fsrefs_test_block_tree_node/fsrefs_test_block_tree_node.vcproj \
 	fsrefs_test_checkpoint/fsrefs_test_checkpoint.vcproj \
+	fsrefs_test_data_run/fsrefs_test_data_run.vcproj \
+	fsrefs_test_directory_entry/fsrefs_test_directory_entry.vcproj \
 	fsrefs_test_directory_object/fsrefs_test_directory_object.vcproj \
 	fsrefs_test_error/fsrefs_test_error.vcproj \
 	fsrefs_test_file_entry/fsrefs_test_file_entry.vcproj \

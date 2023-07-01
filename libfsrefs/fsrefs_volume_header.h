@@ -75,10 +75,10 @@ struct fsrefs_volume_header
 	 */
 	uint8_t bytes_per_sector[ 4 ];
 
-	/* The number of sectors per block
+	/* The number of sectors per cluster block
 	 * Consists of 4 bytes
 	 */
-	uint8_t sectors_per_block[ 4 ];
+	uint8_t sectors_per_cluster_block[ 4 ];
 
 	/* Major format version
 	 * Consists of 1 byte

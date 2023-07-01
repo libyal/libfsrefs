@@ -1,7 +1,7 @@
 /*
  * Directory entry functions
  *
- * Copyright (C) 2010-2023, Joachim Metz <joachim.metz@gmail.com>
+ * Copyright (C) 2012-2023, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *
@@ -24,8 +24,10 @@
 #include <memory.h>
 #include <types.h>
 
+#include "libfsrefs_data_run.h"
 #include "libfsrefs_debug.h"
 #include "libfsrefs_directory_entry.h"
+#include "libfsrefs_libcdata.h"
 #include "libfsrefs_libcerror.h"
 #include "libfsrefs_libcnotify.h"
 #include "libfsrefs_libfdatetime.h"
@@ -93,6 +95,25 @@ int libfsrefs_directory_entry_initialize(
 		 "%s: unable to clear directory entry.",
 		 function );
 
+		memory_free(
+		 *directory_entry );
+
+		*directory_entry = NULL;
+
+		return( -1 );
+	}
+	if( libcdata_array_initialize(
+	     &( ( *directory_entry )->data_runs_array ),
+	     0,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to create data runs array.",
+		 function );
+
 		goto on_error;
 	}
 	return( 1 );
@@ -116,6 +137,7 @@ int libfsrefs_directory_entry_free(
      libcerror_error_t **error )
 {
 	static char *function = "libfsrefs_directory_entry_free";
+	int result            = 1;
 
 	if( directory_entry == NULL )
 	{
@@ -130,6 +152,20 @@ int libfsrefs_directory_entry_free(
 	}
 	if( *directory_entry != NULL )
 	{
+		if( libcdata_array_free(
+		     &( ( *directory_entry )->data_runs_array ),
+		     (int (*)(intptr_t **, libcerror_error_t **)) &libfsrefs_data_run_free,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable to free data runs array.",
+			 function );
+
+			result = -1;
+		}
 		if( ( *directory_entry )->name_data != NULL )
 		{
 			memory_free(
@@ -140,7 +176,877 @@ int libfsrefs_directory_entry_free(
 
 		*directory_entry = NULL;
 	}
+	return( result );
+}
+
+/* Reads the directory entry data stream
+ * Returns 1 if successful or -1 on error
+ */
+int libfsrefs_directory_entry_read_data_stream(
+     libfsrefs_directory_entry_t *directory_entry,
+     libfsrefs_io_handle_t *io_handle,
+     const uint8_t *data,
+     size_t data_size,
+     uint16_t record_flags,
+     libcerror_error_t **error )
+{
+	libfsrefs_data_run_t *data_run       = NULL;
+	libfsrefs_ministore_node_t *node     = NULL;
+	libfsrefs_node_record_t *node_record = NULL;
+	static char *function                = "libfsrefs_directory_entry_read_data_stream";
+	int entry_index                      = 0;
+	int number_of_records                = 0;
+	int record_index                     = 0;
+
+#if defined( HAVE_DEBUG_OUTPUT )
+	uint64_t value_64bit                 = 0;
+	uint32_t value_32bit                 = 0;
+#endif
+
+	if( directory_entry == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid directory entry.",
+		 function );
+
+		return( -1 );
+	}
+	if( ( record_flags & 0x0008 ) == 0 )
+	{
+#if defined( HAVE_DEBUG_OUTPUT )
+		if( libcnotify_verbose != 0 )
+		{
+			libcnotify_printf(
+			 "%s: resident data stream data:\n",
+			 function );
+			libcnotify_print_data(
+			 data,
+			 data_size,
+			 LIBCNOTIFY_PRINT_DATA_FLAG_GROUP_DATA );
+		}
+#endif
+/* TODO implement */
+	}
+	else
+	{
+		if( libfsrefs_ministore_node_initialize(
+		     &node,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+			 "%s: unable to create non-resident data stream ministore node.",
+			 function );
+
+			goto on_error;
+		}
+		if( libfsrefs_ministore_node_read_data(
+		     node,
+		     io_handle,
+		     data,
+		     data_size,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_IO,
+			 LIBCERROR_IO_ERROR_READ_FAILED,
+			 "%s: unable to read non-resident data stream ministore node.",
+			 function );
+
+			goto on_error;
+		}
+		if( ( node->node_type_flags & 0x02 ) == 0 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
+			 "%s: unsupported non-resident data stream ministore node - missing is root (0x02) flag.",
+			 function );
+
+			goto on_error;
+		}
+		if( node->header_data == NULL )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+			 "%s: invalid non-resident data stream ministore node - missing header data.",
+			 function );
+
+			return( -1 );
+		}
+		if( node->header_data_size != sizeof( fsrefs_data_stream_non_resident_t ) )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+			 "%s: invalid non-resident data stream ministore node - header data size value out of bounds.",
+			 function );
+
+			goto on_error;
+		}
+#if defined( HAVE_DEBUG_OUTPUT )
+		if( libcnotify_verbose != 0 )
+		{
+			byte_stream_copy_to_uint32_little_endian(
+			 ( (fsrefs_data_stream_non_resident_t *) node->header_data )->unknown1,
+			 value_32bit );
+			libcnotify_printf(
+			 "%s: unknown1\t\t\t: 0x%08" PRIx32 "\n",
+			 function,
+			 value_32bit );
+
+			byte_stream_copy_to_uint64_little_endian(
+			 ( (fsrefs_data_stream_non_resident_t *) node->header_data )->unknown2,
+			 value_64bit );
+			libcnotify_printf(
+			 "%s: unknown2\t\t\t: 0x%08" PRIx64 "\n",
+			 function,
+			 value_64bit );
+
+			byte_stream_copy_to_uint64_little_endian(
+			 ( (fsrefs_data_stream_non_resident_t *) node->header_data )->allocated_data_size,
+			 value_64bit );
+			libcnotify_printf(
+			 "%s: allocated data size\t\t: %" PRIu64 "\n",
+			 function,
+			 value_64bit );
+
+			byte_stream_copy_to_uint64_little_endian(
+			 ( (fsrefs_data_stream_non_resident_t *) node->header_data )->data_size,
+			 value_64bit );
+			libcnotify_printf(
+			 "%s: data size\t\t\t: %" PRIu64 "\n",
+			 function,
+			 value_64bit );
+
+			byte_stream_copy_to_uint64_little_endian(
+			 ( (fsrefs_data_stream_non_resident_t *) node->header_data )->valid_data_size,
+			 value_64bit );
+			libcnotify_printf(
+			 "%s: valid data size\t\t: %" PRIu64 "\n",
+			 function,
+			 value_64bit );
+
+			libcnotify_printf(
+			 "%s: unknown3:\n",
+			 function );
+			libcnotify_print_data(
+			 ( (fsrefs_data_stream_non_resident_t *) node->header_data )->unknown3,
+			 60,
+			 LIBCNOTIFY_PRINT_DATA_FLAG_GROUP_DATA );
+		}
+#endif /* defined( HAVE_DEBUG_OUTPUT ) */
+
+		if( libfsrefs_ministore_node_get_number_of_records(
+		     node,
+		     &number_of_records,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve number of records.",
+			 function );
+
+			goto on_error;
+		}
+		for( record_index = 0;
+		     record_index < number_of_records;
+		     record_index++ )
+		{
+			if( libfsrefs_ministore_node_get_record_by_index(
+			     node,
+			     record_index,
+			     &node_record,
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+				 "%s: unable to retrieve data run: %d record.",
+				 function,
+				 record_index );
+
+				goto on_error;
+			}
+			if( libfsrefs_data_run_initialize(
+			     &data_run,
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+				 "%s: unable to create data run: %d.",
+				 function,
+				 record_index );
+
+				goto on_error;
+			}
+			if( libfsrefs_data_run_read_data(
+			     data_run,
+			     node_record->value_data,
+			     node_record->value_data_size,
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_IO,
+				 LIBCERROR_IO_ERROR_READ_FAILED,
+				 "%s: unable to read data run: %d.",
+				 function,
+				 record_index );
+
+				goto on_error;
+			}
+			if( libcdata_array_append_entry(
+			     directory_entry->data_runs_array,
+			     &entry_index,
+			     (intptr_t *) data_run,
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_APPEND_FAILED,
+				 "%s: unable to append data run: %d to array.",
+				 function,
+				 record_index );
+
+				goto on_error;
+			}
+			data_run = NULL;
+		}
+		if( libfsrefs_ministore_node_free(
+		     &node,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable to free non-resident data stream ministore node.",
+			 function );
+
+			goto on_error;
+		}
+	}
 	return( 1 );
+
+on_error:
+	if( data_run != NULL )
+	{
+		libfsrefs_data_run_free(
+		 &data_run,
+		 NULL );
+	}
+	if( node != NULL )
+	{
+		libfsrefs_ministore_node_free(
+		 &node,
+		 NULL );
+	}
+	libcdata_array_empty(
+	 directory_entry->data_runs_array,
+	 (int (*)(intptr_t **, libcerror_error_t **)) &libfsrefs_data_run_free,
+	 NULL );
+
+	return( -1 );
+}
+
+/* Reads the directory entry directory values
+ * Returns 1 if successful or -1 on error
+ */
+int libfsrefs_directory_entry_read_directory_values(
+     libfsrefs_directory_entry_t *directory_entry,
+     const uint8_t *data,
+     size_t data_size,
+     libcerror_error_t **error )
+{
+	static char *function = "libfsrefs_directory_entry_read_directory_values";
+
+#if defined( HAVE_DEBUG_OUTPUT )
+	uint64_t value_64bit  = 0;
+	uint32_t value_32bit  = 0;
+#endif
+
+	if( directory_entry == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid directory entry.",
+		 function );
+
+		return( -1 );
+	}
+	if( data == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 "%s: invalid data.",
+		 function );
+
+		return( -1 );
+	}
+	if( data_size != sizeof( fsrefs_directory_values_t ) )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: invalid data size value out of bounds.",
+		 function );
+
+		return( -1 );
+	}
+#if defined( HAVE_DEBUG_OUTPUT )
+	if( libcnotify_verbose != 0 )
+	{
+		libcnotify_printf(
+		 "%s: directory values data:\n",
+		 function );
+		libcnotify_print_data(
+		 data,
+		 data_size,
+		 LIBCNOTIFY_PRINT_DATA_FLAG_GROUP_DATA );
+	}
+#endif
+	byte_stream_copy_to_uint64_little_endian(
+	 ( (fsrefs_directory_values_t *) data )->object_identifier,
+	 directory_entry->object_identifier );
+
+	byte_stream_copy_to_uint64_little_endian(
+	 ( (fsrefs_directory_values_t *) data )->creation_time,
+	 directory_entry->creation_time );
+
+	byte_stream_copy_to_uint64_little_endian(
+	 ( (fsrefs_directory_values_t *) data )->modification_time,
+	 directory_entry->modification_time );
+
+	byte_stream_copy_to_uint64_little_endian(
+	 ( (fsrefs_directory_values_t *) data )->entry_modification_time,
+	 directory_entry->entry_modification_time );
+
+	byte_stream_copy_to_uint64_little_endian(
+	 ( (fsrefs_directory_values_t *) data )->access_time,
+	 directory_entry->access_time );
+
+	byte_stream_copy_to_uint32_little_endian(
+	 ( (fsrefs_directory_values_t *) data )->file_attribute_flags,
+	 directory_entry->file_attribute_flags );
+
+#if defined( HAVE_DEBUG_OUTPUT )
+	if( libcnotify_verbose != 0 )
+	{
+		libcnotify_printf(
+		 "%s: object identifier\t\t: 0x%08" PRIx64 "\n",
+		 function,
+		 directory_entry->object_identifier );
+
+		byte_stream_copy_to_uint64_little_endian(
+		 ( (fsrefs_directory_values_t *) data )->unknown1,
+		 value_64bit );
+		libcnotify_printf(
+		 "%s: unknown1\t\t\t: 0x%08" PRIx64 "\n",
+		 function,
+		 value_64bit );
+
+		if( libfsrefs_debug_print_filetime_value(
+		     function,
+		     "creation time\t\t\t",
+		     ( (fsrefs_directory_values_t *) data )->creation_time,
+		     8,
+		     LIBFDATETIME_ENDIAN_LITTLE,
+		     LIBFDATETIME_STRING_FORMAT_TYPE_CTIME | LIBFDATETIME_STRING_FORMAT_FLAG_DATE_TIME_NANO_SECONDS,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_PRINT_FAILED,
+			 "%s: unable to print FILETIME value.",
+			 function );
+
+			return( -1 );
+		}
+		if( libfsrefs_debug_print_filetime_value(
+		     function,
+		     "modification time\t\t",
+		     ( (fsrefs_directory_values_t *) data )->modification_time,
+		     8,
+		     LIBFDATETIME_ENDIAN_LITTLE,
+		     LIBFDATETIME_STRING_FORMAT_TYPE_CTIME | LIBFDATETIME_STRING_FORMAT_FLAG_DATE_TIME_NANO_SECONDS,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_PRINT_FAILED,
+			 "%s: unable to print FILETIME value.",
+			 function );
+
+			return( -1 );
+		}
+		if( libfsrefs_debug_print_filetime_value(
+		     function,
+		     "entry modification time\t",
+		     ( (fsrefs_directory_values_t *) data )->entry_modification_time,
+		     8,
+		     LIBFDATETIME_ENDIAN_LITTLE,
+		     LIBFDATETIME_STRING_FORMAT_TYPE_CTIME | LIBFDATETIME_STRING_FORMAT_FLAG_DATE_TIME_NANO_SECONDS,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_PRINT_FAILED,
+			 "%s: unable to print FILETIME value.",
+			 function );
+
+			return( -1 );
+		}
+		if( libfsrefs_debug_print_filetime_value(
+		     function,
+		     "access time\t\t\t",
+		     ( (fsrefs_directory_values_t *) data )->access_time,
+		     8,
+		     LIBFDATETIME_ENDIAN_LITTLE,
+		     LIBFDATETIME_STRING_FORMAT_TYPE_CTIME | LIBFDATETIME_STRING_FORMAT_FLAG_DATE_TIME_NANO_SECONDS,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_PRINT_FAILED,
+			 "%s: unable to print FILETIME value.",
+			 function );
+
+			return( -1 );
+		}
+		libcnotify_printf(
+		 "%s: unknown2:\n",
+		 function );
+		libcnotify_print_data(
+		 ( (fsrefs_directory_values_t *) data )->unknown2,
+		 16,
+		 0 );
+
+		libcnotify_printf(
+		 "%s: file attribute flags\t\t: 0x%08" PRIx32 "\n",
+		 function,
+		 directory_entry->file_attribute_flags );
+		libfsrefs_debug_print_file_attribute_flags(
+		 directory_entry->file_attribute_flags );
+		libcnotify_printf(
+		 "\n" );
+
+		byte_stream_copy_to_uint32_little_endian(
+		 ( (fsrefs_directory_values_t *) data )->unknown3,
+		 value_32bit );
+		libcnotify_printf(
+		 "%s: unknown3\t\t\t: 0x%08" PRIx32 "\n",
+		 function,
+		 value_32bit );
+
+		libcnotify_printf(
+		 "\n" );
+	}
+#endif /* defined( HAVE_DEBUG_OUTPUT ) */
+
+	return( 1 );
+}
+
+/* Reads the directory entry file values
+ * Returns 1 if successful or -1 on error
+ */
+int libfsrefs_directory_entry_read_file_values(
+     libfsrefs_directory_entry_t *directory_entry,
+     libfsrefs_io_handle_t *io_handle,
+     const uint8_t *data,
+     size_t data_size,
+     libcerror_error_t **error )
+{
+	libfsrefs_ministore_node_t *node     = NULL;
+	libfsrefs_node_record_t *node_record = NULL;
+	static char *function                = "libfsrefs_directory_entry_read_file_values";
+	int number_of_records                = 0;
+	int record_index                     = 0;
+
+#if defined( HAVE_DEBUG_OUTPUT )
+	uint64_t value_64bit                 = 0;
+	uint32_t value_32bit                 = 0;
+#endif
+
+	if( directory_entry == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid directory entry.",
+		 function );
+
+		return( -1 );
+	}
+	if( libfsrefs_ministore_node_initialize(
+	     &node,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to create file ministore node.",
+		 function );
+
+		goto on_error;
+	}
+	if( libfsrefs_ministore_node_read_data(
+	     node,
+	     io_handle,
+	     data,
+	     data_size,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_IO,
+		 LIBCERROR_IO_ERROR_READ_FAILED,
+		 "%s: unable to read file ministore node.",
+		 function );
+
+		goto on_error;
+	}
+	if( ( node->node_type_flags & 0x02 ) == 0 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
+		 "%s: unsupported file ministore node - missing is root (0x02) flag.",
+		 function );
+
+		goto on_error;
+	}
+	if( node->header_data == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 "%s: invalid file ministore node - missing header data.",
+		 function );
+
+		return( -1 );
+	}
+	if( node->header_data_size != sizeof( fsrefs_file_values_t ) )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: invalid file ministore node - header data size value out of bounds.",
+		 function );
+
+		goto on_error;
+	}
+	byte_stream_copy_to_uint64_little_endian(
+	 ( (fsrefs_file_values_t *) node->header_data )->creation_time,
+	 directory_entry->creation_time );
+
+	byte_stream_copy_to_uint64_little_endian(
+	 ( (fsrefs_file_values_t *) node->header_data )->modification_time,
+	 directory_entry->modification_time );
+
+	byte_stream_copy_to_uint64_little_endian(
+	 ( (fsrefs_file_values_t *) node->header_data )->entry_modification_time,
+	 directory_entry->entry_modification_time );
+
+	byte_stream_copy_to_uint64_little_endian(
+	 ( (fsrefs_file_values_t *) node->header_data )->access_time,
+	 directory_entry->access_time );
+
+	byte_stream_copy_to_uint32_little_endian(
+	 ( (fsrefs_file_values_t *) node->header_data )->file_attribute_flags,
+	 directory_entry->file_attribute_flags );
+
+#if defined( HAVE_DEBUG_OUTPUT )
+	if( libcnotify_verbose != 0 )
+	{
+		if( libfsrefs_debug_print_filetime_value(
+		     function,
+		     "creation time\t\t",
+		     ( (fsrefs_file_values_t *) node->header_data )->creation_time,
+		     8,
+		     LIBFDATETIME_ENDIAN_LITTLE,
+		     LIBFDATETIME_STRING_FORMAT_TYPE_CTIME | LIBFDATETIME_STRING_FORMAT_FLAG_DATE_TIME_NANO_SECONDS,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_PRINT_FAILED,
+			 "%s: unable to print FILETIME value.",
+			 function );
+
+			goto on_error;
+		}
+		if( libfsrefs_debug_print_filetime_value(
+		     function,
+		     "modification time\t\t",
+		     ( (fsrefs_file_values_t *) node->header_data )->modification_time,
+		     8,
+		     LIBFDATETIME_ENDIAN_LITTLE,
+		     LIBFDATETIME_STRING_FORMAT_TYPE_CTIME | LIBFDATETIME_STRING_FORMAT_FLAG_DATE_TIME_NANO_SECONDS,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_PRINT_FAILED,
+			 "%s: unable to print FILETIME value.",
+			 function );
+
+			goto on_error;
+		}
+		if( libfsrefs_debug_print_filetime_value(
+		     function,
+		     "entry modification time\t",
+		     ( (fsrefs_file_values_t *) node->header_data )->entry_modification_time,
+		     8,
+		     LIBFDATETIME_ENDIAN_LITTLE,
+		     LIBFDATETIME_STRING_FORMAT_TYPE_CTIME | LIBFDATETIME_STRING_FORMAT_FLAG_DATE_TIME_NANO_SECONDS,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_PRINT_FAILED,
+			 "%s: unable to print FILETIME value.",
+			 function );
+
+			goto on_error;
+		}
+		if( libfsrefs_debug_print_filetime_value(
+		     function,
+		     "access time\t\t\t",
+		     ( (fsrefs_file_values_t *) node->header_data )->access_time,
+		     8,
+		     LIBFDATETIME_ENDIAN_LITTLE,
+		     LIBFDATETIME_STRING_FORMAT_TYPE_CTIME | LIBFDATETIME_STRING_FORMAT_FLAG_DATE_TIME_NANO_SECONDS,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_PRINT_FAILED,
+			 "%s: unable to print FILETIME value.",
+			 function );
+
+			goto on_error;
+		}
+		libcnotify_printf(
+		 "%s: file attribute flags\t: 0x%08" PRIx32 "\n",
+		 function,
+		 directory_entry->file_attribute_flags );
+		libfsrefs_debug_print_file_attribute_flags(
+		 directory_entry->file_attribute_flags );
+		libcnotify_printf(
+		 "\n" );
+
+		byte_stream_copy_to_uint32_little_endian(
+		 ( (fsrefs_file_values_t *) node->header_data )->unknown1,
+		 value_32bit );
+		libcnotify_printf(
+		 "%s: unknown1\t\t\t: 0x%08" PRIx32 "\n",
+		 function,
+		 value_32bit );
+
+		byte_stream_copy_to_uint64_little_endian(
+		 ( (fsrefs_file_values_t *) node->header_data )->identifier_lower,
+		 value_64bit );
+		libcnotify_printf(
+		 "%s: identifier (lower 64-bits)\t: 0x%08" PRIx64 "\n",
+		 function,
+		 value_64bit );
+
+		byte_stream_copy_to_uint64_little_endian(
+		 ( (fsrefs_file_values_t *) node->header_data )->identifier_upper,
+		 value_64bit );
+		libcnotify_printf(
+		 "%s: identifier (upper 64-bits)\t: 0x%08" PRIx64 "\n",
+		 function,
+		 value_64bit );
+
+		byte_stream_copy_to_uint32_little_endian(
+		 ( (fsrefs_file_values_t *) node->header_data )->unknown4,
+		 value_32bit );
+		libcnotify_printf(
+		 "%s: unknown4\t\t\t: 0x%08" PRIx32 "\n",
+		 function,
+		 value_32bit );
+
+		byte_stream_copy_to_uint32_little_endian(
+		 ( (fsrefs_file_values_t *) node->header_data )->unknown5,
+		 value_32bit );
+		libcnotify_printf(
+		 "%s: unknown5\t\t\t: 0x%08" PRIx32 "\n",
+		 function,
+		 value_32bit );
+
+		byte_stream_copy_to_uint64_little_endian(
+		 ( (fsrefs_file_values_t *) node->header_data )->data_size,
+		 value_64bit );
+		libcnotify_printf(
+		 "%s: data size\t\t\t: %" PRIu64 "\n",
+		 function,
+		 value_64bit );
+
+		byte_stream_copy_to_uint64_little_endian(
+		 ( (fsrefs_file_values_t *) node->header_data )->allocated_data_size,
+		 value_64bit );
+		libcnotify_printf(
+		 "%s: allocated data size\t\t: %" PRIu64 "\n",
+		 function,
+		 value_64bit );
+
+		libcnotify_printf(
+		 "%s: unknown6:\n",
+		 function );
+		libcnotify_print_data(
+		 ( (fsrefs_file_values_t *) node->header_data )->unknown6,
+		 32,
+		 0 );
+
+		byte_stream_copy_to_uint64_little_endian(
+		 ( (fsrefs_file_values_t *) node->header_data )->unknown7,
+		 value_64bit );
+		libcnotify_printf(
+		 "%s: unknown7\t\t\t: 0x%08" PRIx64 "\n",
+		 function,
+		 value_64bit );
+
+		byte_stream_copy_to_uint64_little_endian(
+		 ( (fsrefs_file_values_t *) node->header_data )->unknown8,
+		 value_64bit );
+		libcnotify_printf(
+		 "%s: unknown8\t\t\t: 0x%08" PRIx64 "\n",
+		 function,
+		 value_64bit );
+
+		libcnotify_printf(
+		 "\n" );
+	}
+#endif /* defined( HAVE_DEBUG_OUTPUT ) */
+
+	if( libfsrefs_ministore_node_get_number_of_records(
+	     node,
+	     &number_of_records,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve number of records.",
+		 function );
+
+		goto on_error;
+	}
+	if( number_of_records == 0 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
+		 "%s: unsupported file ministore node - missing data stream records.",
+		 function );
+
+		goto on_error;
+	}
+	for( record_index = 0;
+	     record_index < number_of_records;
+	     record_index++ )
+	{
+		if( libfsrefs_ministore_node_get_record_by_index(
+		     node,
+		     record_index,
+		     &node_record,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve data stream: %d record.",
+			 function,
+			 record_index );
+
+			goto on_error;
+		}
+		if( libfsrefs_directory_entry_read_data_stream(
+		     directory_entry,
+		     io_handle,
+		     node_record->value_data,
+		     node_record->value_data_size,
+		     node_record->flags,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_IO,
+			 LIBCERROR_IO_ERROR_READ_FAILED,
+			 "%s: unable to read data stream: %d.",
+			 function,
+			 record_index );
+
+			goto on_error;
+		}
+	}
+	if( libfsrefs_ministore_node_free(
+	     &node,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+		 "%s: unable to free file ministore node.",
+		 function );
+
+		goto on_error;
+	}
+	return( 1 );
+
+on_error:
+	if( node != NULL )
+	{
+		libfsrefs_ministore_node_free(
+		 &node,
+		 NULL );
+	}
+	libcdata_array_empty(
+	 directory_entry->data_runs_array,
+	 (int (*)(intptr_t **, libcerror_error_t **)) &libfsrefs_data_run_free,
+	 NULL );
+
+	return( -1 );
 }
 
 /* Reads the directory entry from a ministore node record
@@ -154,11 +1060,6 @@ int libfsrefs_directory_entry_read_node_record(
 {
 	libfsrefs_ministore_node_t *ministore_node = NULL;
 	static char *function                      = "libfsrefs_directory_entry_read_node_record";
-
-#if defined( HAVE_DEBUG_OUTPUT )
-	uint64_t value_64bit                       = 0;
-	uint32_t value_32bit                       = 0;
-#endif
 
 	if( directory_entry == NULL )
 	{
@@ -285,46 +1186,10 @@ int libfsrefs_directory_entry_read_node_record(
 		 "\n" );
 	}
 #endif
-	if( node_record->value_data == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-		 "%s: invalid node record - missing value data.",
-		 function );
-
-		goto on_error;
-	}
-#if defined( HAVE_DEBUG_OUTPUT )
-	if( libcnotify_verbose != 0 )
-	{
-		libcnotify_printf(
-		 "%s: value data:\n",
-		 function );
-		libcnotify_print_data(
-		 node_record->value_data,
-		 node_record->value_data_size,
-		 LIBCNOTIFY_PRINT_DATA_FLAG_GROUP_DATA );
-	}
-#endif
 	if( directory_entry->entry_type == 1 )
 	{
-		if( libfsrefs_ministore_node_initialize(
-		     &ministore_node,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-			 "%s: unable to create file ministore node.",
-			 function );
-
-			goto on_error;
-		}
-		if( libfsrefs_ministore_node_read_data(
-		     ministore_node,
+		if( libfsrefs_directory_entry_read_file_values(
+		     directory_entry,
 		     io_handle,
 		     node_record->value_data,
 		     node_record->value_data_size,
@@ -334,301 +1199,7 @@ int libfsrefs_directory_entry_read_node_record(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_IO,
 			 LIBCERROR_IO_ERROR_READ_FAILED,
-			 "%s: unable to read file ministore node.",
-			 function );
-
-			goto on_error;
-		}
-		if( ( ministore_node->node_type_flags & 0x02 ) == 0 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
-			 "%s: unsupported file ministore node - missing is root (0x02) flag.",
-			 function );
-
-			goto on_error;
-		}
-		if( ministore_node->header_data_size != sizeof( fsrefs_file_values_t ) )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
-			 "%s: invalid file ministore node - header data size value out of bounds.",
-			 function );
-
-			goto on_error;
-		}
-		byte_stream_copy_to_uint64_little_endian(
-		 ( (fsrefs_file_values_t *) ministore_node->header_data )->creation_time,
-		 directory_entry->creation_time );
-
-		byte_stream_copy_to_uint64_little_endian(
-		 ( (fsrefs_file_values_t *) ministore_node->header_data )->modification_time,
-		 directory_entry->modification_time );
-
-		byte_stream_copy_to_uint64_little_endian(
-		 ( (fsrefs_file_values_t *) ministore_node->header_data )->entry_modification_time,
-		 directory_entry->entry_modification_time );
-
-		byte_stream_copy_to_uint64_little_endian(
-		 ( (fsrefs_file_values_t *) ministore_node->header_data )->access_time,
-		 directory_entry->access_time );
-
-		byte_stream_copy_to_uint32_little_endian(
-		 ( (fsrefs_file_values_t *) ministore_node->header_data )->file_attribute_flags,
-		 directory_entry->file_attribute_flags );
-
-#if defined( HAVE_DEBUG_OUTPUT )
-		if( libcnotify_verbose != 0 )
-		{
-			if( libfsrefs_debug_print_filetime_value(
-			     function,
-			     "creation time\t\t",
-			     ( (fsrefs_file_values_t *) ministore_node->header_data )->creation_time,
-			     8,
-			     LIBFDATETIME_ENDIAN_LITTLE,
-			     LIBFDATETIME_STRING_FORMAT_TYPE_CTIME | LIBFDATETIME_STRING_FORMAT_FLAG_DATE_TIME_NANO_SECONDS,
-			     error ) != 1 )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_PRINT_FAILED,
-				 "%s: unable to print FILETIME value.",
-				 function );
-
-				goto on_error;
-			}
-			if( libfsrefs_debug_print_filetime_value(
-			     function,
-			     "modification time\t\t",
-			     ( (fsrefs_file_values_t *) ministore_node->header_data )->modification_time,
-			     8,
-			     LIBFDATETIME_ENDIAN_LITTLE,
-			     LIBFDATETIME_STRING_FORMAT_TYPE_CTIME | LIBFDATETIME_STRING_FORMAT_FLAG_DATE_TIME_NANO_SECONDS,
-			     error ) != 1 )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_PRINT_FAILED,
-				 "%s: unable to print FILETIME value.",
-				 function );
-
-				goto on_error;
-			}
-			if( libfsrefs_debug_print_filetime_value(
-			     function,
-			     "entry modification time\t",
-			     ( (fsrefs_file_values_t *) ministore_node->header_data )->entry_modification_time,
-			     8,
-			     LIBFDATETIME_ENDIAN_LITTLE,
-			     LIBFDATETIME_STRING_FORMAT_TYPE_CTIME | LIBFDATETIME_STRING_FORMAT_FLAG_DATE_TIME_NANO_SECONDS,
-			     error ) != 1 )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_PRINT_FAILED,
-				 "%s: unable to print FILETIME value.",
-				 function );
-
-				goto on_error;
-			}
-			if( libfsrefs_debug_print_filetime_value(
-			     function,
-			     "access time\t\t\t",
-			     ( (fsrefs_file_values_t *) ministore_node->header_data )->access_time,
-			     8,
-			     LIBFDATETIME_ENDIAN_LITTLE,
-			     LIBFDATETIME_STRING_FORMAT_TYPE_CTIME | LIBFDATETIME_STRING_FORMAT_FLAG_DATE_TIME_NANO_SECONDS,
-			     error ) != 1 )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_PRINT_FAILED,
-				 "%s: unable to print FILETIME value.",
-				 function );
-
-				goto on_error;
-			}
-			libcnotify_printf(
-			 "%s: file attribute flags\t: 0x%08" PRIx32 "\n",
-			 function,
-			 directory_entry->file_attribute_flags );
-			libfsrefs_debug_print_file_attribute_flags(
-			 directory_entry->file_attribute_flags );
-			libcnotify_printf(
-			 "\n" );
-
-			byte_stream_copy_to_uint32_little_endian(
-			 ( (fsrefs_file_values_t *) ministore_node->header_data )->unknown1,
-			 value_32bit );
-			libcnotify_printf(
-			 "%s: unknown1\t\t\t: 0x%08" PRIx32 "\n",
-			 function,
-			 value_32bit );
-
-			byte_stream_copy_to_uint64_little_endian(
-			 ( (fsrefs_file_values_t *) ministore_node->header_data )->identifier_lower,
-			 value_64bit );
-			libcnotify_printf(
-			 "%s: identifier (lower 64-bits)\t: 0x%08" PRIx64 "\n",
-			 function,
-			 value_64bit );
-
-			byte_stream_copy_to_uint64_little_endian(
-			 ( (fsrefs_file_values_t *) ministore_node->header_data )->identifier_upper,
-			 value_64bit );
-			libcnotify_printf(
-			 "%s: identifier (upper 64-bits)\t: 0x%08" PRIx64 "\n",
-			 function,
-			 value_64bit );
-
-			byte_stream_copy_to_uint32_little_endian(
-			 ( (fsrefs_file_values_t *) ministore_node->header_data )->unknown4,
-			 value_32bit );
-			libcnotify_printf(
-			 "%s: unknown4\t\t\t: 0x%08" PRIx32 "\n",
-			 function,
-			 value_32bit );
-
-			byte_stream_copy_to_uint32_little_endian(
-			 ( (fsrefs_file_values_t *) ministore_node->header_data )->unknown5,
-			 value_32bit );
-			libcnotify_printf(
-			 "%s: unknown5\t\t\t: 0x%08" PRIx32 "\n",
-			 function,
-			 value_32bit );
-
-			byte_stream_copy_to_uint64_little_endian(
-			 ( (fsrefs_file_values_t *) ministore_node->header_data )->file_size,
-			 value_64bit );
-			libcnotify_printf(
-			 "%s: file size\t\t\t: %" PRIu64 "\n",
-			 function,
-			 value_64bit );
-
-			byte_stream_copy_to_uint64_little_endian(
-			 ( (fsrefs_file_values_t *) ministore_node->header_data )->allocated_file_size,
-			 value_64bit );
-			libcnotify_printf(
-			 "%s: allocated file size\t\t: %" PRIu64 "\n",
-			 function,
-			 value_64bit );
-
-			libcnotify_printf(
-			 "%s: unknown6:\n",
-			 function );
-			libcnotify_print_data(
-			 ( (fsrefs_file_values_t *) ministore_node->header_data )->unknown6,
-			 32,
-			 0 );
-
-			byte_stream_copy_to_uint64_little_endian(
-			 ( (fsrefs_file_values_t *) ministore_node->header_data )->unknown7,
-			 value_64bit );
-			libcnotify_printf(
-			 "%s: unknown7\t\t\t: 0x%08" PRIx64 "\n",
-			 function,
-			 value_64bit );
-
-			byte_stream_copy_to_uint64_little_endian(
-			 ( (fsrefs_file_values_t *) ministore_node->header_data )->unknown8,
-			 value_64bit );
-			libcnotify_printf(
-			 "%s: unknown8\t\t\t: 0x%08" PRIx64 "\n",
-			 function,
-			 value_64bit );
-
-			libcnotify_printf(
-			 "\n" );
-		}
-#endif /* defined( HAVE_DEBUG_OUTPUT ) */
-
-		fprintf( stderr, "DEBUG\n" );
-
-		libfsrefs_node_record_t *debug_node_record = NULL;
-		libfsrefs_ministore_node_t *debug_node = NULL;
-
-		ministore_node->data = node_record->value_data;
-		ministore_node->data_size = node_record->value_data_size;
-
-		if( libfsrefs_ministore_node_get_record_by_index(
-		     ministore_node,
-		     0,
-		     &debug_node_record,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve record: %d.",
-			 function,
-			 0 );
-
-			goto on_error;
-		}
-		if( libfsrefs_ministore_node_initialize(
-		     &debug_node,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-			 "%s: unable to create file ministore node.",
-			 function );
-
-			goto on_error;
-		}
-		if( libfsrefs_ministore_node_read_data(
-		     debug_node,
-		     io_handle,
-		     debug_node_record->value_data,
-		     debug_node_record->value_data_size,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_IO,
-			 LIBCERROR_IO_ERROR_READ_FAILED,
-			 "%s: unable to read file ministore node.",
-			 function );
-
-			goto on_error;
-		}
-		ministore_node->data = NULL;
-		ministore_node->data_size = 0;
-
-		if( libfsrefs_ministore_node_free(
-		     &debug_node,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-			 "%s: unable to free file ministore node.",
-			 function );
-
-			goto on_error;
-		}
-
-		if( libfsrefs_ministore_node_free(
-		     &ministore_node,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-			 "%s: unable to free file ministore node.",
+			 "%s: unable to read file values.",
 			 function );
 
 			goto on_error;
@@ -636,158 +1207,21 @@ int libfsrefs_directory_entry_read_node_record(
 	}
 	else if( directory_entry->entry_type == 2 )
 	{
-		if( node_record->value_data_size != sizeof( fsrefs_directory_values_t ) )
+		if( libfsrefs_directory_entry_read_directory_values(
+		     directory_entry,
+		     node_record->value_data,
+		     node_record->value_data_size,
+		     error ) != 1 )
 		{
 			libcerror_error_set(
 			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
-			 "%s: invalid node record - value data size value out of bounds.",
+			 LIBCERROR_ERROR_DOMAIN_IO,
+			 LIBCERROR_IO_ERROR_READ_FAILED,
+			 "%s: unable to read directory values.",
 			 function );
 
 			goto on_error;
 		}
-		byte_stream_copy_to_uint64_little_endian(
-		 ( (fsrefs_directory_values_t *) node_record->value_data )->object_identifier,
-		 directory_entry->object_identifier );
-
-		byte_stream_copy_to_uint64_little_endian(
-		 ( (fsrefs_directory_values_t *) node_record->value_data )->creation_time,
-		 directory_entry->creation_time );
-
-		byte_stream_copy_to_uint64_little_endian(
-		 ( (fsrefs_directory_values_t *) node_record->value_data )->modification_time,
-		 directory_entry->modification_time );
-
-		byte_stream_copy_to_uint64_little_endian(
-		 ( (fsrefs_directory_values_t *) node_record->value_data )->entry_modification_time,
-		 directory_entry->entry_modification_time );
-
-		byte_stream_copy_to_uint64_little_endian(
-		 ( (fsrefs_directory_values_t *) node_record->value_data )->access_time,
-		 directory_entry->access_time );
-
-		byte_stream_copy_to_uint32_little_endian(
-		 ( (fsrefs_directory_values_t *) node_record->value_data )->file_attribute_flags,
-		 directory_entry->file_attribute_flags );
-
-#if defined( HAVE_DEBUG_OUTPUT )
-		if( libcnotify_verbose != 0 )
-		{
-			libcnotify_printf(
-			 "%s: object identifier\t\t: 0x%08" PRIx64 "\n",
-			 function,
-			 directory_entry->object_identifier );
-
-			byte_stream_copy_to_uint64_little_endian(
-			 ( (fsrefs_directory_values_t *) node_record->value_data )->unknown1,
-			 value_64bit );
-			libcnotify_printf(
-			 "%s: unknown1\t\t\t: 0x%08" PRIx64 "\n",
-			 function,
-			 value_64bit );
-
-			if( libfsrefs_debug_print_filetime_value(
-			     function,
-			     "creation time\t\t",
-			     ( (fsrefs_directory_values_t *) node_record->value_data )->creation_time,
-			     8,
-			     LIBFDATETIME_ENDIAN_LITTLE,
-			     LIBFDATETIME_STRING_FORMAT_TYPE_CTIME | LIBFDATETIME_STRING_FORMAT_FLAG_DATE_TIME_NANO_SECONDS,
-			     error ) != 1 )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_PRINT_FAILED,
-				 "%s: unable to print FILETIME value.",
-				 function );
-
-				goto on_error;
-			}
-			if( libfsrefs_debug_print_filetime_value(
-			     function,
-			     "modification time\t\t",
-			     ( (fsrefs_directory_values_t *) node_record->value_data )->modification_time,
-			     8,
-			     LIBFDATETIME_ENDIAN_LITTLE,
-			     LIBFDATETIME_STRING_FORMAT_TYPE_CTIME | LIBFDATETIME_STRING_FORMAT_FLAG_DATE_TIME_NANO_SECONDS,
-			     error ) != 1 )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_PRINT_FAILED,
-				 "%s: unable to print FILETIME value.",
-				 function );
-
-				goto on_error;
-			}
-			if( libfsrefs_debug_print_filetime_value(
-			     function,
-			     "entry modification time\t",
-			     ( (fsrefs_directory_values_t *) node_record->value_data )->entry_modification_time,
-			     8,
-			     LIBFDATETIME_ENDIAN_LITTLE,
-			     LIBFDATETIME_STRING_FORMAT_TYPE_CTIME | LIBFDATETIME_STRING_FORMAT_FLAG_DATE_TIME_NANO_SECONDS,
-			     error ) != 1 )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_PRINT_FAILED,
-				 "%s: unable to print FILETIME value.",
-				 function );
-
-				goto on_error;
-			}
-			if( libfsrefs_debug_print_filetime_value(
-			     function,
-			     "access time\t\t\t",
-			     ( (fsrefs_directory_values_t *) node_record->value_data )->access_time,
-			     8,
-			     LIBFDATETIME_ENDIAN_LITTLE,
-			     LIBFDATETIME_STRING_FORMAT_TYPE_CTIME | LIBFDATETIME_STRING_FORMAT_FLAG_DATE_TIME_NANO_SECONDS,
-			     error ) != 1 )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_PRINT_FAILED,
-				 "%s: unable to print FILETIME value.",
-				 function );
-
-				goto on_error;
-			}
-			libcnotify_printf(
-			 "%s: unknown2:\n",
-			 function );
-			libcnotify_print_data(
-			 ( (fsrefs_directory_values_t *) node_record->value_data )->unknown2,
-			 16,
-			 0 );
-
-			libcnotify_printf(
-			 "%s: file attribute flags\t: 0x%08" PRIx32 "\n",
-			 function,
-			 directory_entry->file_attribute_flags );
-			libfsrefs_debug_print_file_attribute_flags(
-			 directory_entry->file_attribute_flags );
-			libcnotify_printf(
-			 "\n" );
-
-			byte_stream_copy_to_uint32_little_endian(
-			 ( (fsrefs_directory_values_t *) node_record->value_data )->unknown3,
-			 value_32bit );
-			libcnotify_printf(
-			 "%s: unknown3\t\t\t: 0x%08" PRIx32 "\n",
-			 function,
-			 value_32bit );
-
-			libcnotify_printf(
-			 "\n" );
-		}
-#endif /* defined( HAVE_DEBUG_OUTPUT ) */
 	}
 	return( 1 );
 
@@ -808,6 +1242,11 @@ on_error:
 		directory_entry->name_data = NULL;
 	}
 	directory_entry->name_data_size = 0;
+
+	libcdata_array_empty(
+	 directory_entry->data_runs_array,
+	 (int (*)(intptr_t **, libcerror_error_t **)) &libfsrefs_data_run_free,
+	 NULL );
 
 	return( -1 );
 }

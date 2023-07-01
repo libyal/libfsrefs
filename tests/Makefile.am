@@ -40,6 +40,8 @@ check_PROGRAMS = \
 	fsrefs_test_block_tree \
 	fsrefs_test_block_tree_node \
 	fsrefs_test_checkpoint \
+	fsrefs_test_data_run \
+	fsrefs_test_directory_entry \
 	fsrefs_test_directory_object \
 	fsrefs_test_error \
 	fsrefs_test_file_entry \
@@ -127,6 +129,30 @@ fsrefs_test_checkpoint_LDADD = \
 	@LIBCNOTIFY_LIBADD@ \
 	@LIBCLOCALE_LIBADD@ \
 	@LIBCDATA_LIBADD@ \
+	../libfsrefs/libfsrefs.la \
+	@LIBCERROR_LIBADD@
+
+fsrefs_test_data_run_SOURCES = \
+	fsrefs_test_data_run.c \
+	fsrefs_test_libcerror.h \
+	fsrefs_test_libfsrefs.h \
+	fsrefs_test_macros.h \
+	fsrefs_test_memory.c fsrefs_test_memory.h \
+	fsrefs_test_unused.h
+
+fsrefs_test_data_run_LDADD = \
+	../libfsrefs/libfsrefs.la \
+	@LIBCERROR_LIBADD@
+
+fsrefs_test_directory_entry_SOURCES = \
+	fsrefs_test_directory_entry.c \
+	fsrefs_test_libcerror.h \
+	fsrefs_test_libfsrefs.h \
+	fsrefs_test_macros.h \
+	fsrefs_test_memory.c fsrefs_test_memory.h \
+	fsrefs_test_unused.h
+
+fsrefs_test_directory_entry_LDADD = \
 	../libfsrefs/libfsrefs.la \
 	@LIBCERROR_LIBADD@
 

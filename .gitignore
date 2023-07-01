@@ -132,6 +132,8 @@ stamp-h[1-9]
 /tests/fsrefs_test_block_tree
 /tests/fsrefs_test_block_tree_node
 /tests/fsrefs_test_checkpoint
+/tests/fsrefs_test_data_run
+/tests/fsrefs_test_directory_entry
 /tests/fsrefs_test_directory_object
 /tests/fsrefs_test_error
 /tests/fsrefs_test_file_entry

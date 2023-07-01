@@ -42,7 +42,11 @@ struct libfsrefs_ministore_node
 {
 	/* The data
 	 */
-	uint8_t *data;
+	uint8_t *internal_data;
+
+	/* The data
+	 */
+	const uint8_t *data;
 
 	/* The data size
 	 */

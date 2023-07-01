@@ -29,6 +29,66 @@
 extern "C" {
 #endif
 
+typedef struct fsrefs_data_stream_non_resident fsrefs_data_stream_non_resident_t;
+
+struct fsrefs_data_stream_non_resident
+{
+	/* Unknown
+	 * Consists of 4 bytes
+	 */
+	uint8_t unknown1[ 4 ];
+
+	/* Unknown
+	 * Consists of 8 bytes
+	 */
+	uint8_t unknown2[ 8 ];
+
+	/* Allocated file data size
+	 * Consists of 8 bytes
+	 */
+	uint8_t allocated_data_size[ 8 ];
+
+	/* File data size
+	 * Consists of 8 bytes
+	 */
+	uint8_t data_size[ 8 ];
+
+	/* Valid file data size
+	 * Consists of 8 bytes
+	 */
+	uint8_t valid_data_size[ 8 ];
+
+	/* Unknown
+	 * Consists of 60 bytes
+	 */
+	uint8_t unknown3[ 60 ];
+};
+
+typedef struct fsrefs_data_run fsrefs_data_run_t;
+
+struct fsrefs_data_run
+{
+	/* Logical offset
+	 * Consists of 8 bytes
+	 */
+	uint8_t logical_offset[ 8 ];
+
+	/* Size
+	 * Consists of 8 bytes
+	 */
+	uint8_t size[ 8 ];
+
+	/* Physical offset
+	 * Consists of 8 bytes
+	 */
+	uint8_t physical_offset[ 8 ];
+
+	/* Unknown
+	 * Consists of 8 bytes
+	 */
+	uint8_t unknown1[ 8 ];
+};
+
 typedef struct fsrefs_directory_values fsrefs_directory_values_t;
 
 struct fsrefs_directory_values
@@ -141,15 +201,15 @@ struct fsrefs_file_values
 	 */
 	uint8_t unknown5[ 4 ];
 
-	/* File size
+	/* File data size
 	 * Consists of 8 bytes
 	 */
-	uint8_t file_size[ 8 ];
+	uint8_t data_size[ 8 ];
 
-	/* Allocated file size
+	/* Allocated file data size
 	 * Consists of 8 bytes
 	 */
-	uint8_t allocated_file_size[ 8 ];
+	uint8_t allocated_data_size[ 8 ];
 
 	/* Unknown
 	 * Consists of 32 bytes

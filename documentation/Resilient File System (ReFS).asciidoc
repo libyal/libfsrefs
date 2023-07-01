@@ -145,7 +145,9 @@ The volume header is 512 bytes of size and consists of:
 | 72 | 440 | 0x00 | [yellow-background]*Unknown (empty values)*
 |===
 
-Seen 4096 and 65536 as supported allocation unit byte sizes.
+[NOTE]
+Note that currently 4096 and 65536 have been observed as supported cluster block
+(allocation unit) byte sizes.
 
 [NOTE]
 Note the container size has been first observed in format version 3.4, in previous format versions such as 3.1, which has containers, this value is 0.
@@ -739,15 +741,15 @@ the directory entry type.
 | Value | Identifier | Description
 | 0 | | File system metadata file
 | 1 | | File +
-See section: <<directory_entry_record_value_file,Directory entry record value - file>>
+See section: <<directory_object_entry_record_file_values,Directory object entry record file values>>
 | 2 | | Directory +
-See section: <<directory_entry_record_value_directory,Directory entry record value - directory>>
+See section: <<directory_object_entry_record_directory_values,Directory object entry record directory values>>
 |===
 
-=== [[directory_entry_record_value_directory]]Directory entry record value - directory
+=== [[directory_object_entry_record_directory_values]]Directory object entry record directory values
 
-The directory type directory entry record value is 72 bytes in size and
-consists of:
+The directory object entry record directory values are 72 bytes in size and
+consist of:
 
 [cols="1,1,1,5",options="header"]
 |===
@@ -769,13 +771,15 @@ Contains a FILETIME
 | 68 | 4 | | [yellow-background]*Unknown (empty values)*
 |===
 
-=== [[directory_entry_record_value_file]]Directory entry record value - file
+=== [[directory_object_entry_record_file_values]]Directory object entry record file values
 
-The file type directory entry record value is variable in size and consists of
-an embedded Ministore node.
+The directory object entry record file values are variable in size and consist
+of an embedded Ministore node. The embedded Ministore node contains:
 
-The header data of the embedded Ministore node is 128 bytes in size and consists
-of:
+* header data
+* one or more <<directory_object_entry_record_data_stream,data stream records>>
+
+The header data is 128 bytes in size and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
@@ -795,11 +799,86 @@ Contains a FILETIME
 | 48 | 8 | | File system identifier (upper 64-bits)
 | 56 | 4 | | [yellow-background]*Unknown*
 | 60 | 4 | | [yellow-background]*Unknown*
-| 64 | 8 | | File size
-| 72 | 8 | | Allocated (or reserved) file size
+| 64 | 8 | | Data size
+| 72 | 8 | | Allocated (or reserved) data size
 | 80 | 32 | | [yellow-background]*Unknown*
 | 112 | 8 | | [yellow-background]*Unknown*
 | 120 | 8 | | [yellow-background]*Unknown*
+|===
+
+=== [[directory_object_entry_record_data_stream]]Data stream record
+
+key data of default (or nameless) data stream
+
+....
+00000000: 60 01 00 00 00 00 00 00  80 00 00 00 00 00         `....... ......
+....
+
+key data of alternate data stream
+....
+00000000: 4a 00 00 00 00 00 00 00  b0 00 00 00 6d 00 79 00   J....... ....m.y.
+00000010: 61 00 64 00 73 00                                  a.d.s.
+....
+
+==== [[directory_object_entry_record_resident_data_stream]]Directory object entry record resident data stream
+
+The directory object entry record resident data stream is TODO in size and consist of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 4 | | [yellow-background]*Unknown (seen: 0 resident?)
+| 4 | 4 | | (Resident) data offset +
+The offset is relative to the start of the record value
+| 8 | 4 | | [yellow-background]*Unknown*
+| 12 | 4 | | [yellow-background]*Unknown*
+| 16 | 8 | | [yellow-background]*Unknown*
+| 24 | 8 | | [yellow-background]*Unknown (data size?)*
+| 32 | 8 | | [yellow-background]*Unknown*
+| 40 | 8 | | [yellow-background]*Unknown (data size?)*
+| 32 | 8 | | [yellow-background]*Unknown*
+| 40 | 4 | | [yellow-background]*Unknown*
+| 44 | ... | | (Resident) data
+|===
+
+==== [[directory_object_entry_record_non_resident_data_stream]]Directory object entry record non-resident data stream
+
+The directory object entry record non-resident data stream is variable in size
+and consist of an embedded Ministore node. The embedded Ministore node contains:
+
+* header data
+* zero or more <<directory_object_entry_record_data_run,data run records>>
+
+The header data is 96 bytes in size and consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 4 | | [yellow-background]*Unknown (seen: 1 non-resident?)
+| 4 | 8 | | [yellow-background]*Unknown (empty values?)*
+| 12 | 8 | | Allocated (or reserved) data size
+| 20 | 8 | | Data size
+| 28 | 8 | | Valid data size
+| 36 | 60 | | [yellow-background]*Unknown (empty values?)*
+|===
+
+=== [[directory_object_entry_record_data_run]]Data run record
+
+The directory object entry record data run record key is the first 16 bytes of
+the directory object entry record data run record value.
+
+The directory object entry record data run record value is 16 bytes in size and
+consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 8 | | Data run logical offset
+| 8 | 8 | | Data run size +
+Contains the number of metadata blocks
+| 16 | 8 | | Data run physical offset +
+Contains a metadata block number
+| 24 | 8 | | [yellow-background]*Unknown*
 |===
 
 == [[file_system_information_object]]File system information object

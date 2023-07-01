@@ -1,5 +1,5 @@
 /*
- * Library block_descriptor type test program
+ * Library data_run type test program
  *
  * Copyright (C) 2012-2023, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -33,30 +33,34 @@
 #include "fsrefs_test_memory.h"
 #include "fsrefs_test_unused.h"
 
-#include "../libfsrefs/libfsrefs_block_descriptor.h"
+#include "../libfsrefs/libfsrefs_data_run.h"
+
+uint8_t fsrefs_test_data_run_data1[ 32 ] = {
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0xe0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x08, 0x00, 0x00, 0x00, 0x00 };
 
 #if defined( __GNUC__ ) && !defined( LIBFSREFS_DLL_IMPORT )
 
-/* Tests the libfsrefs_block_descriptor_initialize function
+/* Tests the libfsrefs_data_run_initialize function
  * Returns 1 if successful or 0 if not
  */
-int fsrefs_test_block_descriptor_initialize(
+int fsrefs_test_data_run_initialize(
      void )
 {
-	libcerror_error_t *error                       = NULL;
-	libfsrefs_block_descriptor_t *block_descriptor = NULL;
-	int result                                     = 0;
+	libcerror_error_t *error        = NULL;
+	libfsrefs_data_run_t *data_run  = NULL;
+	int result                      = 0;
 
 #if defined( HAVE_FSREFS_TEST_MEMORY )
-	int number_of_malloc_fail_tests                = 1;
-	int number_of_memset_fail_tests                = 1;
-	int test_number                                = 0;
+	int number_of_malloc_fail_tests = 1;
+	int number_of_memset_fail_tests = 1;
+	int test_number                 = 0;
 #endif
 
 	/* Test regular cases
 	 */
-	result = libfsrefs_block_descriptor_initialize(
-	          &block_descriptor,
+	result = libfsrefs_data_run_initialize(
+	          &data_run,
 	          &error );
 
 	FSREFS_TEST_ASSERT_EQUAL_INT(
@@ -65,15 +69,15 @@ int fsrefs_test_block_descriptor_initialize(
 	 1 );
 
 	FSREFS_TEST_ASSERT_IS_NOT_NULL(
-	 "block_descriptor",
-	 block_descriptor );
+	 "data_run",
+	 data_run );
 
 	FSREFS_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
-	result = libfsrefs_block_descriptor_free(
-	          &block_descriptor,
+	result = libfsrefs_data_run_free(
+	          &data_run,
 	          &error );
 
 	FSREFS_TEST_ASSERT_EQUAL_INT(
@@ -82,8 +86,8 @@ int fsrefs_test_block_descriptor_initialize(
 	 1 );
 
 	FSREFS_TEST_ASSERT_IS_NULL(
-	 "block_descriptor",
-	 block_descriptor );
+	 "data_run",
+	 data_run );
 
 	FSREFS_TEST_ASSERT_IS_NULL(
 	 "error",
@@ -91,7 +95,7 @@ int fsrefs_test_block_descriptor_initialize(
 
 	/* Test error cases
 	 */
-	result = libfsrefs_block_descriptor_initialize(
+	result = libfsrefs_data_run_initialize(
 	          NULL,
 	          &error );
 
@@ -107,13 +111,13 @@ int fsrefs_test_block_descriptor_initialize(
 	libcerror_error_free(
 	 &error );
 
-	block_descriptor = (libfsrefs_block_descriptor_t *) 0x12345678UL;
+	data_run = (libfsrefs_data_run_t *) 0x12345678UL;
 
-	result = libfsrefs_block_descriptor_initialize(
-	          &block_descriptor,
+	result = libfsrefs_data_run_initialize(
+	          &data_run,
 	          &error );
 
-	block_descriptor = NULL;
+	data_run = NULL;
 
 	FSREFS_TEST_ASSERT_EQUAL_INT(
 	 "result",
@@ -133,22 +137,22 @@ int fsrefs_test_block_descriptor_initialize(
 	     test_number < number_of_malloc_fail_tests;
 	     test_number++ )
 	{
-		/* Test libfsrefs_block_descriptor_initialize with malloc failing
+		/* Test libfsrefs_data_run_initialize with malloc failing
 		 */
 		fsrefs_test_malloc_attempts_before_fail = test_number;
 
-		result = libfsrefs_block_descriptor_initialize(
-		          &block_descriptor,
+		result = libfsrefs_data_run_initialize(
+		          &data_run,
 		          &error );
 
 		if( fsrefs_test_malloc_attempts_before_fail != -1 )
 		{
 			fsrefs_test_malloc_attempts_before_fail = -1;
 
-			if( block_descriptor != NULL )
+			if( data_run != NULL )
 			{
-				libfsrefs_block_descriptor_free(
-				 &block_descriptor,
+				libfsrefs_data_run_free(
+				 &data_run,
 				 NULL );
 			}
 		}
@@ -160,8 +164,8 @@ int fsrefs_test_block_descriptor_initialize(
 			 -1 );
 
 			FSREFS_TEST_ASSERT_IS_NULL(
-			 "block_descriptor",
-			 block_descriptor );
+			 "data_run",
+			 data_run );
 
 			FSREFS_TEST_ASSERT_IS_NOT_NULL(
 			 "error",
@@ -175,22 +179,22 @@ int fsrefs_test_block_descriptor_initialize(
 	     test_number < number_of_memset_fail_tests;
 	     test_number++ )
 	{
-		/* Test libfsrefs_block_descriptor_initialize with memset failing
+		/* Test libfsrefs_data_run_initialize with memset failing
 		 */
 		fsrefs_test_memset_attempts_before_fail = test_number;
 
-		result = libfsrefs_block_descriptor_initialize(
-		          &block_descriptor,
+		result = libfsrefs_data_run_initialize(
+		          &data_run,
 		          &error );
 
 		if( fsrefs_test_memset_attempts_before_fail != -1 )
 		{
 			fsrefs_test_memset_attempts_before_fail = -1;
 
-			if( block_descriptor != NULL )
+			if( data_run != NULL )
 			{
-				libfsrefs_block_descriptor_free(
-				 &block_descriptor,
+				libfsrefs_data_run_free(
+				 &data_run,
 				 NULL );
 			}
 		}
@@ -202,8 +206,8 @@ int fsrefs_test_block_descriptor_initialize(
 			 -1 );
 
 			FSREFS_TEST_ASSERT_IS_NULL(
-			 "block_descriptor",
-			 block_descriptor );
+			 "data_run",
+			 data_run );
 
 			FSREFS_TEST_ASSERT_IS_NOT_NULL(
 			 "error",
@@ -223,19 +227,19 @@ on_error:
 		libcerror_error_free(
 		 &error );
 	}
-	if( block_descriptor != NULL )
+	if( data_run != NULL )
 	{
-		libfsrefs_block_descriptor_free(
-		 &block_descriptor,
+		libfsrefs_data_run_free(
+		 &data_run,
 		 NULL );
 	}
 	return( 0 );
 }
 
-/* Tests the libfsrefs_block_descriptor_free function
+/* Tests the libfsrefs_data_run_free function
  * Returns 1 if successful or 0 if not
  */
-int fsrefs_test_block_descriptor_free(
+int fsrefs_test_data_run_free(
      void )
 {
 	libcerror_error_t *error = NULL;
@@ -243,7 +247,7 @@ int fsrefs_test_block_descriptor_free(
 
 	/* Test error cases
 	 */
-	result = libfsrefs_block_descriptor_free(
+	result = libfsrefs_data_run_free(
 	          NULL,
 	          &error );
 
@@ -266,6 +270,165 @@ on_error:
 	{
 		libcerror_error_free(
 		 &error );
+	}
+	return( 0 );
+}
+
+/* Tests the libfsrefs_data_run_read_data function
+ * Returns 1 if successful or 0 if not
+ */
+int fsrefs_test_data_run_read_data(
+     void )
+{
+	libcerror_error_t *error             = NULL;
+	libfsrefs_data_run_t *data_run = NULL;
+	int result                           = 0;
+
+	/* Initialize test
+	 */
+	result = libfsrefs_data_run_initialize(
+	          &data_run,
+	          &error );
+
+	FSREFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	FSREFS_TEST_ASSERT_IS_NOT_NULL(
+	 "data_run",
+	 data_run );
+
+	FSREFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	/* Test regular cases
+	 */
+	result = libfsrefs_data_run_read_data(
+	          data_run,
+	          fsrefs_test_data_run_data1,
+	          32,
+	          &error );
+
+	FSREFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	FSREFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	/* Test error cases
+	 */
+	result = libfsrefs_data_run_read_data(
+	          NULL,
+	          fsrefs_test_data_run_data1,
+	          32,
+	          &error );
+
+	FSREFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	FSREFS_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	result = libfsrefs_data_run_read_data(
+	          data_run,
+	          NULL,
+	          32,
+	          &error );
+
+	FSREFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	FSREFS_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	result = libfsrefs_data_run_read_data(
+	          data_run,
+	          fsrefs_test_data_run_data1,
+	          (size_t) SSIZE_MAX + 1,
+	          &error );
+
+	FSREFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	FSREFS_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	result = libfsrefs_data_run_read_data(
+	          data_run,
+	          fsrefs_test_data_run_data1,
+	          0,
+	          &error );
+
+	FSREFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	FSREFS_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+/* TODO: Test error case where data is invalid
+ */
+
+	/* Clean up
+	 */
+	result = libfsrefs_data_run_free(
+	          &data_run,
+	          &error );
+
+	FSREFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	FSREFS_TEST_ASSERT_IS_NULL(
+	 "data_run",
+	 data_run );
+
+	FSREFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	return( 1 );
+
+on_error:
+	if( error != NULL )
+	{
+		libcerror_error_free(
+		 &error );
+	}
+	if( data_run != NULL )
+	{
+		libfsrefs_data_run_free(
+		 &data_run,
+		 NULL );
 	}
 	return( 0 );
 }
@@ -290,12 +453,16 @@ int main(
 #if defined( __GNUC__ ) && !defined( LIBFSREFS_DLL_IMPORT )
 
 	FSREFS_TEST_RUN(
-	 "libfsrefs_block_descriptor_initialize",
-	 fsrefs_test_block_descriptor_initialize );
+	 "libfsrefs_data_run_initialize",
+	 fsrefs_test_data_run_initialize );
 
 	FSREFS_TEST_RUN(
-	 "libfsrefs_block_descriptor_free",
-	 fsrefs_test_block_descriptor_free );
+	 "libfsrefs_data_run_free",
+	 fsrefs_test_data_run_free );
+
+	FSREFS_TEST_RUN(
+	 "libfsrefs_data_run_read_data",
+	 fsrefs_test_data_run_read_data );
 
 #endif /* defined( __GNUC__ ) && !defined( LIBFSREFS_DLL_IMPORT ) */
 

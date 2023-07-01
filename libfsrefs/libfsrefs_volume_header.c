@@ -144,14 +144,14 @@ int libfsrefs_volume_header_read_data(
      size_t data_size,
      libcerror_error_t **error )
 {
-	static char *function      = "libfsrefs_volume_header_read_data";
-	uint64_t number_of_sectors = 0;
-	uint32_t sectors_per_block = 0;
+	static char *function              = "libfsrefs_volume_header_read_data";
+	uint64_t number_of_sectors         = 0;
+	uint32_t sectors_per_cluster_block = 0;
 
 #if defined( HAVE_DEBUG_OUTPUT )
-	uint64_t value_64bit       = 0;
-	uint32_t value_32bit       = 0;
-	uint16_t value_16bit       = 0;
+	uint64_t value_64bit               = 0;
+	uint32_t value_32bit               = 0;
+	uint16_t value_16bit               = 0;
 #endif
 
 	if( volume_header == NULL )
@@ -223,8 +223,8 @@ int libfsrefs_volume_header_read_data(
 	 volume_header->bytes_per_sector );
 
 	byte_stream_copy_to_uint32_little_endian(
-	 ( (fsrefs_volume_header_t *) data )->sectors_per_block,
-	 sectors_per_block );
+	 ( (fsrefs_volume_header_t *) data )->sectors_per_cluster_block,
+	 sectors_per_cluster_block );
 
 	volume_header->major_format_version = ( (fsrefs_volume_header_t *) data )->major_format_version;
 	volume_header->minor_format_version = ( (fsrefs_volume_header_t *) data )->minor_format_version;
@@ -299,9 +299,9 @@ int libfsrefs_volume_header_read_data(
 		 volume_header->bytes_per_sector );
 
 		libcnotify_printf(
-		 "%s: sectors per block\t\t\t: %" PRIu32 "\n",
+		 "%s: sectors per cluster block\t\t: %" PRIu32 "\n",
 		 function,
-		 sectors_per_block );
+		 sectors_per_cluster_block );
 
 		libcnotify_printf(
 		 "%s: major format version\t\t\t: %" PRIu8 "\n",
@@ -387,18 +387,18 @@ int libfsrefs_volume_header_read_data(
 	volume_header->volume_size  = number_of_sectors * volume_header->bytes_per_sector;
 	volume_header->volume_size += volume_header->bytes_per_sector;
 
-	if( sectors_per_block > (size32_t) ( UINT32_MAX / volume_header->bytes_per_sector ) )
+	if( sectors_per_cluster_block > (size32_t) ( UINT32_MAX / volume_header->bytes_per_sector ) )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
-		 "%s: invalid sectors per block value out of bounds.",
+		 "%s: invalid sectors per cluster block value out of bounds.",
 		 function );
 
 		return( -1 );
 	}
-	volume_header->cluster_block_size = (size32_t) sectors_per_block * volume_header->bytes_per_sector;
+	volume_header->cluster_block_size = (size32_t) sectors_per_cluster_block * volume_header->bytes_per_sector;
 
 	if( ( volume_header->cluster_block_size != 4096 )
 	 && ( volume_header->cluster_block_size != 65536 ) )

@@ -7,7 +7,7 @@ EXIT_SUCCESS=0;
 EXIT_FAILURE=1;
 EXIT_IGNORE=77;
 
-LIBRARY_TESTS="block_descriptor block_reference block_tree block_tree_node checkpoint directory_object error file_entry file_system io_handle metadata_block_header ministore_node node_header node_record notify objects_tree superblock tree_header volume_header";
+LIBRARY_TESTS="block_descriptor block_reference block_tree block_tree_node checkpoint data_run directory_entry directory_object error file_entry file_system io_handle metadata_block_header ministore_node node_header node_record notify objects_tree superblock tree_header volume_header";
 LIBRARY_TESTS_WITH_INPUT="support volume";
 OPTION_SETS="offset";
 
