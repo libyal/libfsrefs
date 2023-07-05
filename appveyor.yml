@@ -120,7 +120,7 @@ environment:
 install:
 - cmd: if [%BUILD_ENVIRONMENT%]==[msbuild] (
     git clone https://github.com/libyal/vstools.git ..\vstools )
-- sh: if test ${BUILD_ENVIRONMENT} = "python-tox" || test ${BUILD_ENVIRONMENT} = "xcode"; then brew update -q; fi
+- sh: if test ${BUILD_ENVIRONMENT} = "python-tox" || test ${BUILD_ENVIRONMENT} = "xcode"; then brew update-reset && brew update -q; fi
 - sh: if test ${BUILD_ENVIRONMENT} = "python-tox" || test ${BUILD_ENVIRONMENT} = "xcode"; then brew install -q gettext gnu-sed || true; fi
 - ps: If ($env:BUILD_ENVIRONMENT -eq "cygwin64") {
     (New-Object Net.WebClient).DownloadFile("https://cygwin.com/setup-x86_64.exe", "C:\\cygwin64\\setup-x86_64.exe") }

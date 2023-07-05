@@ -29,6 +29,7 @@ libfsrefs_la_SOURCES = \
 	fsrefs_superblock.h \
 	fsrefs_volume_header.h \
 	libfsrefs.c \
+	libfsrefs_attribute_values.c libfsrefs_attribute_values.h \
 	libfsrefs_block_descriptor.c libfsrefs_block_descriptor.h \
 	libfsrefs_block_reference.c libfsrefs_block_reference.h \
 	libfsrefs_block_tree.c libfsrefs_block_tree.h \

@@ -74,9 +74,9 @@ struct libfsrefs_directory_entry
 	 */
 	uint32_t file_attribute_flags;
 
-	/* The data runs array
+	/* The attributes array
 	 */
-	libcdata_array_t *data_runs_array;
+	libcdata_array_t *attributes_array;
 };
 
 int libfsrefs_directory_entry_initialize(
@@ -85,14 +85,6 @@ int libfsrefs_directory_entry_initialize(
 
 int libfsrefs_directory_entry_free(
      libfsrefs_directory_entry_t **directory_entry,
-     libcerror_error_t **error );
-
-int libfsrefs_directory_entry_read_data_stream(
-     libfsrefs_directory_entry_t *directory_entry,
-     libfsrefs_io_handle_t *io_handle,
-     const uint8_t *data,
-     size_t data_size,
-     uint16_t record_flags,
      libcerror_error_t **error );
 
 int libfsrefs_directory_entry_read_directory_values(

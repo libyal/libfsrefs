@@ -36,7 +36,6 @@
 #include "fsrefs_test_memory.h"
 #include "fsrefs_test_unused.h"
 
-#include "../libfsrefs/libfsrefs_io_handle.h"
 #include "../libfsrefs/libfsrefs_volume_header.h"
 
 uint8_t fsrefs_test_volume_header_data1[ 512 ] = {

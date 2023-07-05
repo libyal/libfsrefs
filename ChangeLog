@@ -3,6 +3,9 @@ TODO
 Format support
 * Use checkpoint in determining block offsets
 * Rename metadata block header to block header ?
+* Rename metadata block size to page size ?
+* Use directory object name records in determining directory entries and lookup detailed entry record on demand
+* Add support for multi node file values ministore tree
 
 API
 * add function to retrieve container size

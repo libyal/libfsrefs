@@ -38,7 +38,7 @@
 #include "fsrefs_metadata_block.h"
 #include "fsrefs_ministore_tree.h"
 
-/* Creates a ministore node
+/* Creates a Ministore node
  * Make sure the value ministore_node is referencing, is set to NULL
  * Returns 1 if successful or -1 on error
  */
@@ -130,7 +130,7 @@ on_error:
 	return( -1 );
 }
 
-/* Frees a ministore node
+/* Frees a Ministore node
  * Returns 1 if successful or -1 on error
  */
 int libfsrefs_ministore_node_free(
@@ -182,7 +182,7 @@ int libfsrefs_ministore_node_free(
 	return( result );
 }
 
-/* Reads a ministore node
+/* Reads a Ministore node
  * Returns 1 if successful or -1 on error
  */
 int libfsrefs_ministore_node_read_data(
@@ -653,7 +653,7 @@ on_error:
 	return( -1 );
 }
 
-/* Reads a ministore node
+/* Reads a Ministore node
  * Returns 1 if successful or -1 on error
  */
 int libfsrefs_ministore_node_read_file_io_handle(

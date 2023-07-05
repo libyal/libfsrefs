@@ -34,6 +34,7 @@
 #include "fsrefs_test_unused.h"
 
 #include "../libfsrefs/libfsrefs_data_run.h"
+#include "../libfsrefs/libfsrefs_io_handle.h"
 
 uint8_t fsrefs_test_data_run_data1[ 32 ] = {
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -280,12 +281,29 @@ on_error:
 int fsrefs_test_data_run_read_data(
      void )
 {
-	libcerror_error_t *error             = NULL;
-	libfsrefs_data_run_t *data_run = NULL;
-	int result                           = 0;
+	libcerror_error_t *error         = NULL;
+	libfsrefs_data_run_t *data_run   = NULL;
+	libfsrefs_io_handle_t *io_handle = NULL;
+	int result                       = 0;
 
 	/* Initialize test
 	 */
+	result = libfsrefs_io_handle_initialize(
+	          &io_handle,
+	          &error );
+
+	FSREFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	FSREFS_TEST_ASSERT_IS_NOT_NULL(
+	 "io_handle",
+	 io_handle );
+
+	io_handle->metadata_block_size  = 16384;
+	io_handle->major_format_version = 1;
+
 	result = libfsrefs_data_run_initialize(
 	          &data_run,
 	          &error );
@@ -307,6 +325,7 @@ int fsrefs_test_data_run_read_data(
 	 */
 	result = libfsrefs_data_run_read_data(
 	          data_run,
+	          io_handle,
 	          fsrefs_test_data_run_data1,
 	          32,
 	          &error );
@@ -324,6 +343,7 @@ int fsrefs_test_data_run_read_data(
 	 */
 	result = libfsrefs_data_run_read_data(
 	          NULL,
+	          io_handle,
 	          fsrefs_test_data_run_data1,
 	          32,
 	          &error );
@@ -343,6 +363,7 @@ int fsrefs_test_data_run_read_data(
 	result = libfsrefs_data_run_read_data(
 	          data_run,
 	          NULL,
+	          fsrefs_test_data_run_data1,
 	          32,
 	          &error );
 
@@ -360,6 +381,26 @@ int fsrefs_test_data_run_read_data(
 
 	result = libfsrefs_data_run_read_data(
 	          data_run,
+	          io_handle,
+	          NULL,
+	          32,
+	          &error );
+
+	FSREFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	FSREFS_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	result = libfsrefs_data_run_read_data(
+	          data_run,
+	          io_handle,
 	          fsrefs_test_data_run_data1,
 	          (size_t) SSIZE_MAX + 1,
 	          &error );
@@ -378,6 +419,7 @@ int fsrefs_test_data_run_read_data(
 
 	result = libfsrefs_data_run_read_data(
 	          data_run,
+	          io_handle,
 	          fsrefs_test_data_run_data1,
 	          0,
 	          &error );
@@ -416,6 +458,23 @@ int fsrefs_test_data_run_read_data(
 	 "error",
 	 error );
 
+	result = libfsrefs_io_handle_free(
+	          &io_handle,
+	          &error );
+
+	FSREFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	FSREFS_TEST_ASSERT_IS_NULL(
+	 "io_handle",
+	 io_handle );
+
+	FSREFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
 	return( 1 );
 
 on_error:
@@ -428,6 +487,12 @@ on_error:
 	{
 		libfsrefs_data_run_free(
 		 &data_run,
+		 NULL );
+	}
+	if( io_handle != NULL )
+	{
+		libfsrefs_io_handle_free(
+		 &io_handle,
 		 NULL );
 	}
 	return( 0 );

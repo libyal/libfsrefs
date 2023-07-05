@@ -35,6 +35,7 @@ EXTRA_DIST = \
 	$(check_SCRIPTS)
 
 check_PROGRAMS = \
+	fsrefs_test_attribute_values \
 	fsrefs_test_block_descriptor \
 	fsrefs_test_block_reference \
 	fsrefs_test_block_tree \
@@ -61,6 +62,18 @@ check_PROGRAMS = \
 	fsrefs_test_tree_header \
 	fsrefs_test_volume \
 	fsrefs_test_volume_header
+
+fsrefs_test_attribute_values_SOURCES = \
+	fsrefs_test_attribute_values.c \
+	fsrefs_test_libcerror.h \
+	fsrefs_test_libfsrefs.h \
+	fsrefs_test_macros.h \
+	fsrefs_test_memory.c fsrefs_test_memory.h \
+	fsrefs_test_unused.h
+
+fsrefs_test_attribute_values_LDADD = \
+	../libfsrefs/libfsrefs.la \
+	@LIBCERROR_LIBADD@
 
 fsrefs_test_block_descriptor_SOURCES = \
 	fsrefs_test_block_descriptor.c \

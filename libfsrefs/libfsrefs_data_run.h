@@ -25,6 +25,7 @@
 #include <common.h>
 #include <types.h>
 
+#include "libfsrefs_io_handle.h"
 #include "libfsrefs_libcerror.h"
 
 #if defined( __cplusplus )
@@ -54,6 +55,7 @@ int libfsrefs_data_run_free(
 
 int libfsrefs_data_run_read_data(
      libfsrefs_data_run_t *data_run,
+     libfsrefs_io_handle_t *io_handle,
      const uint8_t *data,
      size_t data_size,
      libcerror_error_t **error );

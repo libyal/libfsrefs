@@ -693,10 +693,11 @@ int info_handle_name_value_fprint(
 			goto on_error;
 		}
 		/* Replace:
-		 *   values <= 0x1f and 0x7f by \x##
+		 *   Control characters ([U+0-U+1f, U+7f-U+9f]) by \x##
 		 */
 		if( ( unicode_character <= 0x1f )
-		 || ( unicode_character == 0x7f ) )
+		 || ( ( unicode_character >= 0x7f )
+		  &&  ( unicode_character <= 0x9f ) ) )
 		{
 			print_count = system_string_sprintf(
 			               &( escaped_value_string[ escaped_value_string_index ] ),

@@ -24,7 +24,7 @@
 #include <memory.h>
 #include <types.h>
 
-#include "libfsrefs_data_run.h"
+#include "libfsrefs_attribute_values.h"
 #include "libfsrefs_debug.h"
 #include "libfsrefs_directory_entry.h"
 #include "libfsrefs_libcdata.h"
@@ -103,7 +103,7 @@ int libfsrefs_directory_entry_initialize(
 		return( -1 );
 	}
 	if( libcdata_array_initialize(
-	     &( ( *directory_entry )->data_runs_array ),
+	     &( ( *directory_entry )->attributes_array ),
 	     0,
 	     error ) != 1 )
 	{
@@ -111,7 +111,7 @@ int libfsrefs_directory_entry_initialize(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-		 "%s: unable to create data runs array.",
+		 "%s: unable to create attributes array.",
 		 function );
 
 		goto on_error;
@@ -153,15 +153,15 @@ int libfsrefs_directory_entry_free(
 	if( *directory_entry != NULL )
 	{
 		if( libcdata_array_free(
-		     &( ( *directory_entry )->data_runs_array ),
-		     (int (*)(intptr_t **, libcerror_error_t **)) &libfsrefs_data_run_free,
+		     &( ( *directory_entry )->attributes_array ),
+		     (int (*)(intptr_t **, libcerror_error_t **)) &libfsrefs_attribute_values_free,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-			 "%s: unable to free data runs array.",
+			 "%s: unable to free attributes array.",
 			 function );
 
 			result = -1;
@@ -177,293 +177,6 @@ int libfsrefs_directory_entry_free(
 		*directory_entry = NULL;
 	}
 	return( result );
-}
-
-/* Reads the directory entry data stream
- * Returns 1 if successful or -1 on error
- */
-int libfsrefs_directory_entry_read_data_stream(
-     libfsrefs_directory_entry_t *directory_entry,
-     libfsrefs_io_handle_t *io_handle,
-     const uint8_t *data,
-     size_t data_size,
-     uint16_t record_flags,
-     libcerror_error_t **error )
-{
-	libfsrefs_data_run_t *data_run       = NULL;
-	libfsrefs_ministore_node_t *node     = NULL;
-	libfsrefs_node_record_t *node_record = NULL;
-	static char *function                = "libfsrefs_directory_entry_read_data_stream";
-	int entry_index                      = 0;
-	int number_of_records                = 0;
-	int record_index                     = 0;
-
-#if defined( HAVE_DEBUG_OUTPUT )
-	uint64_t value_64bit                 = 0;
-	uint32_t value_32bit                 = 0;
-#endif
-
-	if( directory_entry == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid directory entry.",
-		 function );
-
-		return( -1 );
-	}
-	if( ( record_flags & 0x0008 ) == 0 )
-	{
-#if defined( HAVE_DEBUG_OUTPUT )
-		if( libcnotify_verbose != 0 )
-		{
-			libcnotify_printf(
-			 "%s: resident data stream data:\n",
-			 function );
-			libcnotify_print_data(
-			 data,
-			 data_size,
-			 LIBCNOTIFY_PRINT_DATA_FLAG_GROUP_DATA );
-		}
-#endif
-/* TODO implement */
-	}
-	else
-	{
-		if( libfsrefs_ministore_node_initialize(
-		     &node,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-			 "%s: unable to create non-resident data stream ministore node.",
-			 function );
-
-			goto on_error;
-		}
-		if( libfsrefs_ministore_node_read_data(
-		     node,
-		     io_handle,
-		     data,
-		     data_size,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_IO,
-			 LIBCERROR_IO_ERROR_READ_FAILED,
-			 "%s: unable to read non-resident data stream ministore node.",
-			 function );
-
-			goto on_error;
-		}
-		if( ( node->node_type_flags & 0x02 ) == 0 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
-			 "%s: unsupported non-resident data stream ministore node - missing is root (0x02) flag.",
-			 function );
-
-			goto on_error;
-		}
-		if( node->header_data == NULL )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-			 "%s: invalid non-resident data stream ministore node - missing header data.",
-			 function );
-
-			return( -1 );
-		}
-		if( node->header_data_size != sizeof( fsrefs_data_stream_non_resident_t ) )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
-			 "%s: invalid non-resident data stream ministore node - header data size value out of bounds.",
-			 function );
-
-			goto on_error;
-		}
-#if defined( HAVE_DEBUG_OUTPUT )
-		if( libcnotify_verbose != 0 )
-		{
-			byte_stream_copy_to_uint32_little_endian(
-			 ( (fsrefs_data_stream_non_resident_t *) node->header_data )->unknown1,
-			 value_32bit );
-			libcnotify_printf(
-			 "%s: unknown1\t\t\t: 0x%08" PRIx32 "\n",
-			 function,
-			 value_32bit );
-
-			byte_stream_copy_to_uint64_little_endian(
-			 ( (fsrefs_data_stream_non_resident_t *) node->header_data )->unknown2,
-			 value_64bit );
-			libcnotify_printf(
-			 "%s: unknown2\t\t\t: 0x%08" PRIx64 "\n",
-			 function,
-			 value_64bit );
-
-			byte_stream_copy_to_uint64_little_endian(
-			 ( (fsrefs_data_stream_non_resident_t *) node->header_data )->allocated_data_size,
-			 value_64bit );
-			libcnotify_printf(
-			 "%s: allocated data size\t\t: %" PRIu64 "\n",
-			 function,
-			 value_64bit );
-
-			byte_stream_copy_to_uint64_little_endian(
-			 ( (fsrefs_data_stream_non_resident_t *) node->header_data )->data_size,
-			 value_64bit );
-			libcnotify_printf(
-			 "%s: data size\t\t\t: %" PRIu64 "\n",
-			 function,
-			 value_64bit );
-
-			byte_stream_copy_to_uint64_little_endian(
-			 ( (fsrefs_data_stream_non_resident_t *) node->header_data )->valid_data_size,
-			 value_64bit );
-			libcnotify_printf(
-			 "%s: valid data size\t\t: %" PRIu64 "\n",
-			 function,
-			 value_64bit );
-
-			libcnotify_printf(
-			 "%s: unknown3:\n",
-			 function );
-			libcnotify_print_data(
-			 ( (fsrefs_data_stream_non_resident_t *) node->header_data )->unknown3,
-			 60,
-			 LIBCNOTIFY_PRINT_DATA_FLAG_GROUP_DATA );
-		}
-#endif /* defined( HAVE_DEBUG_OUTPUT ) */
-
-		if( libfsrefs_ministore_node_get_number_of_records(
-		     node,
-		     &number_of_records,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve number of records.",
-			 function );
-
-			goto on_error;
-		}
-		for( record_index = 0;
-		     record_index < number_of_records;
-		     record_index++ )
-		{
-			if( libfsrefs_ministore_node_get_record_by_index(
-			     node,
-			     record_index,
-			     &node_record,
-			     error ) != 1 )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-				 "%s: unable to retrieve data run: %d record.",
-				 function,
-				 record_index );
-
-				goto on_error;
-			}
-			if( libfsrefs_data_run_initialize(
-			     &data_run,
-			     error ) != 1 )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-				 "%s: unable to create data run: %d.",
-				 function,
-				 record_index );
-
-				goto on_error;
-			}
-			if( libfsrefs_data_run_read_data(
-			     data_run,
-			     node_record->value_data,
-			     node_record->value_data_size,
-			     error ) != 1 )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_IO,
-				 LIBCERROR_IO_ERROR_READ_FAILED,
-				 "%s: unable to read data run: %d.",
-				 function,
-				 record_index );
-
-				goto on_error;
-			}
-			if( libcdata_array_append_entry(
-			     directory_entry->data_runs_array,
-			     &entry_index,
-			     (intptr_t *) data_run,
-			     error ) != 1 )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_APPEND_FAILED,
-				 "%s: unable to append data run: %d to array.",
-				 function,
-				 record_index );
-
-				goto on_error;
-			}
-			data_run = NULL;
-		}
-		if( libfsrefs_ministore_node_free(
-		     &node,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-			 "%s: unable to free non-resident data stream ministore node.",
-			 function );
-
-			goto on_error;
-		}
-	}
-	return( 1 );
-
-on_error:
-	if( data_run != NULL )
-	{
-		libfsrefs_data_run_free(
-		 &data_run,
-		 NULL );
-	}
-	if( node != NULL )
-	{
-		libfsrefs_ministore_node_free(
-		 &node,
-		 NULL );
-	}
-	libcdata_array_empty(
-	 directory_entry->data_runs_array,
-	 (int (*)(intptr_t **, libcerror_error_t **)) &libfsrefs_data_run_free,
-	 NULL );
-
-	return( -1 );
 }
 
 /* Reads the directory entry directory values
@@ -682,15 +395,17 @@ int libfsrefs_directory_entry_read_file_values(
      size_t data_size,
      libcerror_error_t **error )
 {
-	libfsrefs_ministore_node_t *node     = NULL;
-	libfsrefs_node_record_t *node_record = NULL;
-	static char *function                = "libfsrefs_directory_entry_read_file_values";
-	int number_of_records                = 0;
-	int record_index                     = 0;
+	libfsrefs_attribute_values_t *attribute_values = NULL;
+	libfsrefs_ministore_node_t *node               = NULL;
+	libfsrefs_node_record_t *node_record           = NULL;
+	static char *function                          = "libfsrefs_directory_entry_read_file_values";
+	int entry_index                                = 0;
+	int number_of_records                          = 0;
+	int record_index                               = 0;
 
 #if defined( HAVE_DEBUG_OUTPUT )
-	uint64_t value_64bit                 = 0;
-	uint32_t value_32bit                 = 0;
+	uint64_t value_64bit                           = 0;
+	uint32_t value_32bit                           = 0;
 #endif
 
 	if( directory_entry == NULL )
@@ -712,7 +427,7 @@ int libfsrefs_directory_entry_read_file_values(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-		 "%s: unable to create file ministore node.",
+		 "%s: unable to create file values ministore node.",
 		 function );
 
 		goto on_error;
@@ -728,18 +443,18 @@ int libfsrefs_directory_entry_read_file_values(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_IO,
 		 LIBCERROR_IO_ERROR_READ_FAILED,
-		 "%s: unable to read file ministore node.",
+		 "%s: unable to read file values ministore node.",
 		 function );
 
 		goto on_error;
 	}
-	if( ( node->node_type_flags & 0x02 ) == 0 )
+	if( ( node->node_type_flags & 0x03 ) != 0x02 )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
-		 "%s: unsupported file ministore node - missing is root (0x02) flag.",
+		 "%s: invalid file values ministore node - unsupported node type flags.",
 		 function );
 
 		goto on_error;
@@ -750,7 +465,7 @@ int libfsrefs_directory_entry_read_file_values(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-		 "%s: invalid file ministore node - missing header data.",
+		 "%s: invalid file values ministore node - missing header data.",
 		 function );
 
 		return( -1 );
@@ -761,7 +476,7 @@ int libfsrefs_directory_entry_read_file_values(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
-		 "%s: invalid file ministore node - header data size value out of bounds.",
+		 "%s: invalid file values ministore node - header data size value out of bounds.",
 		 function );
 
 		goto on_error;
@@ -975,7 +690,7 @@ int libfsrefs_directory_entry_read_file_values(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
-		 "%s: unsupported file ministore node - missing data stream records.",
+		 "%s: unsupported file values ministore node - missing attribute records.",
 		 function );
 
 		goto on_error;
@@ -994,30 +709,59 @@ int libfsrefs_directory_entry_read_file_values(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve data stream: %d record.",
+			 "%s: unable to retrieve attribute: %d record.",
 			 function,
 			 record_index );
 
 			goto on_error;
 		}
-		if( libfsrefs_directory_entry_read_data_stream(
-		     directory_entry,
+		if( libfsrefs_attribute_values_initialize(
+		     &attribute_values,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+			 "%s: unable to create attribute values: %d.",
+			 function,
+			 record_index );
+
+			goto on_error;
+		}
+		if( libfsrefs_attribute_values_read_node_record(
+		     attribute_values,
 		     io_handle,
-		     node_record->value_data,
-		     node_record->value_data_size,
-		     node_record->flags,
+		     node_record,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_IO,
 			 LIBCERROR_IO_ERROR_READ_FAILED,
-			 "%s: unable to read data stream: %d.",
+			 "%s: unable to read attribute values from record: %d.",
 			 function,
 			 record_index );
 
 			goto on_error;
 		}
+		if( libcdata_array_append_entry(
+		     directory_entry->attributes_array,
+		     &entry_index,
+		     (intptr_t *) attribute_values,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_APPEND_FAILED,
+			 "%s: unable to append attribute values: %d to array.",
+			 function,
+			 record_index );
+
+			goto on_error;
+		}
+		attribute_values = NULL;
 	}
 	if( libfsrefs_ministore_node_free(
 	     &node,
@@ -1027,7 +771,7 @@ int libfsrefs_directory_entry_read_file_values(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-		 "%s: unable to free file ministore node.",
+		 "%s: unable to free file values ministore node.",
 		 function );
 
 		goto on_error;
@@ -1035,6 +779,12 @@ int libfsrefs_directory_entry_read_file_values(
 	return( 1 );
 
 on_error:
+	if( attribute_values != NULL )
+	{
+		libfsrefs_attribute_values_free(
+		 &attribute_values,
+		 NULL );
+	}
 	if( node != NULL )
 	{
 		libfsrefs_ministore_node_free(
@@ -1042,8 +792,8 @@ on_error:
 		 NULL );
 	}
 	libcdata_array_empty(
-	 directory_entry->data_runs_array,
-	 (int (*)(intptr_t **, libcerror_error_t **)) &libfsrefs_data_run_free,
+	 directory_entry->attributes_array,
+	 (int (*)(intptr_t **, libcerror_error_t **)) &libfsrefs_attribute_values_free,
 	 NULL );
 
 	return( -1 );
@@ -1058,8 +808,12 @@ int libfsrefs_directory_entry_read_node_record(
      libfsrefs_node_record_t *node_record,
      libcerror_error_t **error )
 {
-	libfsrefs_ministore_node_t *ministore_node = NULL;
-	static char *function                      = "libfsrefs_directory_entry_read_node_record";
+	static char *function = "libfsrefs_directory_entry_read_node_record";
+	size_t name_data_size = 0;
+
+#if defined( HAVE_DEBUG_OUTPUT )
+	uint16_t value_16bit  = 0;
+#endif
 
 	if( directory_entry == NULL )
 	{
@@ -1105,7 +859,7 @@ int libfsrefs_directory_entry_read_node_record(
 
 		return( -1 );
 	}
-	if( node_record->key_data_size <= 4 )
+	if( node_record->key_data_size < 6 )
 	{
 		libcerror_error_set(
 		 error,
@@ -1132,10 +886,10 @@ int libfsrefs_directory_entry_read_node_record(
 	 &( node_record->key_data[ 2 ] ),
 	 directory_entry->entry_type );
 
-	directory_entry->name_data_size = node_record->key_data_size - 4;
+	name_data_size = node_record->key_data_size - 4;
 
 	directory_entry->name_data = (uint8_t *) memory_allocate(
-	                                          sizeof( uint8_t ) * directory_entry->name_data_size );
+	                                          sizeof( uint8_t ) * name_data_size );
 
 	if( directory_entry->name_data == NULL )
 	{
@@ -1148,6 +902,8 @@ int libfsrefs_directory_entry_read_node_record(
 
 		goto on_error;
 	}
+	directory_entry->name_data_size = name_data_size;
+
 	if( memory_copy(
 	     directory_entry->name_data,
 	     &( node_record->key_data[ 4 ] ),
@@ -1165,6 +921,19 @@ int libfsrefs_directory_entry_read_node_record(
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )
 	{
+		byte_stream_copy_to_uint16_little_endian(
+		 &( node_record->key_data[ 0 ] ),
+		 value_16bit );
+		libcnotify_printf(
+		 "%s: record type\t\t\t: 0x%04" PRIx16 "\n",
+		 function,
+		 value_16bit );
+
+		libcnotify_printf(
+		 "%s: entry type\t\t\t: 0x%04" PRIx16 "\n",
+		 function,
+		 directory_entry->entry_type );
+
 		if( libfsrefs_debug_print_utf16_string_value(
 		     function,
 		     "name\t\t\t",
@@ -1185,7 +954,8 @@ int libfsrefs_directory_entry_read_node_record(
 		libcnotify_printf(
 		 "\n" );
 	}
-#endif
+#endif /* defined( HAVE_DEBUG_OUTPUT ) */
+
 	if( directory_entry->entry_type == 1 )
 	{
 		if( libfsrefs_directory_entry_read_file_values(
@@ -1226,14 +996,6 @@ int libfsrefs_directory_entry_read_node_record(
 	return( 1 );
 
 on_error:
-	if( ministore_node != NULL )
-	{
-		libfsrefs_ministore_node_free(
-		 &ministore_node,
-		 NULL );
-
-		directory_entry->name_data = NULL;
-	}
 	if( directory_entry->name_data != NULL )
 	{
 		memory_free(
@@ -1244,8 +1006,8 @@ on_error:
 	directory_entry->name_data_size = 0;
 
 	libcdata_array_empty(
-	 directory_entry->data_runs_array,
-	 (int (*)(intptr_t **, libcerror_error_t **)) &libfsrefs_data_run_free,
+	 directory_entry->attributes_array,
+	 (int (*)(intptr_t **, libcerror_error_t **)) &libfsrefs_attribute_values_free,
 	 NULL );
 
 	return( -1 );

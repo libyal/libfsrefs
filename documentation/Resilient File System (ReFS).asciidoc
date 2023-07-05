@@ -777,7 +777,11 @@ The directory object entry record file values are variable in size and consist
 of an embedded Ministore node. The embedded Ministore node contains:
 
 * header data
-* one or more <<directory_object_entry_record_data_stream,data stream records>>
+* one or more <<directory_object_entry_record_attribute,attribute records>>
+
+[NOTE]
+Note that although the Ministore node is embedded in the record value it can
+branch out to other Ministore nodes stored elsewhere.
 
 The header data is 128 bytes in size and consists of:
 
@@ -806,44 +810,73 @@ Contains a FILETIME
 | 120 | 8 | | [yellow-background]*Unknown*
 |===
 
-=== [[directory_object_entry_record_data_stream]]Data stream record
+=== [[directory_object_entry_record_attribute]]Attribute record
 
-key data of default (or nameless) data stream
+key data of default (or nameless) data attribute
 
 ....
 00000000: 60 01 00 00 00 00 00 00  80 00 00 00 00 00         `....... ......
 ....
 
-key data of alternate data stream
+key data of alternate data attribute
 ....
 00000000: 4a 00 00 00 00 00 00 00  b0 00 00 00 6d 00 79 00   J....... ....m.y.
 00000010: 61 00 64 00 73 00                                  a.d.s.
 ....
 
-==== [[directory_object_entry_record_resident_data_stream]]Directory object entry record resident data stream
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 8 | | [yellow-background]*Unknown*
+| 8 | 4 | | [yellow-background]*Unknown (attribute type)*
+| 12 | ... | | Attribute name string +
+Contains an UTF-16 little-endian without end-of-string character or an end-of-string character if the attribute is nameless
+|===
 
-The directory object entry record resident data stream is TODO in size and consist of:
+[cols="1,1,5",options="header"]
+|===
+| Value | Identifier | Description
+| 0x10 | $STANDARD_INFORMATION |
+| 0x30 | $FILENAME |
+| 0x38 | $DIR_LINK |
+| 0x40 | $OBJECT_ID |
+| 0x50 | $OBSOLETE |
+| 0x60 | $VOLUME_NAME |
+| 0x70 | $VOLUME_INFO |
+| 0x80 | $DATA |
+| 0x90 | $INDEX_ROOT |
+| 0xa0 | $INDEX_ALLOCATION |
+| 0xb0 | $NAMED_DATA |
+| 0xc0 | $REPARSE_POINT |
+| 0xd0 | $EA_INFORMATION |
+| 0xe0 | $EA |
+|===
+
+==== [[directory_object_entry_record_resident_attribute]]Directory object entry record resident attribute
+
+The directory object entry record resident attribute is variable in size and
+consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
 | Offset | Size | Value | Description
-| 0 | 4 | | [yellow-background]*Unknown (seen: 0 resident?)
-| 4 | 4 | | (Resident) data offset +
+| 0 | 4 | | [yellow-background]*Unknown (seen: 0 resident?)*
+| 4 | 4 | | (Resident or inline) data offset +
 The offset is relative to the start of the record value
-| 8 | 4 | | [yellow-background]*Unknown*
+| 8 | 4 | | (Resident or inline) data size
 | 12 | 4 | | [yellow-background]*Unknown*
 | 16 | 8 | | [yellow-background]*Unknown*
-| 24 | 8 | | [yellow-background]*Unknown (data size?)*
+| 24 | 8 | | [yellow-background]*Unknown*
 | 32 | 8 | | [yellow-background]*Unknown*
-| 40 | 8 | | [yellow-background]*Unknown (data size?)*
+| 40 | 8 | | [yellow-background]*Unknown*
 | 32 | 8 | | [yellow-background]*Unknown*
 | 40 | 4 | | [yellow-background]*Unknown*
-| 44 | ... | | (Resident) data
+| 44 | ... | | (Resident or inline) data
 |===
 
-==== [[directory_object_entry_record_non_resident_data_stream]]Directory object entry record non-resident data stream
+==== [[directory_object_entry_record_non_resident_attribute]]Directory object entry record non-resident attribute
 
-The directory object entry record non-resident data stream is variable in size
+The directory object entry record non-resident attribute is variable in size
 and consist of an embedded Ministore node. The embedded Ministore node contains:
 
 * header data
@@ -854,7 +887,7 @@ The header data is 96 bytes in size and consists of:
 [cols="1,1,1,5",options="header"]
 |===
 | Offset | Size | Value | Description
-| 0 | 4 | | [yellow-background]*Unknown (seen: 1 non-resident?)
+| 0 | 4 | | [yellow-background]*Unknown (seen: 1 non-resident?)*
 | 4 | 8 | | [yellow-background]*Unknown (empty values?)*
 | 12 | 8 | | Allocated (or reserved) data size
 | 20 | 8 | | Data size

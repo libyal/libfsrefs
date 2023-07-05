@@ -25,6 +25,7 @@
 #include <types.h>
 
 #include "libfsrefs_data_run.h"
+#include "libfsrefs_io_handle.h"
 #include "libfsrefs_libcerror.h"
 #include "libfsrefs_libcnotify.h"
 
@@ -138,6 +139,7 @@ int libfsrefs_data_run_free(
  */
 int libfsrefs_data_run_read_data(
      libfsrefs_data_run_t *data_run,
+     libfsrefs_io_handle_t *io_handle,
      const uint8_t *data,
      size_t data_size,
      libcerror_error_t **error )
@@ -155,6 +157,17 @@ int libfsrefs_data_run_read_data(
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid data run.",
+		 function );
+
+		return( -1 );
+	}
+	if( io_handle == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 "%s: invalid IO handle.",
 		 function );
 
 		return( -1 );

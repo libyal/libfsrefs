@@ -29,9 +29,9 @@
 extern "C" {
 #endif
 
-typedef struct fsrefs_data_stream_non_resident fsrefs_data_stream_non_resident_t;
+typedef struct fsrefs_attribute_non_resident fsrefs_attribute_non_resident_t;
 
-struct fsrefs_data_stream_non_resident
+struct fsrefs_attribute_non_resident
 {
 	/* Unknown
 	 * Consists of 4 bytes
@@ -62,6 +62,61 @@ struct fsrefs_data_stream_non_resident
 	 * Consists of 60 bytes
 	 */
 	uint8_t unknown3[ 60 ];
+};
+
+typedef struct fsrefs_attribute_resident fsrefs_attribute_resident_t;
+
+struct fsrefs_attribute_resident
+{
+	/* Unknown
+	 * Consists of 4 bytes
+	 */
+	uint8_t unknown1[ 4 ];
+
+	/* Inline data offset
+	 * Consists of 4 bytes
+	 */
+	uint8_t inline_data_offset[ 4 ];
+
+	/* Inline data size
+	 * Consists of 4 bytes
+	 */
+	uint8_t inline_data_size[ 4 ];
+
+	/* Unknown
+	 * Consists of 4 bytes
+	 */
+	uint8_t unknown3[ 4 ];
+
+	/* Unknown
+	 * Consists of 8 bytes
+	 */
+	uint8_t unknown4[ 8 ];
+
+	/* Unknown
+	 * Consists of 8 bytes
+	 */
+	uint8_t unknown5[ 8 ];
+
+	/* Unknown
+	 * Consists of 8 bytes
+	 */
+	uint8_t unknown6[ 8 ];
+
+	/* Unknown
+	 * Consists of 8 bytes
+	 */
+	uint8_t unknown7[ 8 ];
+
+	/* Unknown
+	 * Consists of 8 bytes
+	 */
+	uint8_t unknown8[ 8 ];
+
+	/* Unknown
+	 * Consists of 4 bytes
+	 */
+	uint8_t unknown9[ 4 ];
 };
 
 typedef struct fsrefs_data_run fsrefs_data_run_t;

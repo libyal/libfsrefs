@@ -127,6 +127,7 @@ stamp-h[1-9]
 /fsrefstools/*.exe
 /fsrefstools/fsrefsinfo
 /tests/*.exe
+/tests/fsrefs_test_attribute_values
 /tests/fsrefs_test_block_descriptor
 /tests/fsrefs_test_block_reference
 /tests/fsrefs_test_block_tree

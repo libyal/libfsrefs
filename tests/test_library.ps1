@@ -6,7 +6,7 @@ $ExitSuccess = 0
 $ExitFailure = 1
 $ExitIgnore = 77
 
-$LibraryTests = "block_descriptor block_reference block_tree block_tree_node checkpoint data_run directory_entry directory_object error file_entry file_system io_handle metadata_block_header ministore_node node_header node_record notify objects_tree superblock tree_header volume_header"
+$LibraryTests = "attribute_values block_descriptor block_reference block_tree block_tree_node checkpoint data_run directory_entry directory_object error file_entry file_system io_handle metadata_block_header ministore_node node_header node_record notify objects_tree superblock tree_header volume_header"
 $LibraryTestsWithInput = "support volume"
 $OptionSets = "offset"
 
