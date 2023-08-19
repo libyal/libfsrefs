@@ -939,7 +939,7 @@ int libfsrefs_directory_entry_read_node_record(
 		     "name\t\t\t",
 		     directory_entry->name_data,
 		     directory_entry->name_data_size,
-		     LIBUNA_ENDIAN_LITTLE,
+		     LIBUNA_ENDIAN_LITTLE | LIBUNA_UTF16_STREAM_ALLOW_UNPAIRED_SURROGATE,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
@@ -1051,6 +1051,7 @@ int libfsrefs_directory_entry_get_object_identifier(
 }
 
 /* Retrieves the size of the UTF-8 encoded name
+ * This function uses UTF-8 RFC 2279 (or 6-byte UTF-8) to support characters outside Unicode
  * The returned size includes the end of string character
  * Returns 1 if successful or -1 on error
  */
@@ -1075,7 +1076,7 @@ int libfsrefs_directory_entry_get_utf8_name_size(
 	if( libuna_utf8_string_size_from_utf16_stream(
 	     directory_entry->name_data,
 	     directory_entry->name_data_size,
-	     LIBUNA_ENDIAN_LITTLE,
+	     LIBUNA_ENDIAN_LITTLE | LIBUNA_UTF16_STREAM_ALLOW_UNPAIRED_SURROGATE,
 	     utf8_string_size,
 	     error ) != 1 )
 	{
@@ -1092,6 +1093,7 @@ int libfsrefs_directory_entry_get_utf8_name_size(
 }
 
 /* Retrieves the UTF-8 encoded name
+ * This function uses UTF-8 RFC 2279 (or 6-byte UTF-8) to support characters outside Unicode
  * The size should include the end of string character
  * Returns 1 if successful or -1 on error
  */
@@ -1119,7 +1121,7 @@ int libfsrefs_directory_entry_get_utf8_name(
 	     utf8_string_size,
 	     directory_entry->name_data,
 	     directory_entry->name_data_size,
-	     LIBUNA_ENDIAN_LITTLE,
+	     LIBUNA_ENDIAN_LITTLE | LIBUNA_UTF16_STREAM_ALLOW_UNPAIRED_SURROGATE,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
@@ -1135,6 +1137,7 @@ int libfsrefs_directory_entry_get_utf8_name(
 }
 
 /* Retrieves the size of the UTF-16 encoded name
+ * This function uses UCS-2 (with surrogates) to support characters outside Unicode
  * The returned size includes the end of string character
  * Returns 1 if successful or -1 on error
  */
@@ -1159,7 +1162,7 @@ int libfsrefs_directory_entry_get_utf16_name_size(
 	if( libuna_utf16_string_size_from_utf16_stream(
 	     directory_entry->name_data,
 	     directory_entry->name_data_size,
-	     LIBUNA_ENDIAN_LITTLE,
+	     LIBUNA_ENDIAN_LITTLE | LIBUNA_UTF16_STREAM_ALLOW_UNPAIRED_SURROGATE,
 	     utf16_string_size,
 	     error ) != 1 )
 	{
@@ -1176,6 +1179,7 @@ int libfsrefs_directory_entry_get_utf16_name_size(
 }
 
 /* Retrieves the UTF-16 encoded name
+ * This function uses UCS-2 (with surrogates) to support characters outside Unicode
  * The size should include the end of string character
  * Returns 1 if successful or -1 on error
  */
@@ -1203,7 +1207,7 @@ int libfsrefs_directory_entry_get_utf16_name(
 	     utf16_string_size,
 	     directory_entry->name_data,
 	     directory_entry->name_data_size,
-	     LIBUNA_ENDIAN_LITTLE,
+	     LIBUNA_ENDIAN_LITTLE | LIBUNA_UTF16_STREAM_ALLOW_UNPAIRED_SURROGATE,
 	     error ) != 1 )
 	{
 		libcerror_error_set(

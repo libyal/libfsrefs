@@ -664,17 +664,19 @@ int info_handle_name_value_fprint(
 
 		goto on_error;
 	}
+	/* Using UCS-2 or RFC 2279 UTF-8 to support unpaired UTF-16 surrogates
+	 */
 	while( value_string_index < value_string_length )
 	{
 #if defined( HAVE_WIDE_SYSTEM_CHARACTER )
-		result = libuna_unicode_character_copy_from_utf16(
+		result = libuna_unicode_character_copy_from_ucs2(
 		          &unicode_character,
 		          (libuna_utf16_character_t *) value_string,
 		          value_string_length,
 		          &value_string_index,
 		          error );
 #else
-		result = libuna_unicode_character_copy_from_utf8(
+		result = libuna_unicode_character_copy_from_utf8_rfc2279(
 		          &unicode_character,
 		          (libuna_utf8_character_t *) value_string,
 		          value_string_length,
@@ -703,6 +705,66 @@ int info_handle_name_value_fprint(
 			               &( escaped_value_string[ escaped_value_string_index ] ),
 			               escaped_value_string_size - escaped_value_string_index,
 			               "\\x%02" PRIx32 "",
+			               unicode_character );
+
+			if( print_count < 0 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_CONVERSION,
+				 LIBCERROR_CONVERSION_ERROR_INPUT_FAILED,
+				 "%s: unable to copy escaped Unicode character to escaped value string.",
+				 function );
+
+				goto on_error;
+			}
+			escaped_value_string_index += print_count;
+		}
+		/* Replace:
+		 *   Unicode surrogate characters ([U+d800-U+dfff]) by \u####
+		 *   Undefined Unicode characters ([U+fdd0-U+fddf, U+fffe-U+ffff]) by \u####
+		 */
+		else if( ( ( unicode_character >= 0x0000d800UL )
+		       &&  ( unicode_character <= 0x0000dfffUL ) )
+		      || ( ( unicode_character >= 0x0000fdd0UL )
+		       &&  ( unicode_character <= 0x0000fddfUL ) )
+		      || ( ( unicode_character >= 0x0000fffeUL )
+		       &&  ( unicode_character <= 0x0000ffffUL ) ) )
+		{
+			print_count = system_string_sprintf(
+			               &( escaped_value_string[ escaped_value_string_index ] ),
+			               escaped_value_string_size - escaped_value_string_index,
+			               "\\u%04" PRIx32 "",
+			               unicode_character );
+
+			if( print_count < 0 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_CONVERSION,
+				 LIBCERROR_CONVERSION_ERROR_INPUT_FAILED,
+				 "%s: unable to copy escaped Unicode character to escaped value string.",
+				 function );
+
+				goto on_error;
+			}
+			escaped_value_string_index += print_count;
+		}
+		/* Replace:
+		 *   Undefined Unicode characters ([
+		 *       U+1fffe-U+1ffff, U+2fffe-U+2ffff, U+3fffe-U+3ffff, U+4fffe-U+4ffff,
+		 *       U+5fffe-U+5ffff, U+6fffe-U+6ffff, U+7fffe-U+7ffff, U+8fffe-U+8ffff,
+		 *       U+9fffe-U+9ffff, U+afffe-U+affff, U+bfffe-U+bffff, U+cfffe-U+cffff,
+		 *       U+dfffe-U+dffff, U+efffe-U+effff, U+ffffe-U+fffff, U+10fffe-U+ffffffff]) by \U########
+		 */
+		else if( ( ( ( unicode_character & 0x0000ffffUL ) >= 0x0000fffeUL )
+		       &&  ( ( unicode_character & 0x0000ffffUL ) <= 0x0000ffffUL ) )
+		      || ( unicode_character > 0x0010fffeUL ) )
+		{
+			print_count = system_string_sprintf(
+			               &( escaped_value_string[ escaped_value_string_index ] ),
+			               escaped_value_string_size - escaped_value_string_index,
+			               "\\U%08" PRIx32 "",
 			               unicode_character );
 
 			if( print_count < 0 )

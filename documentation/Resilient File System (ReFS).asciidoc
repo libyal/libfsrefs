@@ -46,9 +46,10 @@ in the section entitled "GNU Free Documentation License".
 |===
 | Version | Author | Date | Comments
 | 0.0.1 | J.B. Metz | May 2012 | Initial version.
-| 0.0.2 | J.B. Metz | September 2012 | Additional information.
-| 0.0.3 | J.B. Metz | November 2013 | Additional information.
-| 0.0.4 | J.B. Metz | June 2023 | Switched to asciidoc format and additional information.
+| 0.0.2 | J.B. Metz | September 2012 | Additional information about format.
+| 0.0.3 | J.B. Metz | November 2013 | Additional information about format.
+| 0.0.4 | J.B. Metz | June 2023 | Switched to asciidoc format and additional information about format.
+| 0.0.5 | J.B. Metz | July 2023 | Additional information about format.
 |===
 
 :numbered:
@@ -717,6 +718,10 @@ The directory object name record value is variable in size and consists of:
 Contains an UTF-16 little-endian without end-of-string character
 |===
 
+[NOTE]
+The name string is not strict UTF-16 since it allows for unpaired surrogates,
+such as "U+d800" and "U+dc00".
+
 ==== Entry record (record type: 0x0030)
 
 The directory object entry record key is variable in size and consists of:
@@ -730,6 +735,10 @@ See section: <<directory_entry_types,Directory entry types>>
 | 4 | ... | | Name +
 Contains an UTF-16 little-endian without end-of-string character
 |===
+
+[NOTE]
+The name string is not strict UTF-16 since it allows for unpaired surrogates,
+such as "U+d800" and "U+dc00".
 
 The format of the directory object entry record value is dependent on
 the directory entry type.
