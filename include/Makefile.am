@@ -19,9 +19,9 @@ MAINTAINERCLEANFILES = \
 	Makefile.in
 
 distclean: clean
-	/bin/rm -f libfsrefs.h
-	/bin/rm -f libfsrefs/definitions.h
-	/bin/rm -f libfsrefs/features.h
-	/bin/rm -f libfsrefs/types.h
-	/bin/rm -f Makefile
+	-rm -f libfsrefs.h
+	-rm -f libfsrefs/definitions.h
+	-rm -f libfsrefs/features.h
+	-rm -f libfsrefs/types.h
+	-rm -f Makefile
 

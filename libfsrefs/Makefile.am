@@ -100,11 +100,13 @@ MAINTAINERCLEANFILES = \
 	Makefile.in
 
 distclean: clean
-	/bin/rm -f libfsrefs_definitions.h
-	/bin/rm -f libfsrefs.rc
-	/bin/rm -f Makefile
+	-rm -f libfsrefs_definitions.h
+	-rm -f libfsrefs.rc
+	-rm -f Makefile
 
-splint:
+sources-local: $(BUILT_SOURCES)
+
+splint-local:
 	@echo "Running splint on libfsrefs ..."
 	-splint -preproc -redef $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(libfsrefs_la_SOURCES)
 
