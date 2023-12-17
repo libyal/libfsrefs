@@ -846,6 +846,8 @@ Contains a FILETIME
 
 === [[directory_object_entry_record_attribute]]Attribute record
 
+Prior to version 3.7, the key structure of the attribute record is as follows:
+
 key data of default (or nameless) data attribute
 
 ....
@@ -861,10 +863,21 @@ key data of alternate data attribute
 [cols="1,1,1,5",options="header"]
 |===
 | Offset | Size | Value | Description
-| 0 | 8 | | [yellow-background]*Unknown*
+| 0 | 8 | | Total size, in bytes, of the value of this attribute.
 | 8 | 4 | | [yellow-background]*Unknown (attribute type)*
 | 12 | ... | | Attribute name string +
 Contains an UTF-16 little-endian without end-of-string character or an end-of-string character if the attribute is nameless
+|===
+
+In version 3.7 and later, the key structure of the attribute record is as follows:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 8 | | Total size, in bytes, of the value of this attribute.
+| 8 | 4 | | [yellow-background]*Unknown*
+| 12 | 2 | | Attribute type
+| 14 | ... | | [yellow-background]*Unknown*
 |===
 
 [cols="1,1,5",options="header"]
@@ -951,9 +964,9 @@ Contains a metadata block number
 == [[file_system_information_object]]File system information object
 
 The file system information object is a <<ministore_tree,Ministore B+-tree>>
-that contains one or more directory records, similar to any other <<directory_object,Directory Object>>.
+that contains one or more directory records, similar to any other <<directory_object,Directory object>>.
 
-The directory records in this object are similar to what is seen in the $Extend directory of an NTFS file system, and contains such entries as "Reparse Index", "Security Descriptor Stream", and "Volume Direct IO File".
+The directory records in this object are similar to what is seen in the `$Extend` directory of an NTFS file system, and contains such entries as "Reparse Index", "Security Descriptor Stream", and "Volume Direct IO File".
 
 == [[volume_information_object]]Volume information object
 
