@@ -350,7 +350,7 @@ The offset is relative to the start of the metadata block
 
 ==== Checkpoint trailer - format version 3
 
-The format version 3 checkpoint trailer is variable of size and consists of:
+Prior to version 3.12, the format of the checkpoint trailer is variable of size and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
@@ -365,6 +365,28 @@ The format version 3 checkpoint trailer is variable of size and consists of:
 | 44 | 4 | | [yellow-background]*Unknown (seen: 32)*
 | 48 | 4 | | Number of offsets
 | 52 | number of offset x 4 | | Array of offsets +
+The offset is relative to the start of the metadata block
+| ... | ... | 0x00 | [yellow-background]*Unknown (empty values)*
+|===
+
+As of version 3.12, the checkpoint trailer consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 8 | | [yellow-background]*Unknown (sequence number or checkpoint clock?)*
+| 8 | 8 | | [yellow-background]*Unknown (virtual allocator clock?)*
+| 16 | 4 | | [yellow-background]*Unknown (oldest log record?)*
+| 20 | 4 | | [yellow-background]*Unknown*
+| 24 | 8 | | [yellow-background]*Unknown*
+| 32 | 8 | | [yellow-background]*Unknown*
+| 40 | 4 | | [yellow-background]*Unknown (checkpoint data size?)*
+| 44 | 4 | | [yellow-background]*Unknown (seen: 32)*
+| 48 | 4 | | Number of offsets
+| 52 | 4 | | Offset to offsets (seen: 160) +
+The offset is relative to the start of the metadata block
+| 56 | 8 | | [yellow-background]*Unknown (data size of list of offsets?)*
+| 64 | number of offset x 4 | | Array of offsets +
 The offset is relative to the start of the metadata block
 | ... | ... | 0x00 | [yellow-background]*Unknown (empty values)*
 |===
