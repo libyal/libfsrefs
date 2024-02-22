@@ -1,7 +1,7 @@
 /*
  * Common output functions for the fsrefstools
  *
- * Copyright (C) 2012-2023, Joachim Metz <joachim.metz@gmail.com>
+ * Copyright (C) 2012-2024, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *
