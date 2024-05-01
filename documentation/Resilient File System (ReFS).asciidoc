@@ -261,7 +261,7 @@ The offset is relative to the start of the checksum descriptor
 [cols="1,1,5",options="header"]
 |===
 | Value | Identifier | Description
-| 1 | | CRC32-C
+| 1 | | CRC-32C (or CRC32-C), which uses the Castagnoli polynomial (0x1edc6f41)
 | 2 | | CRC64-ECMA-182 +
 Checksum data size is 8 bytes
 |===
