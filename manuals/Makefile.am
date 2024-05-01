@@ -6,9 +6,7 @@ EXTRA_DIST = \
 	fsrefsinfo.1 \
 	libfsrefs.3
 
-MAINTAINERCLEANFILES = \
+DISTCLEANFILES = \
+	Makefile \
 	Makefile.in
-
-distclean: clean
-	-rm -f Makefile
 

@@ -15,13 +15,11 @@ EXTRA_DIST = \
 	libfsrefs/features.h.in \
 	libfsrefs/types.h.in
 
-MAINTAINERCLEANFILES = \
+DISTCLEANFILES = \
+	libfsrefs.h \
+	libfsrefs/definitions.h \
+	libfsrefs/features.h \
+	libfsrefs/types.h \
+	Makefile \
 	Makefile.in
-
-distclean: clean
-	-rm -f libfsrefs.h
-	-rm -f libfsrefs/definitions.h
-	-rm -f libfsrefs/features.h
-	-rm -f libfsrefs/types.h
-	-rm -f Makefile
 

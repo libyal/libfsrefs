@@ -145,6 +145,7 @@ stamp-h[1-9]
 /tests/fsrefs_test_io_handle
 /tests/fsrefs_test_metadata_block_header
 /tests/fsrefs_test_ministore_node
+/tests/fsrefs_test_ministore_tree
 /tests/fsrefs_test_node_header
 /tests/fsrefs_test_node_record
 /tests/fsrefs_test_notify
@@ -158,6 +159,7 @@ stamp-h[1-9]
 /tests/fsrefs_test_volume
 /tests/fsrefs_test_volume_header
 /tests/input
+/tests/notify_stream.log
 /tests/tmp*
 
 # Local library dependencies specific files
