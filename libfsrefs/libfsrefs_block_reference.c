@@ -147,12 +147,12 @@ int libfsrefs_block_reference_read_data(
 	static char *function        = "libfsrefs_block_reference_read_data";
 	size_t block_reference_size  = 0;
 	uint16_t checksum_data_size  = 0;
-	uint8_t checksum_data_offset = 0;
 	uint8_t checksum_type        = 0;
 
 #if defined( HAVE_DEBUG_OUTPUT )
 	size_t data_offset           = 0;
 	uint16_t value_16bit         = 0;
+	uint8_t checksum_data_offset = 0;
 #endif
 
 	if( block_reference == NULL )
@@ -241,8 +241,9 @@ int libfsrefs_block_reference_read_data(
 
 		checksum_type = ( (fsrefs_metadata_block_reference_v1_t *) data )->checksum_type;
 
+#if defined( HAVE_DEBUG_OUTPUT )
 		checksum_data_offset = ( (fsrefs_metadata_block_reference_v1_t *) data )->checksum_data_offset;
-
+#endif
 		byte_stream_copy_to_uint16_little_endian(
 		 ( (fsrefs_metadata_block_reference_v1_t *) data )->checksum_data_size,
 		 checksum_data_size );
@@ -267,8 +268,9 @@ int libfsrefs_block_reference_read_data(
 
 		checksum_type = ( (fsrefs_metadata_block_reference_v3_t *) data )->checksum_type;
 
+#if defined( HAVE_DEBUG_OUTPUT )
 		checksum_data_offset = ( (fsrefs_metadata_block_reference_v3_t *) data )->checksum_data_offset;
-
+#endif
 		byte_stream_copy_to_uint16_little_endian(
 		 ( (fsrefs_metadata_block_reference_v3_t *) data )->checksum_data_size,
 		 checksum_data_size );

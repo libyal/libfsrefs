@@ -469,6 +469,17 @@ int libfsrefs_file_system_read_container_trees(
 
 		goto on_error;
 	}
+	if( root_node == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 "%s: missing root node.",
+		 function );
+
+		return( -1 );
+	}
 	if( ( root_node->node_type_flags & 0x02 ) == 0 )
 	{
 		libcerror_error_set(
@@ -557,8 +568,11 @@ int libfsrefs_file_system_get_block_offsets(
 {
 	static char *function         = "libfsrefs_file_system_get_block_offsets";
 	uint64_t block_number         = 0;
-	uint64_t container_identifier = 0;
 	uint8_t block_number_index    = 0;
+
+#if defined( HAVE_DEBUG_OUTPUT )
+	uint64_t container_identifier = 0;
+#endif
 
 	if( file_system == NULL )
 	{
@@ -606,7 +620,9 @@ int libfsrefs_file_system_get_block_offsets(
 		if( ( io_handle->container_size != 0 )
 		 && ( block_number > io_handle->container_size ) )
 		{
+#if defined( HAVE_DEBUG_OUTPUT )
 			container_identifier = block_number / io_handle->container_size;
+#endif
 			block_number        %= io_handle->container_size;
 
 /* TODO look up container block range */

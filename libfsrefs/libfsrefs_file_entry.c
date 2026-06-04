@@ -144,12 +144,10 @@ int libfsrefs_file_entry_initialize(
 	return( 1 );
 
 on_error:
-	if( *file_entry != NULL )
+	if( internal_file_entry != NULL )
 	{
 		memory_free(
-		 *file_entry );
-
-		*file_entry = NULL;
+		 internal_file_entry );
 	}
 	return( -1 );
 }

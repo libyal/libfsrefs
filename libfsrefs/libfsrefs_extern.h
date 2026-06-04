@@ -24,21 +24,28 @@
 
 #include <common.h>
 
+#if !defined( __CYGWIN__ ) && !defined( _WIN32 ) && defined( __has_attribute )
+#if __has_attribute( visibility )
+#define LIBFSREFS_INTERNAL	__attribute__((visibility("hidden"))) extern
+
+#else
+#define LIBFSREFS_INTERNAL	extern
+
+#endif /* __has_attribute( visibility ) */
+#else
+#define LIBFSREFS_INTERNAL	extern
+
+#endif /* !defined( __CYGWIN__ ) && !defined( _WIN32 ) && defined( __has_attribute ) */
+
 /* Define HAVE_LOCAL_LIBFSREFS for local use of libfsrefs
  */
 #if !defined( HAVE_LOCAL_LIBFSREFS )
 
 #include <libfsrefs/extern.h>
 
-#if defined( __CYGWIN__ ) || defined( __MINGW32__ )
-#define LIBFSREFS_EXTERN_VARIABLE	extern
-#else
-#define LIBFSREFS_EXTERN_VARIABLE	LIBFSREFS_EXTERN
-#endif
-
 #else
 #define LIBFSREFS_EXTERN		/* extern */
-#define LIBFSREFS_EXTERN_VARIABLE	extern
+#define LIBFSREFS_EXTERN_VARIABLE	LIBFSREFS_INTERNAL
 
 #endif /* !defined( HAVE_LOCAL_LIBFSREFS ) */
 

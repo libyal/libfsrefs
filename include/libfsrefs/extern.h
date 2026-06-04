@@ -31,14 +31,17 @@
  */
 #if defined( LIBFSREFS_DLL_EXPORT )
 #define LIBFSREFS_EXTERN __declspec(dllexport)
+#define LIBFSREFS_EXTERN_VARIABLE extern __declspec(dllexport)
 
 #elif defined( LIBFSREFS_DLL_IMPORT )
-#define LIBFSREFS_EXTERN extern __declspec(dllimport)
+#define LIBFSREFS_EXTERN __declspec(dllimport)
+#define LIBFSREFS_EXTERN_VARIABLE extern __declspec(dllimport)
 
 #else
 #define LIBFSREFS_EXTERN extern
+#define LIBFSREFS_EXTERN_VARIABLE extern
 
-#endif
+#endif /* defined( LIBFSREFS_DLL_EXPORT ) */
 
 #endif /* !defined( _LIBFSREFS_EXTERN_H ) */
 

@@ -149,6 +149,7 @@ int libfsrefs_node_record_read_data(
 	size_t data_offset         = 0;
 	uint16_t key_data_offset   = 0;
 	uint16_t value_data_offset = 0;
+	uint16_t value_data_size   = 0;
 
 	if( node_record == NULL )
 	{
@@ -218,7 +219,7 @@ int libfsrefs_node_record_read_data(
 
 	byte_stream_copy_to_uint16_little_endian(
 	 ( (fsrefs_ministore_tree_node_record_t *) data )->value_data_size,
-	 node_record->value_data_size );
+	 value_data_size );
 
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )
@@ -255,7 +256,7 @@ int libfsrefs_node_record_read_data(
 		libcnotify_printf(
 		 "%s: value data size\t\t\t: %" PRIu32 "\n",
 		 function,
-		 node_record->value_data_size );
+		 value_data_size );
 
 		libcnotify_printf(
 		 "\n" );
@@ -313,7 +314,7 @@ int libfsrefs_node_record_read_data(
 
 		return( -1 );
 	}
-	if( node_record->value_data_size > ( data_size - value_data_offset ) )
+	if( (size_t) value_data_size > ( data_size - value_data_offset ) )
 	{
 		libcerror_error_set(
 		 error,
@@ -324,8 +325,16 @@ int libfsrefs_node_record_read_data(
 
 		return( -1 );
 	}
-	node_record->value_data = &( data[ value_data_offset ] );
-
+	if( value_data_size > 0 )
+	{
+		node_record->value_data      = NULL;
+		node_record->value_data_size = 0;
+	}
+	else
+	{
+		node_record->value_data      = &( data[ value_data_offset ] );
+		node_record->value_data_size = (size_t) value_data_size;
+	}
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )
 	{

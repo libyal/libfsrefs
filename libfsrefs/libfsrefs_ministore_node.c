@@ -396,8 +396,9 @@ int libfsrefs_ministore_node_read_data(
 
 		goto on_error;
 	}
+#if defined( HAVE_DEBUG_OUTPUT )
 	data_offset += sizeof( fsrefs_ministore_tree_node_header_t );
-
+#endif
 	if( ( node_header->data_area_start_offset < sizeof( fsrefs_ministore_tree_node_header_t ) )
 	 || ( node_header->data_area_start_offset > ( data_size - node_header_offset ) ) )
 	{
@@ -763,6 +764,20 @@ int libfsrefs_ministore_node_read_file_io_handle(
 		 LIBCERROR_ERROR_DOMAIN_MEMORY,
 		 LIBCERROR_MEMORY_ERROR_INSUFFICIENT,
 		 "%s: unable to create metadata block data.",
+		 function );
+
+		goto on_error;
+	}
+	if( memory_set(
+	     ministore_node->internal_data,
+	     0,
+	     read_size ) == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_MEMORY,
+		 LIBCERROR_MEMORY_ERROR_SET_FAILED,
+		 "%s: unable to clear metadata block data.",
 		 function );
 
 		goto on_error;

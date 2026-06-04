@@ -662,8 +662,6 @@ int libfsrefs_superblock_read_file_io_handle(
 
 		goto on_error;
 	}
-	file_offset += header_size;
-
 	if( io_handle->major_format_version == 3 )
 	{
 		if( memory_compare(

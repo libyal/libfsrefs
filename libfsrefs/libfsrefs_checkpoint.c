@@ -524,10 +524,8 @@ int libfsrefs_checkpoint_read_data(
 		 number_of_offsets * 4,
 		 0 );
 	}
-#endif
 	data_offset += number_of_offsets * 4;
 
-#if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )
 	{
 		if( self_reference_data_offset > data_offset )
@@ -845,8 +843,6 @@ int libfsrefs_checkpoint_read_file_io_handle(
 
 		goto on_error;
 	}
-	file_offset += header_size;
-
 	if( io_handle->major_format_version == 3 )
 	{
 		if( memory_compare(

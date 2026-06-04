@@ -20,6 +20,9 @@ AM_CPPFLAGS = \
 	@LIBFWNT_CPPFLAGS@ \
 	@LIBFSREFS_DLL_IMPORT@
 
+AM_TESTS_ENVIRONMENT = \
+	export TESTS_USE_WINAPI="@TESTS_USE_WINAPI@";
+
 TESTS = \
 	test_library.sh \
 	test_tools.sh \
@@ -395,7 +398,8 @@ fsrefs_test_tools_output_SOURCES = \
 
 fsrefs_test_tools_output_LDADD = \
 	../libfsrefs/libfsrefs.la \
-	@LIBCERROR_LIBADD@
+	@LIBCERROR_LIBADD@ \
+	@LIBINTL@
 
 fsrefs_test_tools_signal_SOURCES = \
 	../fsrefstools/fsrefstools_signal.c ../fsrefstools/fsrefstools_signal.h \
