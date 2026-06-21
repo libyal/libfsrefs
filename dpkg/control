@@ -1,7 +1,7 @@
 Source: libfsrefs
 Priority: extra
 Maintainer: Joachim Metz <joachim.metz@gmail.com>
-Build-Depends: debhelper (>= 9), dh-autoreconf, pkg-config
+Build-Depends: debhelper (>= 13), dh-autoreconf, pkg-config
 Standards-Version: 4.1.4
 Section: libs
 Homepage: https://github.com/libyal/libfsrefs
