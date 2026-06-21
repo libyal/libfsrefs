@@ -350,7 +350,7 @@ The offset is relative to the start of the metadata block
 
 ==== Checkpoint trailer - format version 3
 
-The format version 3 checkpoint trailer is variable of size and consists of:
+Prior to version 3.12, the format of the checkpoint trailer is variable of size and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
@@ -365,6 +365,28 @@ The format version 3 checkpoint trailer is variable of size and consists of:
 | 44 | 4 | | [yellow-background]*Unknown (seen: 32)*
 | 48 | 4 | | Number of offsets
 | 52 | number of offset x 4 | | Array of offsets +
+The offset is relative to the start of the metadata block
+| ... | ... | 0x00 | [yellow-background]*Unknown (empty values)*
+|===
+
+As of version 3.12, the checkpoint trailer consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 8 | | [yellow-background]*Unknown (sequence number or checkpoint clock?)*
+| 8 | 8 | | [yellow-background]*Unknown (virtual allocator clock?)*
+| 16 | 4 | | [yellow-background]*Unknown (oldest log record?)*
+| 20 | 4 | | [yellow-background]*Unknown*
+| 24 | 8 | | [yellow-background]*Unknown*
+| 32 | 8 | | [yellow-background]*Unknown*
+| 40 | 4 | | [yellow-background]*Unknown (checkpoint data size?)*
+| 44 | 4 | | [yellow-background]*Unknown (seen: 32)*
+| 48 | 4 | | Number of offsets
+| 52 | 4 | | Offset to offsets (seen: 160) +
+The offset is relative to the start of the metadata block
+| 56 | 8 | | [yellow-background]*Unknown (data size of list of offsets?)*
+| 64 | number of offset x 4 | | Array of offsets +
 The offset is relative to the start of the metadata block
 | ... | ... | 0x00 | [yellow-background]*Unknown (empty values)*
 |===
@@ -614,6 +636,19 @@ container records.
 [NOTE]
 Note that the container tree has only been observed with format version 3.
 
+=== Using containers
+
+Under ReFS, a volume is divided into containers (or bands). Each container is a fixed size and contains a fixed number of blocks. The size of these containers has been observed to be 64MB or 256MB.
+
+The block addresses used in the structures catalogued here (e.g. in metadata block references, data runs, etc.) are actually a combination of the container number and the block offset within that container. To find the actual block offset within the volume, the following logic can be used:
+
+....
+ContainerIndex = LogicalBlock / (BlocksPerContainer * 2)
+BlockOffset = LogicalBlock % BlocksPerContainer
+....
+
+The only time when this logical block translation is not used is when initially reading the Superblock, Checkpoint, and Container tree, since the container offsets and sizes are not yet known. In this case, the logical block number is used directly.
+
 === Container record
 
 A container record consists of:
@@ -627,7 +662,7 @@ The container record key is the first 16 bytes of the container record value.
 
 ==== Container record value
 
-The container record value is 160 bytes in size and consists of:
+When the volume uses a block size of 4 KB, the container record value is 160 bytes in size and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
@@ -645,6 +680,18 @@ The container record value is 160 bytes in size and consists of:
 | 80 | 64 | | [yellow-background]*Unknown (empty values)*
 | 144 | 8 | | Cluster block number
 | 152 | 8 | | Cluster size +
+Contains the number of (cluster) blocks
+|===
+
+When the volume uses a block size of 64 KB, the container record value is 224 bytes in size and consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 8 | | Container (or band) identifier
+| 8 - 207 |  | | [yellow-background]*Unknown*
+| 208 | 8 | | Cluster block number
+| 216 | 8 | | Cluster size +
 Contains the number of (cluster) blocks
 |===
 
@@ -821,6 +868,8 @@ Contains a FILETIME
 
 === [[directory_object_entry_record_attribute]]Attribute record
 
+Prior to version 3.7, the key structure of the attribute record is as follows:
+
 key data of default (or nameless) data attribute
 
 ....
@@ -836,10 +885,21 @@ key data of alternate data attribute
 [cols="1,1,1,5",options="header"]
 |===
 | Offset | Size | Value | Description
-| 0 | 8 | | [yellow-background]*Unknown*
+| 0 | 8 | | Total size, in bytes, of the value of this attribute.
 | 8 | 4 | | [yellow-background]*Unknown (attribute type)*
 | 12 | ... | | Attribute name string +
 Contains an UTF-16 little-endian without end-of-string character or an end-of-string character if the attribute is nameless
+|===
+
+In version 3.7 and later, the key structure of the attribute record is as follows:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 8 | | Total size, in bytes, of the value of this attribute.
+| 8 | 4 | | [yellow-background]*Unknown*
+| 12 | 2 | | Attribute type
+| 14 | ... | | [yellow-background]*Unknown*
 |===
 
 [cols="1,1,5",options="header"]
@@ -926,31 +986,9 @@ Contains a metadata block number
 == [[file_system_information_object]]File system information object
 
 The file system information object is a <<ministore_tree,Ministore B+-tree>>
-that contains a single file system information record.
+that contains one or more directory records, similar to any other <<directory_object,Directory object>>.
 
-=== File system information record key
-
-The file system information record key is variable in size and consists of:
-
-[cols="1,1,1,5",options="header"]
-|===
-| Offset | Size | Value | Description
-| 0 | 2 | 0x30 | [yellow-background]*Unknown*
-| 2 | 2 | 0x01 | [yellow-background]*Unknown*
-| 4 | ... | "Volume Direct IO File" | String +
-Contains an UTF-16 little-endian without end-of-string character
-|===
-
-=== File system information record value
-
-The file system record value is TODO bytes in size and consists of:
-
-[cols="1,1,1,5",options="header"]
-|===
-| Offset | Size | Value | Description
-|===
-
-[yellow-background]*TODO: describe*
+The directory records in this object are similar to what is seen in the `$Extend` directory of an NTFS file system, and contains such entries as "Reparse Index", "Security Descriptor Stream", and "Volume Direct IO File".
 
 == [[volume_information_object]]Volume information object
 
