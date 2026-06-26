@@ -1330,7 +1330,7 @@ int info_handle_volume_fprint(
 
 	fprintf(
 	 info_handle->notify_stream,
-	 "\nVolume information:\n" );
+	 "Volume information:\n" );
 
 	fprintf(
 	 info_handle->notify_stream,

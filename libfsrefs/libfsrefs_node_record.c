@@ -325,7 +325,7 @@ int libfsrefs_node_record_read_data(
 
 		return( -1 );
 	}
-	if( value_data_size > 0 )
+	if( value_data_size == 0 )
 	{
 		node_record->value_data      = NULL;
 		node_record->value_data_size = 0;

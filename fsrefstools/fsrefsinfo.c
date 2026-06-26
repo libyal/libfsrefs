@@ -21,11 +21,8 @@
 
 #include <common.h>
 #include <file_stream.h>
-#include <memory.h>
 #include <system_string.h>
 #include <types.h>
-
-#include <stdio.h>
 
 #if defined( HAVE_FCNTL_H ) || defined( WINAPI )
 #include <fcntl.h>
@@ -63,29 +60,6 @@ enum FSREFSINFO_MODES
 
 info_handle_t *fsrefsinfo_info_handle = NULL;
 int fsrefsinfo_abort                  = 0;
-
-/* Prints usage information
- */
-void usage_fprint(
-      FILE *stream )
-{
-	if( stream == NULL )
-	{
-		return;
-	}
-	fprintf( stream, "Use fsrefsinfo to determine information about a Resiliant\n"
-	                 " File System (ReFS).\n\n" );
-
-	fprintf( stream, "Usage: fsrefsinfo [ -o offset ] [ -hHvV ] source\n\n" );
-
-	fprintf( stream, "\tsource: the source file or device\n\n" );
-
-	fprintf( stream, "\t-h:     shows this help\n" );
-	fprintf( stream, "\t-H:     shows the file system hierarchy\n" );
-	fprintf( stream, "\t-o:     specify the volume offset\n" );
-	fprintf( stream, "\t-v:     verbose output to stderr\n" );
-	fprintf( stream, "\t-V:     print version\n" );
-}
 
 /* Signal handler for fsrefsinfo
  */
@@ -139,12 +113,26 @@ int wmain( int argc, wchar_t * const argv[] )
 int main( int argc, char * const argv[] )
 #endif
 {
+	const char *description = \
+		"Use fsrefsinfo to determine information about a Resiliant File System (ReFS) volume.";
+
+	fsrefstools_option_t options[ ] = {
+		{ 'h', NULL, "shows this help" },
+		{ 'H', NULL, "shows the file system hierarchy" },
+		{ 'o', "offset", "specify the volume offset in bytes" },
+		{ 'v', NULL, "verbose output to stderr" },
+		{ 'V', NULL, "print version" },
+		{ 0, "source", "the source volume" },
+	};
+	system_character_t options_string[ 32 ];
+
 	libfsrefs_error_t *error                 = NULL;
 	system_character_t *option_volume_offset = NULL;
 	system_character_t *source               = NULL;
 	char *program                            = "fsrefsinfo";
 	system_integer_t option                  = 0;
 	uint8_t calculate_md5                    = 0;
+	int number_of_options                    = (int) ( sizeof( options ) / sizeof( fsrefstools_option_t ) );
 	int option_mode                          = FSREFSINFO_MODE_VOLUME;
 	int verbose                              = 0;
 
@@ -183,10 +171,22 @@ int main( int argc, char * const argv[] )
 	 stdout,
 	 program );
 
+	if( fsrefstools_getopt_get_options_string(
+	     options,
+	     number_of_options,
+	     options_string,
+	     32 ) != 1 )
+	{
+		fprintf(
+		 stderr,
+		 "Unable to determine options string.\n" );
+
+		goto on_error;
+	}
 	while( ( option = fsrefstools_getopt(
 	                   argc,
 	                   argv,
-	                   _SYSTEM_STRING( "hHo:vV" ) ) ) != (system_integer_t) -1 )
+	                   options_string ) ) != (system_integer_t) -1 )
 	{
 		switch( option )
 		{
@@ -197,14 +197,22 @@ int main( int argc, char * const argv[] )
 				 "Invalid argument: %" PRIs_SYSTEM "\n",
 				 argv[ optind - 1 ] );
 
-				usage_fprint(
-				 stdout );
+				fsrefstools_getopt_usage_fprint(
+				 stdout,
+				 program,
+				 description,
+				 options,
+				 number_of_options );
 
 				return( EXIT_FAILURE );
 
 			case (system_integer_t) 'h':
-				usage_fprint(
-				 stdout );
+				fsrefstools_getopt_usage_fprint(
+				 stdout,
+				 program,
+				 description,
+				 options,
+				 number_of_options );
 
 				return( EXIT_SUCCESS );
 
@@ -234,10 +242,14 @@ int main( int argc, char * const argv[] )
 	{
 		fprintf(
 		 stderr,
-		 "Missing source file or device.\n" );
+		 "Missing source volume.\n" );
 
-		usage_fprint(
-		 stdout );
+		fsrefstools_getopt_usage_fprint(
+		 stdout,
+		 program,
+		 description,
+		 options,
+		 number_of_options );
 
 		return( EXIT_FAILURE );
 	}

@@ -1,16 +1,17 @@
-.Dd June 28, 2023
-.Dt fsrefsinfo
-.Os libfsrefs
+.Dd June 26, 2026
+.Dt FSREFSINFO 1
+.Os
 .Sh NAME
 .Nm fsrefsinfo
-.Nd determines information about a Resiliant File System (ReFS)
+.Nd determines information about a Resiliant File System (ReFS) volume
 .Sh SYNOPSIS
 .Nm fsrefsinfo
-.Op Fl ahvV
-.Va Ar source
+.Op Fl hvV
+.Ar source
 .Sh DESCRIPTION
 .Nm fsrefsinfo
-is a utility to determine information about a Resiliant File System (ReFS)
+is a utility to determine information about a Resiliant File System (ReFS) \
+volume
 .Pp
 .Nm fsrefsinfo
 is part of the
@@ -20,12 +21,10 @@ package.
 is a library to access the Resiliant File System (ReFS) format
 .Pp
 .Ar source
-is the source file.
+is the source volume.
 .Pp
 The options are as follows:
 .Bl -tag -width Ds
-.It Fl a
-shows allocation information
 .It Fl h
 shows this help
 .It Fl v
@@ -40,21 +39,30 @@ None
 .Sh EXAMPLES
 .Bd -literal
 # fsrefsinfo /dev/sda1
-fsrefsinfo 20130915
-
+fsrefsinfo 20260626
+.sp
 Resiliant File System (ReFS) volume information:
-.Dl        ...
-
+.sp
+Volume information:
+	Name				: Test Volume
+	Version				: 1.1
+	Serial number			: bf790b1be6690b15
+	Bytes per sector		: 512
+	Cluster block size		: 65536
+.sp
 .Ed
 .Sh DIAGNOSTICS
-Errors, verbose and debug output are printed to stderr when verbose output \-v is enabled.
+Errors, verbose and debug output are printed to stderr when verbose output \
+\-v is enabled.
 Verbose and debug output are only printed when enabled at compilation.
+.Sh AUTHORS
+.An Joachim Metz <joachim.metz@gmail.com>
 .Sh BUGS
-Please report bugs of any kind to <joachim.metz@gmail.com> or on the project website:
-https://github.com/libyal/libfsrefs/
-.Sh AUTHOR
-These man pages were written by Joachim Metz.
+Please report bugs of any kind on the project issue tracker: \
+https://github.com/libyal/libfsrefs/issues
 .Sh COPYRIGHT
-Copyright 2012-2013, Joachim Metz <joachim.metz@gmail.com>.
-This is free software; see the source for copying conditions. There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-.Sh SEE ALSO
+Copyright (C) 2012-2026, Joachim Metz <joachim.metz@gmail.com>.
+.sp
+This is free software; see the source for copying conditions.
+There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A \
+PARTICULAR PURPOSE.
