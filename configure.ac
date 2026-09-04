@@ -2,7 +2,7 @@ AC_PREREQ([2.71])
 
 AC_INIT(
   [libfsrefs],
-  [20260626],
+  [20260904],
   [https://github.com/libyal/libfsrefs/issues])
 
 AC_CONFIG_SRCDIR(

@@ -525,10 +525,12 @@ test_tools: \
 	test_tools.at
 
 EXTRA_DIST = \
-	$(check_AUTOTESTS:=.at) \
 	generate_test_inputs.sh \
 	package.m4 \
-	test_macros.at
+	test_library.at \
+	test_macros.at \
+	test_manpages.at \
+	test_tools.at
 
 CLEANFILES = \
 	$(check_AUTOTESTS) \
