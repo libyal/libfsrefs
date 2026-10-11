@@ -11,7 +11,7 @@ jobs:
     strategy:
       matrix:
         include:
-        - os: ubuntu-24.04
+        - os: ubuntu-26.04
           compiler: 'gcc'
           configure_options: '--enable-asan'
     steps:
@@ -40,7 +40,7 @@ jobs:
     strategy:
       matrix:
         include:
-        - os: ubuntu-24.04
+        - os: ubuntu-26.04
           compiler: 'gcc'
     permissions:
       # Required to upload to GitHub Code Scanning
@@ -116,7 +116,7 @@ jobs:
     strategy:
       matrix:
         include:
-        - os: ubuntu-24.04
+        - os: ubuntu-26.04
           compiler: 'gcc'
           configure_options: '--enable-ubsan'
     steps:
